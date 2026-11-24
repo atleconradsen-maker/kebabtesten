@@ -354,6 +354,7 @@
   async function fetchData() {
     const id = (window.KTConfig || {}).SHEET_ID;
     const base = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq`;
+    const HEAD = (window.KTConfig || {}).HEADER_ROWS || 1;
     try {
       const table = await new Promise((resolve, reject) => {
         const cb = '__kt' + Date.now();
@@ -362,12 +363,12 @@
         const to = setTimeout(() => { done(); reject(new Error('timeout')); }, 12000);
         window[cb] = res => { done(); res && res.status !== 'error' && res.table ? resolve(res.table) : reject(new Error('gviz')); };
         sc.onerror = () => { done(); reject(new Error('load')); };
-        sc.src = `${base}?gid=0&headers=1&tqx=out:json;responseHandler:${cb}&_=${Date.now()}`;
+        sc.src = `${base}?gid=0&headers=${HEAD}&tqx=out:json;responseHandler:${cb}&_=${Date.now()}`;
         document.head.append(sc);
       });
       return KTParse.parseRows(KTParse.gvizToRows(table));
     } catch (e) {
-      const r = await fetch(`${base}?tqx=out:csv&gid=0&headers=1&_=${Date.now()}`);
+      const r = await fetch(`${base}?tqx=out:csv&gid=0&headers=${HEAD}&_=${Date.now()}`);
       const text = await r.text();
       if (!r.ok || /^\s*</.test(text)) throw e;
       return KTParse.parseSheet(text);

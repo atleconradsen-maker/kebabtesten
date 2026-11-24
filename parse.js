@@ -100,7 +100,9 @@
     // exact matches first, so "pris (kr)" and "pris/verdi" don't collide
     for (const [k, names] of Object.entries(FIELDS)) {
       const ns = names.map(norm);
-      const i = head.findIndex((h, j) => !used.has(j) && ns.includes(h));
+      // exact header, or a grouped header like "Score kebab 1 10 Kjøtt" (gviz joins header rows)
+      let i = head.findIndex((h, j) => !used.has(j) && ns.includes(h));
+      if (i < 0) i = head.findIndex((h, j) => !used.has(j) && ns.some(n => h.endsWith(' ' + n)));
       if (i >= 0) { idx[k] = i; used.add(i); }
     }
     const get = (r, k) => idx[k] != null ? r[idx[k]] : '';
