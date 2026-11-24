@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kebabtesten</title>
+<meta name="description" content="Kebabtesten – vi tester kebab og brød, 1 til 10.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%23ff6a2b'/%3E%3Cpath d='M12 3v18M8 7h8l-1 3H9zM7 11.5h10l-1 3H8zM8 16h8l-1 2.5H9z' fill='none' stroke='%2315110f' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#15110f;--panel:#221b17;--panel2:#1d1714;--line:#3a2e27;--line2:#2e2520;--text:#f4ead8;--muted:#b9a995;--dim:#8d7c6a;--sauce:#ff6a2b;--sauce2:#ff7a3d;--gold:#ffb547;--r:18px}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:var(--sauce2)} button{font:inherit;color:inherit}
+  .disp{font-family:'Archivo Black',Impact,sans-serif;font-weight:400;letter-spacing:-.3px}
+  .wrap{max-width:1200px;margin:0 auto;padding:28px 20px 80px;display:flex;flex-direction:column;gap:40px}
+  .hidden{display:none!important}
+
+  header{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding-bottom:22px;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:14px}
+  .mark{width:60px;height:60px;border-radius:50%;background:var(--sauce);display:grid;place-items:center;color:var(--bg);flex:0 0 auto}
+  .brand h1{margin:0;font-size:clamp(26px,5vw,34px);line-height:1}
+  .brand h1 span{color:var(--sauce)}
+  .brand p{margin:5px 0 0;color:var(--muted);font-size:14px}
+  nav.tabs{display:flex;gap:4px;background:var(--panel);padding:5px;border-radius:999px;border:1px solid var(--line);flex-wrap:wrap}
+  nav.tabs button{background:none;border:0;padding:10px 18px;border-radius:999px;font-weight:700;color:var(--muted);cursor:pointer;font-size:14px}
+  nav.tabs button.on{background:var(--text);color:var(--bg)}
+  @media (max-width:560px){nav.tabs{width:100%}nav.tabs button{flex:1;padding:11px 0}}
+
+  .status{padding:14px 16px;border-radius:14px;background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:14px}
+  h2.sec{font-size:26px;margin:0 0 16px}
+  .kick{font-size:12px;font-weight:800;letter-spacing:1.5px;color:var(--sauce2);text-transform:uppercase}
+
+  /* hero */
+  .hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:28px}
+  .photo{position:relative;border-radius:24px;min-height:400px;overflow:hidden;background:repeating-linear-gradient(135deg,#2a211c 0 14px,#251d19 14px 28px);display:flex;align-items:center;justify-content:center;color:var(--dim)}
+  .photo>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;cursor:zoom-in}
+  .photo .ph{display:flex;flex-direction:column;align-items:center;gap:8px;font-weight:600}
+  .photo .badge{position:absolute;left:18px;top:18px;background:var(--sauce);color:var(--bg);font-weight:800;font-size:12px;letter-spacing:1.2px;padding:7px 12px;border-radius:999px;z-index:2}
+  .inset{position:absolute;right:16px;bottom:16px;width:190px;height:130px;border-radius:14px;border:3px solid var(--bg);overflow:hidden;background:repeating-linear-gradient(45deg,#3a2e27 0 10px,#33281f 10px 20px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--muted);font-size:12px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.45);z-index:2}
+  .inset img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;cursor:zoom-in}
+  @media (max-width:560px){.photo{min-height:240px}.inset{width:120px;height:84px;right:12px;bottom:12px}}
+  .info{display:flex;flex-direction:column;gap:20px;justify-content:center}
+  .info h3{font-size:clamp(34px,6vw,52px);line-height:1;margin:6px 0 8px}
+  .meta{color:var(--muted);font-size:15px}
+  .scoreRow{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap}
+  .big{font-size:clamp(64px,12vw,96px);line-height:.85;color:var(--gold)}
+  .lbl{font-size:12px;font-weight:800;letter-spacing:1.4px;color:var(--muted)}
+  .split{font-size:14px;color:#d9cbb6;margin-top:6px}
+  .split b{color:var(--text)}
+  .chili{display:flex;gap:3px;margin-top:8px}
+  .cats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px}
+  @media (max-width:420px){.cats{grid-template-columns:1fr}}
+  .cat .top{display:flex;justify-content:space-between;font-size:14px}
+  .cat .top span{color:var(--muted);font-weight:600}
+  .bar{height:8px;border-radius:99px;background:var(--line2);overflow:hidden;margin-top:6px}
+  .bar i{display:block;height:100%;border-radius:99px;background:var(--sauce);transform-origin:left}
+  .bread{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px}
+  .tag{font-size:11px;font-weight:800;letter-spacing:.8px;padding:3px 8px;border-radius:99px;background:var(--line);color:#d9cbb6;text-transform:uppercase}
+  .tag.home{background:rgba(255,181,71,.16);color:var(--gold)}
+  .quote{margin:0;font-style:italic;color:#d9cbb6;font-size:15px}
+  .quote small{font-style:normal;color:var(--dim)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{font-size:12px;padding:5px 10px;border-radius:99px;background:var(--line2);color:var(--muted)}
+  .chip b{color:var(--text)}
+
+  /* awards */
+  .awards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px}
+  .award{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden}
+  .award .h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+  .award .n{font-size:32px;line-height:1;color:var(--gold)}
+  .award .who{font-size:19px;font-weight:800}
+  .award .sub{font-size:13px;color:var(--muted)}
+  .award.none .who{color:var(--muted);font-weight:600;font-size:15px}
+
+  /* board */
+  .two{display:flex;flex-wrap:wrap;gap:28px}
+  .two>.main{flex:999 1 560px;min-width:0}
+  .two>.side{flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:14px}
+  .bhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  .bhead h2{margin:0}
+  .pills{display:flex;gap:6px;flex-wrap:wrap}
+  .pill{font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+  .pill.on{border-color:var(--sauce);color:var(--sauce2)}
+  .table{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);overflow-x:auto}
+  .row{display:grid;grid-template-columns:44px minmax(0,1fr) 62px 62px 62px 74px;gap:8px;padding:14px 18px;align-items:center;border-top:1px solid var(--line2);min-width:540px}
+  .row.head{font-size:11px;font-weight:800;letter-spacing:1.2px;color:var(--muted);background:#241c18;border-top:0;padding:12px 18px}
+  .row .rk{font-size:22px}
+  .row .nm b{display:block}
+  .row .nm small{font-size:12px;color:var(--muted)}
+  .row .c{text-align:center;font-weight:700}
+  .row .c small{display:block;font-size:10px;color:var(--muted);font-weight:700}
+  .row .c.sel{color:var(--sauce2)}
+  .row .t{text-align:center;font-size:20px;color:var(--gold)}
+  @media (max-width:560px){.table{overflow:visible}.row{min-width:0;grid-template-columns:30px minmax(0,1fr) 54px;padding:13px 14px}.row .c{display:none}.row.head .c{display:none}}
+
+  .jurygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:14px}
+  .judge{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center}
+  .av{width:48px;height:48px;border-radius:50%;background:var(--text);color:var(--bg);display:grid;place-items:center;font-size:17px;flex:0 0 auto}
+  .judge .jn{font-weight:800}
+  .judge .st{font-size:13px;color:var(--muted)}
+  .judge .st b{color:var(--text)}
+  .jtag{font-size:11px;font-weight:800;letter-spacing:.8px;padding:4px 9px;border-radius:99px}
+  .jtag.kind{background:#1f3322;color:#8fe08a}.jtag.hard{background:#3d1f1c;color:#ff8a7a}
+
+  /* all tests */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:16px;align-items:start}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+  .card .pic{height:190px;position:relative;background:repeating-linear-gradient(135deg,#2a211c 0 12px,#251d19 12px 24px);display:flex;align-items:center;justify-content:center;color:var(--dim)}
+  .card .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;cursor:zoom-in}
+  .card .pic .mini{position:absolute;right:10px;bottom:10px;width:84px;height:60px;border-radius:10px;border:2px solid var(--bg);overflow:hidden}
+  .card .pic .mini img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .card .body{padding:16px;display:flex;flex-direction:column;gap:12px}
+  .card .ch{display:flex;justify-content:space-between;gap:10px}
+  .card h4{margin:0;font-size:18px;font-weight:800}
+  .card .sm{font-size:13px;color:var(--muted);margin-top:3px}
+  .card .tot{font-size:36px;line-height:.9;color:var(--gold);text-align:right}
+  .card .tot small{display:block;font-family:Inter;font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted);margin-top:4px}
+  .kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .kv div{background:var(--panel2);border-radius:10px;padding:8px 10px;font-size:12px;color:var(--muted)}
+  .kv b{display:block;font-size:18px;color:var(--text)}
+
+  .empty{text-align:center;color:var(--muted);padding:44px 18px;border:1px dashed var(--line);border-radius:var(--r);line-height:1.5}
+  .empty strong{display:block;color:var(--text);font-size:19px;margin-bottom:6px}
+  footer{font-size:12px;color:var(--dim);border-top:1px solid var(--line);padding-top:18px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+  .lightbox{position:fixed;inset:0;z-index:60;background:rgba(10,7,5,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
+  .lightbox img{max-width:100%;max-height:82vh;border-radius:14px}
+  .lightbox div{margin-top:12px;font-weight:800}
+
+  body.anim .award,body.anim .card,body.anim .judge,body.anim .row:not(.head){animation:rise .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*60ms)}
+  body.anim .bar i{animation:grow .9s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*60ms + 150ms)}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="mark"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M8 6h8l-1 3H9z"/><path d="M7 11h10l-1 3H8z"/><path d="M8 16h8l-1 3H9z"/></svg></div>
+      <div>
+        <h1 class="disp">KEBAB<span>TESTEN</span></h1>
+        <p>Kebaben og brødet får hver sin score fra 1 til 10 · total = 80 % kebab + 20 % brød</p>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button data-v="siste" class="on">Siste test</button>
+      <button data-v="toppliste">Toppliste</button>
+      <button data-v="steder">Alle tester</button>
+    </nav>
+  </header>
+
+  <div class="status" id="status">Henter tester …</div>
+  <main id="view-siste"></main>
+  <main id="view-toppliste" class="hidden"></main>
+  <main id="view-steder" class="hidden"></main>
+
+  <footer><span>Kebabscore = snitt av kjøtt, saus, fyll, porsjon og pris/verdi. Brødet scores for seg.</span><span id="updated"></span></footer>
+</div>
+<div class="lightbox hidden" id="lb"><img alt=""><div></div></div>
+
+<script src="config.js"></script>
+<script src="parse.js"></script>
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const el = (tag, a = {}, ...kids) => {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(a)) {
+      if (v == null || v === false) continue;
+      if (k === 'class') n.className = v; else if (k === 'text') n.textContent = v; else if (k === 'style') n.style.cssText = v;
+      else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else n.setAttribute(k, v);
+    }
+    for (const c of kids.flat()) if (c != null && c !== false) n.append(c);
+    return n;
+  };
+  const svg = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; };
+  const fmt = v => v == null ? '–' : (Math.round(v * 10) / 10).toFixed(1).replace('.', ',');
+  const fmtS = v => v == null ? '–' : (Number.isInteger(v) ? String(v) : fmt(v));
+  const kr = v => v == null ? null : Math.round(v) + ' kr';
+  const dateLbl = d => { if (!d) return ''; const [y, m, dd] = d.split('-').map(Number); return new Date(y, m - 1, dd).toLocaleDateString('nb-NO', {day: 'numeric', month: 'short', year: 'numeric'}); };
+  const CAT_LBL = {meat: 'Kjøtt', sauce: 'Saus', fill: 'Fyll / grønt', portion: 'Porsjon', value: 'Pris / verdi'};
+  const isHome = t => /hjemme|nybakt|egen/i.test(t || '');
+  const ICON = {
+    img: '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>',
+    shop: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9l1.5-5h13L20 9"/><path d="M4 9h16v2a2.7 2.7 0 01-5.3 0 2.7 2.7 0 01-5.4 0A2.7 2.7 0 014 11z"/><path d="M5 13v7h14v-7"/><path d="M10 20v-4h4v4"/></svg>',
+    bread: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffb547" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11a8 5 0 0116 0v7a1 1 0 01-1 1H5a1 1 0 01-1-1z"/><path d="M9 9l1 3M14 9l-1 3"/></svg>',
+    chili: on => `<svg width="20" height="20" viewBox="0 0 24 24" fill="${on ? '#ff6a2b' : '#4a3a30'}" aria-hidden="true"><path d="M12 3c-3 4-6 7-6 11a6 6 0 0012 0c0-4-3-7-6-11z"/></svg>`
+  };
+
+  let tests = [], view = 'siste', sortKey = 'total', animate = true;
+
+  // ---------- helpers ----------
+  const img = (src, alt, cap) => { const i = el('img', {src, alt: alt || '', loading: 'lazy', referrerpolicy: 'no-referrer'}); i.addEventListener('error', () => i.remove()); i.addEventListener('click', e => { e.stopPropagation(); openImg(src, cap || alt); }); return i; };
+  function openImg(src, cap) { const lb = $('#lb'); lb.querySelector('img').src = src; lb.querySelector('div').textContent = cap || ''; lb.classList.remove('hidden'); }
+  $('#lb').addEventListener('click', () => $('#lb').classList.add('hidden'));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') $('#lb').classList.add('hidden'); });
+  const stagger = ns => { ns.forEach((n, i) => n.style.setProperty('--i', Math.min(i, 12))); return ns; };
+  function countUp(node, v, d = 1) {
+    if (v == null) { node.textContent = '–'; return; }
+    const final = d ? fmt(v) : fmtS(v);
+    if (!animate || matchMedia('(prefers-reduced-motion: reduce)').matches) { node.textContent = final; return; }
+    const t0 = performance.now();
+    const step = now => { const p = Math.min(1, (now - t0) / 1000), e = 1 - Math.pow(1 - p, 3); node.textContent = (v * e).toFixed(d).replace('.', ','); if (p < 1) requestAnimationFrame(step); else node.textContent = final; };
+    requestAnimationFrame(step);
+  }
+  function playAnim() { animate = true; document.body.classList.remove('anim'); void document.body.offsetWidth; document.body.classList.add('anim'); clearTimeout(playAnim.t); playAnim.t = setTimeout(() => { animate = false; document.body.classList.remove('anim'); }, 2200); }
+  const sorted = (key = 'total') => [...tests].filter(t => t[key] != null).sort((a, b) => b[key] - a[key]);
+  const latest = () => [...tests].sort((a, b) => (b.date || '').localeCompare(a.date || '') || b.id.localeCompare(a.id))[0];
+  const sub = t => [t.what, t.served, dateLbl(t.date)].filter(Boolean).join(' · ');
+  const bar = (v, i) => { const b = el('div', {class: 'bar'}, el('i', {style: `width:${v ? v * 10 : 0}%`})); b.style.setProperty('--i', i); return b; };
+  const empty = (title, text) => el('div', {class: 'empty'}, el('strong', {text: title}), text);
+
+  // ---------- siste test ----------
+  function renderSiste() {
+    const box = $('#view-siste'); box.replaceChildren();
+    if (!tests.length) { box.append(empty('Ingen tester ennå', 'Legg inn den første kebaben i regnearket, så dukker den opp her innen et minutt.')); return; }
+    const t = latest();
+    const photo = el('div', {class: 'photo'},
+      el('div', {class: 'badge', text: 'SISTE TEST' + (t.date ? ' · ' + dateLbl(t.date).toUpperCase() : '')}),
+      t.imgKebab ? img(t.imgKebab, 'Kebaben fra ' + t.place, t.place) : el('div', {class: 'ph'}, svg(ICON.img), 'Bilde av kebaben'),
+      el('div', {class: 'inset'}, svg(ICON.shop), 'Bilde av sjappa', t.imgShop ? img(t.imgShop, t.place, t.place) : null)
+    );
+    if (!t.imgShop) photo.querySelector('.inset').classList.toggle('hidden', !t.imgKebab ? false : true);
+    const big = el('div', {class: 'big disp'}); countUp(big, t.total);
+    const chili = el('div', {class: 'chili', 'aria-label': t.heat != null ? `Sterkhet ${t.heat} av 5` : null});
+    if (t.heat != null) for (let i = 1; i <= 5; i++) chili.append(svg(ICON.chili(i <= t.heat)));
+    const cats = el('div', {class: 'cats'}, Object.keys(CAT_LBL).map((k, i) =>
+      el('div', {class: 'cat'}, el('div', {class: 'top'}, el('span', {text: CAT_LBL[k]}), el('b', {text: fmt(t.cat[k])})), bar(t.cat[k], i))));
+    const breadN = el('div', {class: 'disp', style: 'font-size:30px;color:var(--gold)'}); countUp(breadN, t.bread);
+    const bread = el('div', {class: 'bread'}, svg(ICON.bread),
+      el('div', {style: 'flex:1;min-width:0'},
+        el('div', {style: 'display:flex;align-items:center;gap:8px;flex-wrap:wrap'}, el('b', {text: 'Brødet'}), t.breadType ? el('span', {class: 'tag' + (isHome(t.breadType) ? ' home' : ''), text: t.breadType}) : null),
+        bar(t.bread, 6)),
+      breadN);
+    const info = el('div', {class: 'info'},
+      el('div', {}, el('div', {class: 'kick', text: 'Siste test'}), el('h3', {class: 'disp', text: t.place}),
+        el('div', {class: 'meta', text: [t.what, t.served, kr(t.price)].filter(Boolean).join(' · ')})),
+      el('div', {class: 'scoreRow'}, big, el('div', {style: 'padding-bottom:6px'}, el('div', {class: 'lbl', text: 'TOTALSCORE'}),
+        el('div', {class: 'split'}, 'Kebab ', el('b', {text: fmt(t.kebab)}), ' (80 %) + brød ', el('b', {text: fmt(t.bread)}), ' (20 %)'), chili)),
+      el('div', {class: 'lbl', text: 'KEBABEN', style: 'margin-bottom:-8px'}), cats, bread,
+      t.notes.length ? el('div', {style: 'display:flex;flex-direction:column;gap:6px'}, t.notes.slice(0, 3).map(n => el('p', {class: 'quote'}, '«' + n.text + '» ', n.name ? el('small', {text: '– ' + n.name}) : null))) : null,
+      el('div', {class: 'chips'}, t.scores.map(s => el('span', {class: 'chip'}, s.name + ' ', el('b', {text: fmt(s.total)}))))
+    );
+    box.append(el('section', {class: 'hero'}, photo, info));
+    box.append(el('section', {style: 'margin-top:40px'}, el('h2', {class: 'sec disp', text: 'KÅRINGER'}), awards()));
+    box.append(el('section', {style: 'margin-top:40px'}, el('h2', {class: 'sec disp', text: 'DOMMERPANELET'}), el('div', {class: 'jurygrid'}, jury())));
+  }
+
+  function awards() {
+    const best = k => sorted(k)[0];
+    const defs = [
+      ['KEBABKONGEN', best('total'), 'total', t => 'Høyeste totalscore'],
+      ['BESTE BRØD', best('bread'), 'bread', t => t.breadType || 'Beste brødscore'],
+      ['BESTE SAUS', (() => { const l = tests.filter(t => t.cat.sauce != null).sort((a, b) => b.cat.sauce - a.cat.sauce); return l[0]; })(), 'sauce', t => t.what || 'Sausen'],
+      ['MEST FOR PENGENE', (() => { const l = tests.filter(t => t.cat.value != null).sort((a, b) => b.cat.value - a.cat.value); return l[0]; })(), 'value', t => t.price != null ? `${kr(t.price)} · ${t.served || t.what || ''}`.replace(/ · $/, '') : 'Pris / verdi']
+    ];
+    return el('div', {class: 'awards'}, stagger(defs.map(([title, t, k, s]) => {
+      const n = el('div', {class: 'n disp'}); const v = t ? (k === 'sauce' || k === 'value' ? t.cat[k] : t[k]) : null; if (t) countUp(n, v);
+      return el('div', {class: 'award' + (t ? '' : ' none')},
+        el('div', {class: 'h'}, el('div', {class: 'kick', text: title}), t ? n : null),
+        el('div', {class: 'who', text: t ? t.place : 'Ingen kandidat ennå'}),
+        el('div', {class: 'sub', text: t ? s(t) : 'Kåres når første test er lagt inn'}));
+    })));
+  }
+
+  function jury() {
+    const m = new Map();
+    tests.forEach(t => t.scores.forEach(s => {
+      if (!m.has(s.name)) m.set(s.name, {name: s.name, totals: [], fav: null});
+      const j = m.get(s.name);
+      if (s.total != null) { j.totals.push(s.total); if (!j.fav || s.total > j.fav.v) j.fav = {v: s.total, place: t.place}; }
+    }));
+    const js = [...m.values()].map(j => ({...j, avg: j.totals.reduce((a, b) => a + b, 0) / (j.totals.length || 1)})).filter(j => j.totals.length)
+      .sort((a, b) => b.totals.length - a.totals.length || a.name.localeCompare(b.name));
+    if (!js.length) return [empty('Ingen dommere ennå', 'Testpersonene dukker opp her.')];
+    const kind = js.length > 1 ? js.reduce((a, b) => b.avg > a.avg ? b : a) : null;
+    const hard = js.length > 1 ? js.reduce((a, b) => b.avg < a.avg ? b : a) : null;
+    return stagger(js.map(j => el('div', {class: 'judge'},
+      el('div', {class: 'av disp', text: (j.name.replace(/\(.*?\)/g, '').trim().split(/\s+/).map(w => (w.match(/\p{L}/u) || [''])[0]).join('').slice(0, 2) || '?').toUpperCase()}),
+      el('div', {style: 'flex:1;min-width:0'}, el('div', {class: 'jn', text: j.name}),
+        el('div', {class: 'st'}, 'Snitt gitt ', el('b', {text: fmt(j.avg)}), ` · ${j.totals.length} ${j.totals.length === 1 ? 'test' : 'tester'}`),
+        j.fav ? el('div', {class: 'st', text: 'Favoritt: ' + j.fav.place}) : null),
+      j === kind ? el('span', {class: 'jtag kind', text: 'SNILLEST'}) : j === hard ? el('span', {class: 'jtag hard', text: 'STRENGEST'}) : null)));
+  }
+
+  // ---------- toppliste ----------
+  function renderTopp() {
+    const box = $('#view-toppliste'); box.replaceChildren();
+    if (!tests.length) { box.append(empty('Topplista er tom', 'Når dere har testet noen kebaber, rangeres de her.')); return; }
+    const opts = [['total', 'Total'], ['kebab', 'Kebab'], ['bread', 'Brød'], ['value', 'Pris / verdi']];
+    const val = (t, k) => k === 'value' ? t.cat.value : t[k];
+    const list = [...tests].filter(t => val(t, sortKey) != null).sort((a, b) => val(b, sortKey) - val(a, sortKey));
+    const colors = ['#ffb547', '#d8d0c4', '#d08a5a'];
+    const table = el('div', {class: 'table'},
+      el('div', {class: 'row head'}, el('span', {text: '#'}), el('span', {text: 'STED'}),
+        el('span', {class: 'c', text: 'KEBAB'}), el('span', {class: 'c', text: 'BRØD'}), el('span', {class: 'c', text: 'PRIS'}), el('span', {style: 'text-align:center', text: 'TOTAL'})),
+      stagger(list.map((t, i) => el('div', {class: 'row'},
+        el('span', {class: 'rk disp', text: String(i + 1), style: `color:${colors[i] || '#6f6054'}`}),
+        el('span', {class: 'nm'}, el('b', {text: t.place}), el('small', {text: sub(t)})),
+        el('span', {class: 'c' + (sortKey === 'kebab' ? ' sel' : ''), text: fmt(t.kebab)}),
+        el('span', {class: 'c' + (sortKey === 'bread' ? ' sel' : '')}, fmt(t.bread), t.breadType ? el('small', {text: isHome(t.breadType) ? 'Hjemmelaget' : t.breadType.replace(/brød$/i, '')}) : null),
+        el('span', {class: 'c' + (sortKey === 'value' ? ' sel' : ''), text: fmt(t.cat.value)}),
+        el('span', {class: 't disp', text: fmt(sortKey === 'total' ? t.total : val(t, sortKey))})))));
+    box.append(el('div', {class: 'two'},
+      el('div', {class: 'main'},
+        el('div', {class: 'bhead'}, el('h2', {class: 'sec disp', text: 'TOPPLISTE'}),
+          el('div', {class: 'pills'}, opts.map(([k, l]) => el('button', {class: 'pill' + (sortKey === k ? ' on' : ''), text: l, onclick: () => { sortKey = k; playAnim(); renderTopp(); }})))),
+        table),
+      el('div', {class: 'side'}, el('h2', {class: 'sec disp', text: 'DOMMERPANELET', style: 'margin:0'}), jury())));
+  }
+
+  // ---------- alle tester ----------
+  function renderSteder() {
+    const box = $('#view-steder'); box.replaceChildren();
+    if (!tests.length) { box.append(empty('Ingen tester ennå', 'Alle kebaber dere har testet samles her.')); return; }
+    const list = [...tests].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    box.append(el('h2', {class: 'sec disp'}, 'ALLE TESTER ', el('span', {style: 'font-family:Inter;font-size:14px;color:var(--muted);letter-spacing:0', text: `${list.length} kebaber`})));
+    box.append(el('div', {class: 'grid'}, stagger(list.map(t => {
+      const tot = el('div', {class: 'tot disp'}); countUp(tot, t.total);
+      tot.append(el('small', {text: 'TOTAL'}));
+      return el('article', {class: 'card'},
+        el('div', {class: 'pic'}, t.imgKebab ? img(t.imgKebab, t.place, t.place) : svg(ICON.img),
+          t.imgShop ? el('div', {class: 'mini'}, img(t.imgShop, t.place, t.place)) : null),
+        el('div', {class: 'body'},
+          el('div', {class: 'ch'}, el('div', {}, el('h4', {text: t.place}), el('div', {class: 'sm', text: sub(t)}), t.price != null ? el('div', {class: 'sm', text: kr(t.price)}) : null), tot),
+          el('div', {class: 'kv'},
+            el('div', {}, el('b', {text: fmt(t.kebab)}), 'Kebab'),
+            el('div', {}, el('b', {text: fmt(t.bread)}), t.breadType ? 'Brød · ' + t.breadType.toLowerCase() : 'Brød')),
+          el('div', {class: 'chips'}, t.scores.map(s => el('span', {class: 'chip'}, s.name + ' ', el('b', {text: fmt(s.total)}))))));
+    }))));
+  }
+
+  function render() { renderSiste(); renderTopp(); renderSteder(); }
+
+  // ---------- navigation ----------
+  const VIEWS = ['siste', 'toppliste', 'steder'];
+  function setView(v, anim) {
+    view = v;
+    document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+    VIEWS.forEach(k => $('#view-' + k).classList.toggle('hidden', k !== v));
+    if (location.hash.slice(1) !== v) history.replaceState(null, '', '#' + v);
+    if (anim) { playAnim(); render(); }
+  }
+  $('#tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b && b.dataset.v !== view) setView(b.dataset.v, true); });
+  window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (VIEWS.includes(h) && h !== view) setView(h, true); });
+  { const h = location.hash.slice(1); if (VIEWS.includes(h)) setView(h); }
+
+  // ---------- data ----------
+  async function fetchData() {
+    const id = (window.KTConfig || {}).SHEET_ID;
+    const base = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq`;
+    try {
+      const table = await new Promise((resolve, reject) => {
+        const cb = '__kt' + Date.now();
+        const sc = document.createElement('script');
+        const done = () => { delete window[cb]; sc.remove(); clearTimeout(to); };
+        const to = setTimeout(() => { done(); reject(new Error('timeout')); }, 12000);
+        window[cb] = res => { done(); res && res.status !== 'error' && res.table ? resolve(res.table) : reject(new Error('gviz')); };
+        sc.onerror = () => { done(); reject(new Error('load')); };
+        sc.src = `${base}?gid=0&headers=1&tqx=out:json;responseHandler:${cb}&_=${Date.now()}`;
+        document.head.append(sc);
+      });
+      return KTParse.parseRows(KTParse.gvizToRows(table));
+    } catch (e) {
+      const r = await fetch(`${base}?tqx=out:csv&gid=0&headers=1&_=${Date.now()}`);
+      const text = await r.text();
+      if (!r.ok || /^\s*</.test(text)) throw e;
+      return KTParse.parseSheet(text);
+    }
+  }
+  let last = '', loaded = false;
+  async function load() {
+    try {
+      const data = await fetchData();
+      const json = JSON.stringify(data.tests);
+      if (json !== last) { last = json; tests = data.tests; if (!loaded) playAnim(); render(); }
+      loaded = true;
+      $('#status').classList.add('hidden');
+      $('#updated').textContent = 'Oppdatert ' + new Date().toLocaleTimeString('nb-NO', {hour: '2-digit', minute: '2-digit'});
+    } catch (e) {
+      if (!loaded) { $('#status').textContent = 'Får ikke hentet testene akkurat nå. Prøv igjen om litt.'; render(); }
+    }
+  }
+  render(); load();
+  setInterval(() => { if (!document.hidden) load(); }, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
+})();
+</script>
+</body>
+</html>
