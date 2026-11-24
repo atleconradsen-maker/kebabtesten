@@ -48,6 +48,7 @@
     const s = String(v).trim();
     if ((m = /^Date\((\d{4}),(\d{1,2}),(\d{1,2})/.exec(s))) return iso(+m[1], +m[2] + 1, +m[3]);
     if ((m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s))) return iso(+m[1], +m[2], +m[3]);
+    if ((m = /^(\d{1,2})\.(\d{1,2})\.?$/.exec(s))) return iso(new Date().getFullYear(), +m[2], +m[1]); // "24.11" = i år
     if ((m = /^(\d{1,2})[./](\d{1,2})[./](\d{2,4})$/.exec(s))) {
       const y = +m[3] < 100 ? 2000 + +m[3] : +m[3];
       // Norwegian dd.mm.yyyy; US m/d/yyyy only if "/" and first > 12 impossible
