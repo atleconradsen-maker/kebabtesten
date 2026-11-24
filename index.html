@@ -24,6 +24,8 @@
   .brand h1{margin:0;font-size:clamp(26px,5vw,34px);line-height:1}
   .brand h1 span{color:var(--sauce)}
   .brand p{margin:5px 0 0;color:var(--muted);font-size:14px}
+  .addbtn{order:3;padding:12px 20px;border-radius:999px;background:var(--sauce);color:var(--bg);font-weight:800;text-decoration:none;font-size:14px}
+  @media (max-width:560px){.addbtn{order:0;width:100%;text-align:center}}
   nav.tabs{display:flex;gap:4px;background:var(--panel);padding:5px;border-radius:999px;border:1px solid var(--line);flex-wrap:wrap}
   nav.tabs button{background:none;border:0;padding:10px 18px;border-radius:999px;font-weight:700;color:var(--muted);cursor:pointer;font-size:14px}
   nav.tabs button.on{background:var(--text);color:var(--bg)}
@@ -147,6 +149,7 @@
         <p>Kebaben og brødet får hver sin score fra 1 til 10 · total = 80 % kebab + 20 % brød</p>
       </div>
     </div>
+    <a href="legg-inn.html" class="addbtn">+ Legg inn test</a>
     <nav class="tabs" id="tabs">
       <button data-v="siste" class="on">Siste test</button>
       <button data-v="toppliste">Toppliste</button>
