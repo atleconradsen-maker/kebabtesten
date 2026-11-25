@@ -175,6 +175,24 @@
   .av{background:var(--gold)!important;color:#17110e!important}
   .tag.home{background:rgba(255,198,41,.16)!important;color:var(--gold)!important}
   footer{border-top:2px dashed var(--line)}
+  .kwrap{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+  .kmap{flex:999 1 520px;min-width:0;height:min(70vh,560px);border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:#1d1511;display:grid;place-items:center}
+  .kmap-ph{color:var(--muted);font-size:14px;padding:20px;text-align:center}
+  .klist{flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:10px}
+  .krow{display:flex;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+  .krk{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;background:var(--line2);color:var(--muted);font-size:16px}
+  .krow b{display:block}
+  .ksub{font-size:12px;color:var(--muted);margin-top:2px}
+  .klinks{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+  .klinks a{font-size:12px;font-weight:700;color:var(--gold);text-decoration:none}
+  .klinks a:hover{text-decoration:underline}
+  .kpin{width:44px;height:44px;border-radius:50%;background:var(--sauce);border:3px solid #fff4e0;box-shadow:0 4px 12px rgba(0,0,0,.5);display:grid;place-items:center;color:#fff4e0;font:400 13px 'Archivo Black',Impact,sans-serif}
+  .kpin.top{background:var(--gold);color:#17110e}
+  .leaflet-container{font-family:Inter,system-ui,sans-serif}
+  .leaflet-popup-content{font-size:13px;line-height:1.5}
+  .leaflet-popup-content b{font-size:15px}
+  .leaflet-popup-content a{color:#c2410c;font-weight:800}
+  @media (max-width:560px){nav.tabs button{padding:11px 0;font-size:13px}}
   .addr{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:13px;font-weight:600;color:var(--gold);text-decoration:none}
   .addr:hover{text-decoration:underline}
   @media (prefers-reduced-motion:reduce){.ticker .track{animation:none}}
@@ -230,6 +248,7 @@
       <button data-v="siste" class="on">Siste test</button>
       <button data-v="toppliste">Toppliste</button>
       <button data-v="steder">Alle tester</button>
+      <button data-v="kart">Kart</button>
     </nav>
   </header>
 
@@ -238,6 +257,7 @@
   <main id="view-siste"></main>
   <main id="view-toppliste" class="hidden"></main>
   <main id="view-steder" class="hidden"></main>
+  <main id="view-kart" class="hidden"></main>
 
   <footer><span>Kebabscore = snitt av kjøtt, saus, fyll, porsjon og pris/verdi. Brødet scores for seg.</span><span id="updated"></span></footer>
 </div>
@@ -417,10 +437,117 @@
     }))));
   }
 
-  function render() { renderSiste(); renderTopp(); renderSteder(); }
+  function render() { renderSiste(); renderTopp(); renderSteder(); if (view === 'kart') renderKart(); }
+
+  // ---------- kart og best i byen ----------
+  const store = { get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+  const geo = store.get('kt-geo') || {};
+  const titleCase = t => String(t || '').toLowerCase().replace(/(^|[\s-])(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
+  async function geocode(addr) {
+    if (geo[addr]) return geo[addr];
+    const r = await fetch('https://ws.geonorge.no/adresser/v1/sok?' + new URLSearchParams({ sok: addr, treffPerSide: '1', fuzzy: 'true' }));
+    const a = ((await r.json()).adresser || [])[0];
+    if (!a || !a.representasjonspunkt) return null;
+    geo[addr] = { lat: a.representasjonspunkt.lat, lon: a.representasjonspunkt.lon, kommune: titleCase(a.kommunenavn), poststed: titleCase(a.poststed) };
+    store.set('kt-geo', geo);
+    return geo[addr];
+  }
+  function placesAgg() {
+    const m = new Map();
+    for (const t of tests) {
+      if (!m.has(t.placeKey)) m.set(t.placeKey, { key: t.placeKey, name: t.place, address: t.address, tests: [] });
+      m.get(t.placeKey).tests.push(t);
+    }
+    return [...m.values()].map(p => {
+      const avgOf = k => { const v = p.tests.map(t => t[k]).filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+      const latest = [...p.tests].sort((a, b) => (b.date || '').localeCompare(a.date || ''))[0];
+      return { ...p, total: avgOf('total'), kebab: avgOf('kebab'), bread: avgOf('bread'), what: latest.what, img: p.tests.map(t => t.imgKebab).find(Boolean) || null, g: p.address ? geo[p.address] || null : null };
+    });
+  }
+  const km = (a, b) => { const R = 6371, r = x => x * Math.PI / 180, dLat = r(b.lat - a.lat), dLon = r(b.lon - a.lon); const h = Math.sin(dLat / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dLon / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); };
+  const fmtKm = d => d < 1 ? Math.round(d * 1000 / 10) * 10 + ' m' : (Math.round(d * 10) / 10).toString().replace('.', ',') + ' km';
+  const gmaps = p => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.name + ', ' + (p.address || ''));
+  const gdir = p => p.g ? `https://www.google.com/maps/dir/?api=1&destination=${p.g.lat},${p.g.lon}` : gmaps(p);
+  let city = 'Alle', me = null, kmap = null, leafletP = null;
+  function loadLeaflet() {
+    if (window.L) return Promise.resolve();
+    if (leafletP) return leafletP;
+    leafletP = new Promise((res, rej) => {
+      const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.append(css);
+      const sc = document.createElement('script'); sc.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; sc.onload = () => res(); sc.onerror = () => { leafletP = null; rej(); }; document.head.append(sc);
+    });
+    return leafletP;
+  }
+  let geocoding = false;
+  async function renderKart() {
+    const box = $('#view-kart'); box.replaceChildren();
+    box.append(el('h2', {class: 'sec disp', text: 'KART & BEST I BYEN'}));
+    if (!tests.length) { box.append(empty('Ingen steder ennå', 'Når dere har testet noen kebaber, dukker de opp på kartet.')); return; }
+    let places = placesAgg();
+    // finn kommune og kartposisjon for nye adresser (én gang per adresse, lagres i nettleseren)
+    const missing = [...new Set(places.filter(p => p.address && !geo[p.address]).map(p => p.address))];
+    if (missing.length && !geocoding) {
+      geocoding = true;
+      Promise.allSettled(missing.map(geocode)).then(() => { geocoding = false; if (view === 'kart') renderKart(); });
+    }
+    const cities = new Map();
+    places.forEach(p => { const c = p.g?.kommune; if (c) cities.set(c, (cities.get(c) || 0) + 1); });
+    if (city !== 'Alle' && city !== 'Nær meg' && !cities.has(city)) city = 'Alle';
+    const chips = el('div', {class: 'pills', style: 'margin:4px 0 18px'},
+      el('button', {class: 'pill' + (city === 'Alle' ? ' on' : ''), text: `Alle (${places.length})`, onclick: () => { city = 'Alle'; renderKart(); }}),
+      [...cities.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([c, n]) => el('button', {class: 'pill' + (city === c ? ' on' : ''), text: `${c} (${n})`, onclick: () => { city = c; renderKart(); }})),
+      el('button', {class: 'pill' + (city === 'Nær meg' ? ' on' : ''), text: '📍 Nær meg', onclick: nearMe}));
+    box.append(chips);
+
+    let list = places;
+    if (city === 'Nær meg' && me) list = places.filter(p => p.g).map(p => ({...p, dist: km(me, p.g)})).sort((a, b) => a.dist - b.dist);
+    else { if (city !== 'Alle') list = places.filter(p => p.g?.kommune === city); list = [...list].sort((a, b) => (b.total ?? -1) - (a.total ?? -1)); }
+
+    const mapEl = el('div', {class: 'kmap', id: 'kmap'}, el('div', {class: 'kmap-ph', text: 'Laster kart …'}));
+    const colors = ['#ffc629', '#e9dccb', '#c98652'];
+    const rows = list.map((p, i) => el('div', {class: 'krow'},
+      el('span', {class: 'krk disp', text: String(i + 1), style: city !== 'Nær meg' && i < 3 ? `background:${colors[i]};color:#17110e` : ''}),
+      el('div', {style: 'flex:1;min-width:0'},
+        el('b', {text: p.name}),
+        el('div', {class: 'ksub', text: [p.dist != null ? fmtKm(p.dist) + ' unna' : null, p.g?.kommune, p.address || 'Adresse mangler'].filter(Boolean).join(' · ')}),
+        el('div', {class: 'klinks'},
+          el('a', {href: gmaps(p), target: '_blank', rel: 'noopener', text: 'Åpne i Google Maps'}),
+          p.g ? el('a', {href: gdir(p), target: '_blank', rel: 'noopener', text: 'Veibeskrivelse'}) : null)),
+      el('div', {style: 'text-align:right'}, el('div', {class: 'disp', style: 'font-size:26px;color:var(--gold);line-height:1', text: fmt(p.total)}),
+        el('div', {class: 'ksub', text: p.tests.length + (p.tests.length === 1 ? ' test' : ' tester')}))));
+    const title = city === 'Alle' ? 'Beste steder totalt' : city === 'Nær meg' ? 'Nærmest deg' : 'Best i ' + city;
+    box.append(el('div', {class: 'kwrap'}, mapEl,
+      el('div', {class: 'klist'}, el('div', {class: 'kick', text: title.toUpperCase(), style: 'margin-bottom:10px'}),
+        rows.length ? stagger(rows) : el('div', {class: 'empty', text: city === 'Nær meg' ? 'Fant ingen steder med kartposisjon.' : 'Ingen steder her ennå.'}),
+        places.some(p => !p.address) ? el('p', {class: 'ksub', style: 'margin-top:12px', text: 'Steder uten adresse vises ikke på kartet. Legg inn adressen i regnearket eller neste gang dere tester stedet.'}) : null)));
+
+    try { await loadLeaflet(); } catch { mapEl.replaceChildren(el('div', {class: 'kmap-ph', text: 'Kartet kunne ikke lastes akkurat nå, men lista virker.'})); return; }
+    if (!document.body.contains(mapEl)) return;
+    if (kmap) { kmap.remove(); kmap = null; }
+    mapEl.replaceChildren();
+    kmap = L.map(mapEl, { scrollWheelZoom: false, attributionControl: true });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd', attribution: '© OpenStreetMap-bidragsytere © CARTO' }).addTo(kmap);
+    const pts = [];
+    list.filter(p => p.g).forEach((p, i) => {
+      const icon = L.divIcon({ className: '', html: `<div class="kpin${i === 0 && city !== 'Nær meg' ? ' top' : ''}">${fmt(p.total)}</div>`, iconSize: [44, 44], iconAnchor: [22, 22] });
+      const pop = document.createElement('div');
+      pop.append(el('b', {text: p.name}), el('div', {text: `${fmt(p.total)} · ${p.tests.length} ${p.tests.length === 1 ? 'test' : 'tester'}`}), el('div', {text: p.address || ''}),
+        el('a', {href: gdir(p), target: '_blank', rel: 'noopener', text: 'Veibeskrivelse →'}));
+      L.marker([p.g.lat, p.g.lon], { icon, title: p.name }).addTo(kmap).bindPopup(pop);
+      pts.push([p.g.lat, p.g.lon]);
+    });
+    if (me) { L.circleMarker([me.lat, me.lon], { radius: 8, color: '#fff4e0', weight: 3, fillColor: '#3b82f6', fillOpacity: 1 }).addTo(kmap).bindPopup('Du er her'); pts.push([me.lat, me.lon]); }
+    if (pts.length) kmap.fitBounds(pts, { padding: [40, 40], maxZoom: 15 }); else kmap.setView([64.5, 12], 4);
+  }
+  function nearMe() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(pos => { me = { lat: pos.coords.latitude, lon: pos.coords.longitude }; city = 'Nær meg'; renderKart(); },
+      () => { alertBox('Fikk ikke tilgang til posisjonen din. Sjekk at nettleseren har lov til å bruke posisjon.'); }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
+  }
+  function alertBox(msg) { const s = $('#status'); s.textContent = msg; s.classList.remove('hidden'); setTimeout(() => s.classList.add('hidden'), 6000); }
 
   // ---------- navigation ----------
-  const VIEWS = ['siste', 'toppliste', 'steder'];
+  const VIEWS = ['siste', 'toppliste', 'steder', 'kart'];
   function setView(v, anim) {
     view = v;
     document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
