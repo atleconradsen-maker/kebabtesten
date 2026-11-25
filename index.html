@@ -196,6 +196,14 @@
   .like.on{border-color:var(--gold);background:rgba(255,198,41,.14)}
   .like.on b{color:var(--gold)}
   .like:active{transform:scale(.94)}
+  .revs{display:flex;flex-direction:column;gap:8px}
+  .rev{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.02)}
+  .rev .like{min-width:48px;min-height:48px}
+  .rnote{margin-top:4px;font-style:italic;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .rchip{cursor:pointer;font:inherit;font-size:12px;min-height:34px;border:1px solid transparent}
+  .rchip .rl{color:var(--muted)}
+  .rchip.on{border-color:var(--gold);background:rgba(255,198,41,.14)}
+  .rchip.on .rl{color:var(--gold)}
   .linkbtn{background:none;border:0;padding:0;color:var(--gold);font:inherit;font-weight:700;cursor:pointer;text-decoration:underline}
   .overlay{position:fixed;inset:0;z-index:70;background:rgba(10,7,5,.8);display:flex;align-items:flex-end;justify-content:center;padding:0}
   @media (min-width:640px){.overlay{align-items:center;padding:20px}}
@@ -319,8 +327,8 @@
 </div>
 <div class="lightbox hidden" id="lb"><img alt=""><div></div></div>
 
-<script src="config.js?v=202611251609"></script>
-<script src="parse.js?v=202611251609"></script>
+<script src="config.js?v=202611251936"></script>
+<script src="parse.js?v=202611251936"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -418,7 +426,8 @@
         el('div', {class: 'split'}, 'Kebab ', el('b', {text: fmt(t.kebab)}), ' (80 %) + brød ', el('b', {text: fmt(t.bread)}), ' (20 %)'), chili),
       el('div', {class: 'lbl', text: 'KEBABEN', style: 'margin-bottom:-8px'}), cats, bread,
       t.notes.length ? el('div', {style: 'display:flex;flex-direction:column;gap:6px'}, t.notes.slice(0, 3).map(n => el('p', {class: 'quote'}, '«' + n.text + '» ', n.name ? el('small', {text: '– ' + n.name}) : null))) : null,
-      el('div', {class: 'chips'}, t.scores.map(s => el('span', {class: 'chip'}, s.name + ' ', el('b', {text: fmt(s.total)})))),
+      el('div', {class: 'lbl', text: 'ANMELDELSENE', style: 'margin-bottom:-8px'}),
+      el('div', {class: 'revs'}, t.scores.map(sc => reviewRow(t, sc))),
       (() => { const p = places.find(x => x.key === t.placeKey); return p && p.visits > 1 ? el('div', {class: 'split'}, 'Snitt for stedet etter ', el('b', {text: p.visits + ' besøk'}), ': ', el('b', {text: fmt(p.total)}), ` (${p.ratings} vurderinger)`) : null; })()
     );
     box.append(el('section', {class: 'hero'}, photo, info));
@@ -510,7 +519,7 @@
           el('div', {class: 'kv'},
             el('div', {}, el('b', {text: fmt(t.kebab)}), 'Kebab'),
             el('div', {}, el('b', {text: fmt(t.bread)}), t.breadType ? 'Brød · ' + t.breadType.toLowerCase() : 'Brød')),
-          el('div', {class: 'chips'}, t.scores.map(s => el('span', {class: 'chip'}, s.name + ' ', el('b', {text: fmt(s.total)}))))));
+          el('div', {class: 'chips'}, t.scores.map(sc => reviewChip(t, sc)))));
     }))));
   }
 
@@ -642,6 +651,24 @@
   const initials = n => (String(n).replace(/\(.*?\)/g, '').trim().split(/\s+/).map(w => (w.match(/\p{L}/u) || [''])[0]).join('').slice(0, 2) || '?').toUpperCase();
   const likeCount = id => (likes.get(id) || new Set()).size;
   const iLike = id => { const me = getMe().toLowerCase(); return !!me && (likes.get(id) || new Set()).has(me); };
+  const reviewId = (t, sc) => cid(`r|${t.date}|${t.placeKey}|${sc.name}`);
+  const reviewItem = (t, sc) => ({ id: reviewId(t, sc), name: sc.name });
+  function reviewRow(t, sc) {
+    const id = reviewId(t, sc), n = likeCount(id), mine = iLike(id);
+    const note = (t.notes.find(x => x.name === sc.name) || {}).text;
+    return el('div', { class: 'rev' },
+      el('button', { type: 'button', class: 'av disp', text: initials(sc.name), 'aria-label': 'Profil for ' + sc.name, onclick: () => openProfile(sc.name) }),
+      el('div', { style: 'flex:1;min-width:0' },
+        el('button', { type: 'button', class: 'cm-name', text: sc.name, onclick: () => openProfile(sc.name) }),
+        el('div', { style: 'margin-top:4px' }, kebabMeter(sc.total, 'xs')),
+        note ? el('div', { class: 'ksub rnote', text: '«' + note + '»' }) : null),
+      el('button', { type: 'button', class: 'like' + (mine ? ' on' : ''), 'aria-pressed': String(mine), 'aria-label': (mine ? 'Fjern like på anmeldelsen til ' : 'Lik anmeldelsen til ') + sc.name + ` (${n})`, onclick: () => toggleLike(reviewItem(t, sc)) }, '👍', el('b', { text: String(n) })));
+  }
+  function reviewChip(t, sc) {
+    const id = reviewId(t, sc), n = likeCount(id), mine = iLike(id);
+    return el('button', { type: 'button', class: 'chip rchip' + (mine ? ' on' : ''), 'aria-pressed': String(mine), 'aria-label': `${sc.name} ${fmt(sc.total)}. ${mine ? 'Fjern like' : 'Lik anmeldelsen'} (${n})`, onclick: () => toggleLike(reviewItem(t, sc)) },
+      sc.name + ' ', el('b', { text: fmt(sc.total) }), el('span', { class: 'rl', text: ' 👍' + (n ? ' ' + n : '') }));
+  }
   function allComments() {
     const out = [];
     tests.forEach(t => t.notes.forEach(n => out.push({ id: cid(`${t.date}|${t.placeKey}|${n.name}|${n.text}`), name: n.name || 'Anonym', text: n.text, place: t.place, date: t.date })));
@@ -676,6 +703,7 @@
     for (const t of tests) for (const sc of t.scores) {
       const p = get(sc.name);
       p.entries.push({ t, s: sc });
+      p.likes += likeCount(reviewId(t, sc));
       if (sc.total != null) p.totals.push(sc.total);
       const c = t.address && geo[t.address] ? geo[t.address].kommune : null;
       if (c) p.cities.set(c, (p.cities.get(c) || 0) + 1);
@@ -697,7 +725,7 @@
     const titles = [];
     const add = (key, title, people, sub) => { if (people.length && people.length < ps.length || (people.length === 1)) titles.push({ key, title, people, sub }); };
     add('maskin', 'KEBABMASKINEN', leaders(p => p.entries.length), p => `${p.entries.length} ${p.entries.length === 1 ? 'test' : 'tester'}`);
-    add('stemme', 'FOLKETS STEMME', leaders(p => p.likes), p => `${p.likes} 👍 på kommentarene`);
+    add('stemme', 'FOLKETS STEMME', leaders(p => p.likes), p => `${p.likes} 👍 på anmeldelser og kommentarer`);
     add('oppdager', 'OPPDAGEREN', leaders(p => p.discovered), p => `Først på ${p.discovered} ${p.discovered === 1 ? 'sted' : 'steder'}`);
     const rated = ps.filter(p => p.avg != null);
     if (rated.length > 1) {
@@ -743,7 +771,7 @@
     return el('div', { class: 'cmts' },
       stagger(shown.map(commentRow)),
       list.length > 5 ? el('button', { type: 'button', class: 'pill', style: 'align-self:flex-start', text: showAllComments ? 'Vis færre' : `Vis alle ${list.length}`, onclick: () => { showAllComments = !showAllComments; render(); } }) : null,
-      el('div', { class: 'ksub' }, me ? ['Du liker som ', el('b', { text: me }), ' · ', el('button', { type: 'button', class: 'linkbtn', text: 'bytt', onclick: () => askWho(true) })] : 'Trykk 👍 på en kommentar du er enig i.'));
+      el('div', { class: 'ksub' }, me ? ['Du liker som ', el('b', { text: me }), ' · ', el('button', { type: 'button', class: 'linkbtn', text: 'bytt', onclick: () => askWho(true) })] : 'Trykk 👍 på en kommentar eller anmeldelse du er enig i.'));
   }
 
   // «Hvem er du?» – velg navn én gang, telefonen husker det
@@ -800,7 +828,7 @@
       el('div', { class: 'lbl', style: 'margin:18px 0 8px', text: 'TESTENE' }),
       el('div', { class: 'plist' }, [...p.entries].sort((a, b) => (b.t.date || '').localeCompare(a.t.date || '')).map(e => el('div', { class: 'prow' },
         el('div', { style: 'flex:1;min-width:0' }, el('b', { text: e.t.place }), el('div', { class: 'ksub', text: [e.t.what, dateLbl(e.t.date)].filter(Boolean).join(' · ') })),
-        kebabMeter(e.s.total, 'xs')))),
+        kebabMeter(e.s.total, 'xs'), reviewChip(e.t, e.s)))),
       myComments.length ? el('div', { class: 'lbl', style: 'margin:18px 0 8px', text: 'KOMMENTARENE' }) : null,
       myComments.length ? el('div', { class: 'cmts' }, myComments.map(commentRow)) : null));
     dlg.addEventListener('click', e => { if (e.target === dlg) close(); });
