@@ -207,6 +207,13 @@
   .bdg b{display:block;font-size:14px}.bdg small{color:var(--muted);font-size:12px}
   .unlock{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:80;width:min(92vw,380px);text-align:center;padding:18px 16px;border-radius:20px;background:#1f1612;border:2px solid var(--gold);box-shadow:0 10px 40px rgba(0,0,0,.6);animation:pop .5s cubic-bezier(.2,1.4,.4,1) both;display:flex;flex-direction:column;gap:4px;align-items:center}
   .unlock .u-big{font-size:40px}
+  .has-ym{position:relative;overflow:visible}
+  .ymark{position:absolute;right:-6px;bottom:-4px;min-width:24px;height:18px;padding:0 4px;border-radius:9px;background:linear-gradient(180deg,#ffe27a,#e0a100);color:#17110e;border:2px solid #17110e;font:900 10px/14px Inter,system-ui,sans-serif;letter-spacing:0;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+  .big-av .ymark{min-width:40px;height:26px;font-size:14px;line-height:22px;border-radius:13px;right:-8px;bottom:-2px}
+  .trophies{display:flex;flex-direction:column;gap:6px;margin:0 50px 14px 0}
+  .trophy{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;border:2px solid var(--gold);background:linear-gradient(135deg,rgba(255,198,41,.2),rgba(255,106,43,.08))}
+  .trophy b{display:block;font-size:14px}.trophy small{color:var(--muted);font-size:12px}
+  .tro-y{flex:0 0 auto;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#fff1a8,#ffc629 45%,#b8860b);color:#17110e;font-size:18px;border:2px solid #7a5a00}
   .ann{text-align:center}
   .ann h3{font-size:30px}
   .ann-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 10px;margin-top:12px;border:2px solid var(--gold);border-radius:18px;background:linear-gradient(135deg,rgba(255,198,41,.16),rgba(255,106,43,.08))}
@@ -348,8 +355,8 @@
 </div>
 <div class="lightbox hidden" id="lb"><img alt=""><div></div></div>
 
-<script src="config.js?v=202611252007"></script>
-<script src="parse.js?v=202611252007"></script>
+<script src="config.js?v=202611252011"></script>
+<script src="parse.js?v=202611252011"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -490,7 +497,7 @@
     const kind = js.length > 1 ? js.reduce((a, b) => b.avg > a.avg ? b : a) : null;
     const hard = js.length > 1 ? js.reduce((a, b) => b.avg < a.avg ? b : a) : null;
     return stagger(js.map(j => el('button', {type: 'button', class: 'judge', onclick: () => openProfile(j.name), 'aria-label': 'Profil for ' + j.name},
-      el('div', {class: 'av disp', text: (j.name.replace(/\(.*?\)/g, '').trim().split(/\s+/).map(w => (w.match(/\p{L}/u) || [''])[0]).join('').slice(0, 2) || '?').toUpperCase()}),
+      mk(el('div', {class: 'av disp', text: (j.name.replace(/\(.*?\)/g, '').trim().split(/\s+/).map(w => (w.match(/\p{L}/u) || [''])[0]).join('').slice(0, 2) || '?').toUpperCase()}), j.name),
       el('div', {style: 'flex:1;min-width:0'}, el('div', {class: 'jn', text: j.name}),
         el('div', {class: 'st'}, 'Snitt gitt ', el('b', {text: fmt(j.avg)}), ` · ${j.totals.length} ${j.totals.length === 1 ? 'test' : 'tester'}`),
         j.fav ? el('div', {class: 'st', text: 'Favoritt: ' + j.fav.place}) : null),
@@ -679,7 +686,7 @@
     const id = reviewId(t, sc), n = likeCount(id), mine = iLike(id);
     const note = (t.notes.find(x => x.name === sc.name) || {}).text;
     return el('div', { class: 'rev' },
-      el('button', { type: 'button', class: 'av disp', text: initials(sc.name), 'aria-label': 'Profil for ' + sc.name, onclick: () => openProfile(sc.name) }),
+      mk(el('button', { type: 'button', class: 'av disp', text: initials(sc.name), 'aria-label': 'Profil for ' + sc.name, onclick: () => openProfile(sc.name) }), sc.name),
       el('div', { style: 'flex:1;min-width:0' },
         el('button', { type: 'button', class: 'cm-name', text: sc.name, onclick: () => openProfile(sc.name) }),
         el('div', { style: 'margin-top:4px' }, kebabMeter(sc.total, 'xs')),
@@ -795,12 +802,37 @@
     const live = boardFor(String(y) + '-');
     return live.length ? { final: false, year: y, people: live } : null;
   }
+  // Alle avsluttede år: vinner(e) per år. Navn -> [år, ...]
+  function yearWinners() {
+    const now = new Date().getFullYear();
+    const years = [...new Set(tests.map(t => +(t.date || '').slice(0, 4)).filter(y => y && y < now))].sort((a, b) => b - a);
+    const out = years.map(y => ({ year: y, people: boardFor(y + '-') })).filter(x => x.people.length);
+    return out;
+  }
+  let _yw = null, _ywKey = '';
+  function yearsWon(name) {
+    const key = tests.length + '|' + new Date().getFullYear();
+    if (_ywKey !== key) { _ywKey = key; _yw = new Map(); yearWinners().forEach(w => w.people.forEach(p => { const k = p.name.toLowerCase(); if (!_yw.has(k)) _yw.set(k, []); _yw.get(k).push(w.year); })); }
+    return _yw.get(String(name || '').toLowerCase()) || [];
+  }
+  const yy = y => '’' + String(y).slice(2);
+  // Lite gullmerke på avataren: «’26» for siste år personen vant
+  function mk(node, name) {
+    const ys = yearsWon(name);
+    if (ys.length) {
+      node.classList.add('has-ym');
+      node.append(el('span', { class: 'ymark', 'aria-hidden': 'true', text: yy(ys[0]) + (ys.length > 1 ? '×' + ys.length : '') }));
+      const lbl = node.getAttribute('aria-label'); if (lbl) node.setAttribute('aria-label', lbl + ` – årets babcowboy/babgirl ${ys.join(', ')}`);
+      node.title = `Årets babcowboy/babgirl ${ys.join(', ')}`;
+    }
+    return node;
+  }
   const champSub = o => `${o.tests} ${o.tests === 1 ? 'test' : 'tester'}` + (o.comments ? ` og ${o.comments} ${o.comments === 1 ? 'kommentar' : 'kommentarer'}` : '');
   function champCard() {
     const c = monthChamp(); if (!c) return null;
     return el('div', { class: 'award folk champ' },
       el('div', { class: 'h' }, el('div', { class: 'kick', text: '🤠 MÅNEDENS BABCOWBOY / BABGIRL' }),
-        el('div', { class: 'avs' }, c.people.slice(0, 3).map(p => el('button', { type: 'button', class: 'av disp', text: initials(p.name), 'aria-label': 'Profil for ' + p.name, onclick: () => openProfile(p.name) })))),
+        el('div', { class: 'avs' }, c.people.slice(0, 3).map(p => mk(el('button', { type: 'button', class: 'av disp', text: initials(p.name), 'aria-label': 'Profil for ' + p.name, onclick: () => openProfile(p.name) }), p.name)))),
       el('div', { class: 'who' }, c.people.flatMap((p, i) => [i ? (i === c.people.length - 1 ? ' og ' : ', ') : '', el('button', { type: 'button', class: 'cm-name big', text: p.name, onclick: () => openProfile(p.name) })]).filter(x => x !== '')),
       el('div', { class: 'sub', text: (c.final ? `Mest bidrag i ${c.month}: ` : `Leder ${c.month} så langt: `) + champSub(c.people[0]) + (c.people.length > 1 ? ' hver' : '') + (c.final ? '' : ' · kåres 1. ' + MND[(MND.indexOf(c.month) + 1) % 12]) }));
   }
@@ -808,7 +840,7 @@
     const c = yearChamp(); if (!c) return null;
     return el('div', { class: 'award folk champ year' },
       el('div', { class: 'h' }, el('div', { class: 'kick', text: `🏆 ÅRETS BABCOWBOY / BABGIRL ${c.year}` }),
-        el('div', { class: 'avs' }, c.people.slice(0, 3).map(p => el('button', { type: 'button', class: 'av disp', text: initials(p.name), 'aria-label': 'Profil for ' + p.name, onclick: () => openProfile(p.name) })))),
+        el('div', { class: 'avs' }, c.people.slice(0, 3).map(p => mk(el('button', { type: 'button', class: 'av disp', text: initials(p.name), 'aria-label': 'Profil for ' + p.name, onclick: () => openProfile(p.name) }), p.name)))),
       el('div', { class: 'who' }, c.people.flatMap((p, i) => [i ? (i === c.people.length - 1 ? ' og ' : ', ') : '', el('button', { type: 'button', class: 'cm-name big', text: p.name, onclick: () => openProfile(p.name) })]).filter(x => x !== '')),
       el('div', { class: 'sub', text: (c.final ? `Mest bidrag i hele ${c.year}: ` : 'Leder året så langt: ') + `${c.people[0].pts} poeng (` + champSub(c.people[0]) + ')' + (c.people.length > 1 ? ' hver' : '') + (c.final ? '' : ` · kåres 1. januar ${c.year + 1}`) }));
   }
@@ -850,7 +882,7 @@
     if (!titles.length && !champ && !yc) return empty('Ingen kåringer ennå', 'Kåringene dukker opp når dere har testet litt.');
     return el('div', { class: 'awards' }, stagger([champ, yc, ...titles.map(t => el('div', { class: 'award folk' },
       el('div', { class: 'h' }, el('div', { class: 'kick', text: t.title }),
-        el('div', { class: 'avs' }, t.people.slice(0, 3).map(p => el('button', { type: 'button', class: 'av disp', text: initials(p.name), 'aria-label': 'Profil for ' + p.name, onclick: () => openProfile(p.name) })))),
+        el('div', { class: 'avs' }, t.people.slice(0, 3).map(p => mk(el('button', { type: 'button', class: 'av disp', text: initials(p.name), 'aria-label': 'Profil for ' + p.name, onclick: () => openProfile(p.name) }), p.name)))),
       el('div', { class: 'who' }, t.people.flatMap((p, i) => [i ? (i === t.people.length - 1 ? ' og ' : ', ') : '', el('button', { type: 'button', class: 'cm-name big', text: p.name, onclick: () => openProfile(p.name) })]).filter(x => x !== '')),
       el('div', { class: 'sub', text: t.sub(t.people[0]) + (t.people.length > 1 ? ' hver' : '') })))].filter(Boolean)));
   }
@@ -910,6 +942,11 @@
       el('h3', { class: 'disp', style: 'margin-top:26px', text: 'KÅRINGER' }),
       el('p', { class: 'ksub', style: 'margin:0 0 10px' }, 'Kåringene går til den som leder akkurat nå, og kan tas fra deg. Står det likt, deles tittelen.'),
       el('div', { class: 'blist' }, FOLK.map(([i, n, h]) => el('div', { class: 'bdg on' }, el('span', { class: 'bi', text: i }), el('span', {}, el('b', { text: n }), el('small', { text: h }))))),
+      (() => { const w = yearWinners(); return [
+        el('h3', { class: 'disp', style: 'margin-top:26px', text: 'ÆRESHALLEN' }),
+        el('p', { class: 'ksub', style: 'margin:0 0 10px' }, 'Årets babcowboy/babgirl får et gullmerke med årstallet (for eksempel ’26) på profilbildet sitt for alltid.'),
+        w.length ? el('div', { class: 'blist' }, w.map(x => el('div', { class: 'bdg on' }, el('span', { class: 'tro-y disp', text: yy(x.year) }), el('span', {}, el('b', { text: joinNames(x.people.map(p => p.name)) }), el('small', { text: `Årets babcowboy/babgirl ${x.year} · ${x.people[0].pts} poeng` })))))
+          : el('div', { class: 'ksub', text: `Første vinner kåres 1. januar ${new Date().getFullYear() + 1}.` })]; })(),
       el('p', { class: 'ksub', style: 'margin-top:18px' }, 'Tips: Trykk 👍 på anmeldelser og kommentarer du er enig i. Det gir folk cred.')));
     dlg.addEventListener('click', e => { if (e.target === dlg) close(); });
     document.body.append(dlg);
@@ -971,7 +1008,7 @@
   function commentRow(c) {
     const n = likeCount(c.id), mine = iLike(c.id);
     return el('div', { class: 'cmt' },
-      el('button', { type: 'button', class: 'av disp', text: initials(c.name), 'aria-label': 'Profil for ' + c.name, onclick: () => openProfile(c.name) }),
+      mk(el('button', { type: 'button', class: 'av disp', text: initials(c.name), 'aria-label': 'Profil for ' + c.name, onclick: () => openProfile(c.name) }), c.name),
       el('div', { style: 'flex:1;min-width:0' },
         el('div', { class: 'cm-h' }, el('button', { type: 'button', class: 'cm-name', text: c.name, onclick: () => openProfile(c.name) }), el('span', { class: 'ksub', text: [c.place, dateLbl(c.date)].filter(Boolean).join(' · ') })),
         el('p', { class: 'cm-t', text: '«' + c.text + '»' })),
@@ -1035,11 +1072,14 @@
     const stat = (n, l) => el('div', { class: 'pstat' }, el('b', { class: 'disp', text: n }), el('span', { text: l }));
     dlg.append(el('div', { class: 'sheet profile' },
       el('button', { type: 'button', class: 'x', 'aria-label': 'Lukk', text: '×', onclick: close }),
-      el('div', { class: 'ph-top' }, el('span', { class: 'av disp big-av', text: initials(p.name) }),
+      yearsWon(p.name).length ? el('div', { class: 'trophies' }, yearsWon(p.name).map(y => el('div', { class: 'trophy' },
+        el('span', { class: 'tro-y disp', text: yy(y) }),
+        el('span', {}, el('b', { text: `Årets babcowboy/babgirl ${y}` }), el('small', { text: (d => d === 1 ? 'Fjorårets vinner' : d === 2 ? 'Vinner i forfjor (for 2 år siden)' : `Vinner for ${d} år siden`)(new Date().getFullYear() - y) }))))) : null,
+      el('div', { class: 'ph-top' }, mk(el('span', { class: 'av disp big-av', text: initials(p.name) }), p.name),
         el('div', {}, el('h3', { class: 'disp', text: p.name }), p.fav ? el('div', { class: 'ksub', text: '❤️ Favoritt: ' + p.fav }) : null)),
       (() => { const ch = monthChamp(), isCh = ch && ch.final && ch.people.some(x => x.name === p.name);
-        const yc = yearChamp(), isY = yc && yc.final && yc.people.some(x => x.name === p.name);
-        return titles.length || isCh || isY ? el('div', { class: 'badges' }, isY ? el('span', { class: 'badge-t', text: `🏆 Årets babcowboy/babgirl ${yc.year}` }) : null, isCh ? el('span', { class: 'badge-t', text: `🤠 Månedens babcowboy/babgirl (${ch.month})` }) : null, titles.map(t => el('span', { class: 'badge-t', text: '🏆 ' + t.title.charAt(0) + t.title.slice(1).toLowerCase() }))) : null; })(),
+        const isY = yearsWon(p.name).length > 0;
+        return titles.length || isCh || isY ? el('div', { class: 'badges' }, isCh ? el('span', { class: 'badge-t', text: `🤠 Månedens babcowboy/babgirl (${ch.month})` }) : null, titles.map(t => el('span', { class: 'badge-t', text: '🏆 ' + t.title.charAt(0) + t.title.slice(1).toLowerCase() }))) : null; })(),
       (() => { const bs = badgesOf(p), got = bs.filter(b => b.done); return el('div', {},
         el('div', { class: 'lbl', style: 'margin:18px 0 8px;display:flex;justify-content:space-between;align-items:center' }, `BADGES · ${got.length} AV ${bs.length}`, el('button', { type: 'button', class: 'linkbtn', text: 'Hva er dette?', onclick: () => { close(); openInfo(); } })),
         (() => { const locked = bs.filter(b => !b.done).sort((a, b) => b.have / b.goal - a.have / a.goal);
