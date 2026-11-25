@@ -59,6 +59,7 @@
   .add button{flex:0 0 auto;padding:0 18px;border-radius:12px;border:1px solid var(--sauce);background:transparent;color:var(--sauce2);font-weight:800;cursor:pointer}
   .quick{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
   .quick button{font-size:14px;font-weight:800;padding:10px 14px;border-radius:999px;border:1.5px solid var(--gold);background:rgba(255,198,41,.08);color:var(--gold);cursor:pointer;min-height:44px}
+  .quick button.on{background:var(--gold);color:#17110e}
   .empty-t{border:1.5px dashed var(--gold);display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--muted);line-height:1.45}
   .empty-t b{color:var(--text);font-size:16px}
   .bar{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(transparent,var(--bg) 30%);padding:24px 16px 18px}
@@ -115,6 +116,15 @@
 
   <form id="f" autocomplete="off" novalidate>
     <div style="display:flex;flex-direction:column;gap:20px">
+      <div>
+        <span class="lbl">Hvem tester?</span>
+        <div class="quick" id="quick" style="margin:0 0 10px"></div>
+        <div class="add">
+          <input type="text" id="nyNavn" list="navn" placeholder="Nytt navn" maxlength="40">
+          <button type="button" id="leggTil">Legg til</button>
+        </div>
+        <datalist id="navn"></datalist>
+      </div>
       <div class="placebox">
         <label class="lbl" for="sted">Sted</label>
         <div class="ac"><input type="text" id="sted" placeholder="Navnet på sjappa, eller start med adressen under" maxlength="80" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="sugg" aria-expanded="false"><div class="sugg hidden" id="sugg" role="listbox"></div></div>
@@ -145,14 +155,8 @@
       </div>
 
       <div>
-        <span class="lbl">Testpersoner</span>
+        <span class="lbl">Score</span>
         <div id="testers" style="display:flex;flex-direction:column;gap:12px"></div>
-        <div class="add" style="margin-top:12px">
-          <input type="text" id="nyNavn" list="navn" placeholder="Navn på testperson" maxlength="40">
-          <button type="button" id="leggTil">Legg til</button>
-        </div>
-        <datalist id="navn"></datalist>
-        <div class="quick" id="quick"></div>
       </div>
 
       <label id="pinWrap"><span class="lbl">PIN-kode</span><input type="password" id="pin" inputmode="numeric" placeholder="Fås av Atle"></label>
@@ -226,7 +230,7 @@
   const avg = a => { const x = a.filter(v => v != null); return x.length ? x.reduce((s, v) => s + v, 0) / x.length : null; };
   function drawTesters() {
     if (!state.testere.length) {
-      $('#testers').replaceChildren(el('div', { class: 'tester empty-t' }, el('b', { text: 'Hvem testet?' }), el('div', { text: 'Trykk på navnet ditt under, eller skriv inn et nytt, så får du opp scorene for kjøtt, saus, fyll, porsjon, pris og brød.' })));
+      $('#testers').replaceChildren(el('div', { class: 'tester empty-t' }, el('b', { text: 'Velg hvem som tester' }), el('div', { text: 'Trykk på navnet ditt øverst under «Hvem tester?», så kommer scorene for kjøtt, saus, fyll, porsjon, pris og brød her.' })));
       return;
     }
     $('#testers').replaceChildren(...state.testere.map((t, i) => {
@@ -251,8 +255,12 @@
     }));
   }
   function drawQuick() {
-    const left = known.filter(n => !state.testere.some(t => t.navn.toLowerCase() === n.toLowerCase()));
-    $('#quick').replaceChildren(...left.map(n => el('button', { type: 'button', text: '+ ' + n, onclick: () => addTester(n) })));
+    const names = [...state.testere.map(t => t.navn), ...known.filter(n => !state.testere.some(t => t.navn.toLowerCase() === n.toLowerCase()))];
+    $('#quick').replaceChildren(...names.map(n => {
+      const on = state.testere.some(t => t.navn.toLowerCase() === n.toLowerCase());
+      return el('button', { type: 'button', class: on ? 'on' : '', 'aria-pressed': String(on), text: (on ? '✓ ' : '+ ') + n,
+        onclick: () => { if (on) { state.testere = state.testere.filter(t => t.navn.toLowerCase() !== n.toLowerCase()); drawTesters(); drawQuick(); } else addTester(n); } });
+    }));
   }
   drawTesters();
   $('#leggTil').addEventListener('click', () => { addTester($('#nyNavn').value); $('#nyNavn').value = ''; });
