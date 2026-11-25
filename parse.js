@@ -151,7 +151,9 @@
       const addr = String(base.address || '').trim();
       if (addr && !pinfo.address) pinfo.address = addr.slice(0, 120);
       const place = pinfo.name;
-      const key = (date || 'u' + n) + '|' + pk;
+      // Mangler datoen (f.eks. tolket som tall i arket), hør til siste test på samme sted
+      let key = (date || 'u' + n) + '|' + pk;
+      if (!date) { const same = [...tests.keys()].reverse().find(k => k.endsWith('|' + pk)); if (same) key = same; }
       if (!tests.has(key)) {
         tests.set(key, {
           id: 't' + (n + 2), date, place, placeKey: pk,
