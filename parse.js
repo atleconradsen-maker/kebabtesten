@@ -193,7 +193,23 @@
       const bread = avg(t.scores.map(s => s.bread));
       return { ...t, address: (places.get(t.placeKey) || {}).address || '', cat, kebab, bread, total: combine(kebab, bread) };
     });
-    return { tests: out, places: [...places.values()] };
+    // Ett sted = alle tester der samlet, uansett dato. Snittet tas over alle vurderinger (alle personer, alle besøk).
+    const placeList = [...places.entries()].map(([pk, p]) => {
+      const ts = out.filter(t => t.placeKey === pk).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      const all = ts.flatMap(t => t.scores);
+      const cat = {};
+      CATS.forEach(c => cat[c] = avg(all.map(s => s[c])));
+      const kebab = avg(all.map(s => s.kebab)), bread = avg(all.map(s => s.bread));
+      const latest = ts[0] || {};
+      return {
+        key: pk, name: p.name, address: p.address, tests: ts, visits: ts.length, ratings: all.length,
+        cat, kebab, bread, total: combine(kebab, bread),
+        what: latest.what || '', served: latest.served || '', price: latest.price ?? null, date: latest.date || '',
+        breadType: (ts.map(t => t.breadType).filter(Boolean)[0]) || '',
+        imgKebab: ts.map(t => t.imgKebab).find(Boolean) || null, imgShop: ts.map(t => t.imgShop).find(Boolean) || null
+      };
+    });
+    return { tests: out, places: placeList };
   }
   function combine(k, b) {
     if (k != null && b != null) return k * W_KEBAB + b * W_BREAD;

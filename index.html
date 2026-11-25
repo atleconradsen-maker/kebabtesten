@@ -19,7 +19,7 @@
   .hidden{display:none!important}
 
   header{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding-bottom:22px;border-bottom:1px solid var(--line)}
-  .brand{display:flex;align-items:center;gap:14px}
+  .brand{display:flex;align-items:center;gap:14px;color:inherit;text-decoration:none}
   .mark{width:60px;height:60px;border-radius:50%;background:var(--sauce);display:grid;place-items:center;color:var(--bg);flex:0 0 auto}
   .brand h1{margin:0;font-size:clamp(26px,5vw,34px);line-height:1}
   .brand h1 span{color:var(--sauce)}
@@ -201,7 +201,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="brand">
+    <a class="brand" href="./#siste" id="home" aria-label="Kebabtesten – til forsiden">
       <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Kebabtesten-logo">
   <defs>
     <linearGradient id="kt-meat" x1="0" x2="1">
@@ -242,7 +242,7 @@
         <h1 class="disp"><span class="w1">KEBAB</span><span class="w2">TESTEN</span></h1>
         <p>Vi tester byens kebab. Kebab og brød scores fra 1 til 10, og totalen er 80 % kebab og 20 % brød.</p>
       </div>
-    </div>
+    </a>
     <a href="legg-inn.html" class="addbtn">+ Legg inn test</a>
     <nav class="tabs" id="tabs">
       <button data-v="siste" class="on">Siste test</button>
@@ -263,8 +263,8 @@
 </div>
 <div class="lightbox hidden" id="lb"><img alt=""><div></div></div>
 
-<script src="config.js?v=202611250817"></script>
-<script src="parse.js?v=202611250817"></script>
+<script src="config.js?v=202611250820"></script>
+<script src="parse.js?v=202611250820"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -292,7 +292,7 @@
     chili: on => `<svg width="20" height="20" viewBox="0 0 24 24" fill="${on ? '#ff6a2b' : '#4a3a30'}" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`
   };
 
-  let tests = [], view = 'siste', sortKey = 'total', animate = true;
+  let tests = [], places = [], view = 'siste', sortKey = 'total', animate = true;
 
   // ---------- helpers ----------
   const img = (src, alt, cap) => { const i = el('img', {src, alt: alt || '', loading: 'lazy', referrerpolicy: 'no-referrer'}); i.addEventListener('error', () => i.remove()); i.addEventListener('click', e => { e.stopPropagation(); openImg(src, cap || alt); }); return i; };
@@ -346,7 +346,8 @@
         el('div', {class: 'split'}, 'Kebab ', el('b', {text: fmt(t.kebab)}), ' (80 %) + brød ', el('b', {text: fmt(t.bread)}), ' (20 %)'), chili)),
       el('div', {class: 'lbl', text: 'KEBABEN', style: 'margin-bottom:-8px'}), cats, bread,
       t.notes.length ? el('div', {style: 'display:flex;flex-direction:column;gap:6px'}, t.notes.slice(0, 3).map(n => el('p', {class: 'quote'}, '«' + n.text + '» ', n.name ? el('small', {text: '– ' + n.name}) : null))) : null,
-      el('div', {class: 'chips'}, t.scores.map(s => el('span', {class: 'chip'}, s.name + ' ', el('b', {text: fmt(s.total)}))))
+      el('div', {class: 'chips'}, t.scores.map(s => el('span', {class: 'chip'}, s.name + ' ', el('b', {text: fmt(s.total)})))),
+      (() => { const p = places.find(x => x.key === t.placeKey); return p && p.visits > 1 ? el('div', {class: 'split'}, 'Snitt for stedet etter ', el('b', {text: p.visits + ' besøk'}), ': ', el('b', {text: fmt(p.total)}), ` (${p.ratings} vurderinger)`) : null; })()
     );
     box.append(el('section', {class: 'hero'}, photo, info));
     box.append(el('section', {style: 'margin-top:40px'}, el('h2', {class: 'sec disp', text: 'KÅRINGER'}), awards()));
@@ -354,19 +355,20 @@
   }
 
   function awards() {
-    const best = k => sorted(k)[0];
+    const best = f => { const l = places.filter(p => f(p) != null).sort((x, y) => f(y) - f(x)); return l[0]; };
+    const n = p => `${p.ratings} ${p.ratings === 1 ? 'vurdering' : 'vurderinger'}`;
     const defs = [
-      ['KEBABKONGEN', best('total'), 'total', t => 'Høyeste totalscore'],
-      ['BESTE BRØD', best('bread'), 'bread', t => t.breadType || 'Beste brødscore'],
-      ['BESTE SAUS', (() => { const l = tests.filter(t => t.cat.sauce != null).sort((a, b) => b.cat.sauce - a.cat.sauce); return l[0]; })(), 'sauce', t => t.what || 'Sausen'],
-      ['MEST FOR PENGENE', (() => { const l = tests.filter(t => t.cat.value != null).sort((a, b) => b.cat.value - a.cat.value); return l[0]; })(), 'value', t => t.price != null ? `${kr(t.price)} · ${t.served || t.what || ''}`.replace(/ · $/, '') : 'Pris / verdi']
+      ['KEBABKONGEN', best(p => p.total), p => p.total, p => 'Høyeste snitt · ' + n(p)],
+      ['BESTE BRØD', best(p => p.bread), p => p.bread, p => (p.breadType || 'Brødet') + ' · ' + n(p)],
+      ['BESTE SAUS', best(p => p.cat.sauce), p => p.cat.sauce, p => (p.what || 'Sausen') + ' · ' + n(p)],
+      ['MEST FOR PENGENE', best(p => p.cat.value), p => p.cat.value, p => (p.price != null ? kr(p.price) + ' · ' : '') + n(p)]
     ];
-    return el('div', {class: 'awards'}, stagger(defs.map(([title, t, k, s]) => {
-      const n = el('div', {class: 'n disp'}); const v = t ? (k === 'sauce' || k === 'value' ? t.cat[k] : t[k]) : null; if (t) countUp(n, v);
-      return el('div', {class: 'award' + (t ? '' : ' none')},
-        el('div', {class: 'h'}, el('div', {class: 'kick', text: title}), t ? n : null),
-        el('div', {class: 'who', text: t ? t.place : 'Ingen kandidat ennå'}),
-        el('div', {class: 'sub', text: t ? s(t) : 'Kåres når første test er lagt inn'}));
+    return el('div', {class: 'awards'}, stagger(defs.map(([title, p, val, sub]) => {
+      const num = el('div', {class: 'n disp'}); if (p) countUp(num, val(p));
+      return el('div', {class: 'award' + (p ? '' : ' none')},
+        el('div', {class: 'h'}, el('div', {class: 'kick', text: title}), p ? num : null),
+        el('div', {class: 'who', text: p ? p.name : 'Ingen kandidat ennå'}),
+        el('div', {class: 'sub', text: p ? sub(p) : 'Kåres når første test er lagt inn'}));
     })));
   }
 
@@ -393,26 +395,28 @@
   // ---------- toppliste ----------
   function renderTopp() {
     const box = $('#view-toppliste'); box.replaceChildren();
-    if (!tests.length) { box.append(empty('Topplista er tom', 'Når dere har testet noen kebaber, rangeres de her.')); return; }
+    if (!places.length) { box.append(empty('Topplista er tom', 'Når dere har testet noen kebaber, rangeres stedene her.')); return; }
     const opts = [['total', 'Total'], ['kebab', 'Kebab'], ['bread', 'Brød'], ['value', 'Pris / verdi']];
-    const val = (t, k) => k === 'value' ? t.cat.value : t[k];
-    const list = [...tests].filter(t => val(t, sortKey) != null).sort((a, b) => val(b, sortKey) - val(a, sortKey));
+    const val = (p, k) => k === 'value' ? p.cat.value : p[k];
+    const list = places.filter(p => val(p, sortKey) != null).sort((a, b) => val(b, sortKey) - val(a, sortKey));
     const colors = ['#ffb547', '#d8d0c4', '#d08a5a'];
     const table = el('div', {class: 'table'},
       el('div', {class: 'row head'}, el('span', {text: '#'}), el('span', {text: 'STED'}),
         el('span', {class: 'c', text: 'KEBAB'}), el('span', {class: 'c', text: 'BRØD'}), el('span', {class: 'c', text: 'PRIS'}), el('span', {style: 'text-align:center', text: 'TOTAL'})),
-      stagger(list.map((t, i) => el('div', {class: 'row'},
+      stagger(list.map((p, i) => el('div', {class: 'row'},
         el('span', {class: 'rk disp', text: String(i + 1), style: `color:${colors[i] || '#6f6054'}`}),
-        el('span', {class: 'nm'}, el('b', {text: t.place}), el('small', {text: sub(t)})),
-        el('span', {class: 'c' + (sortKey === 'kebab' ? ' sel' : ''), text: fmt(t.kebab)}),
-        el('span', {class: 'c' + (sortKey === 'bread' ? ' sel' : '')}, fmt(t.bread), t.breadType ? el('small', {text: isHome(t.breadType) ? 'Hjemmelaget' : t.breadType.replace(/brød$/i, '')}) : null),
-        el('span', {class: 'c' + (sortKey === 'value' ? ' sel' : ''), text: fmt(t.cat.value)}),
-        el('span', {class: 't disp', text: fmt(sortKey === 'total' ? t.total : val(t, sortKey))})))));
+        el('span', {class: 'nm'}, el('b', {text: p.name}),
+          el('small', {text: [p.what, `${p.ratings} ${p.ratings === 1 ? 'vurdering' : 'vurderinger'}`, p.visits > 1 ? `${p.visits} besøk` : dateLbl(p.date)].filter(Boolean).join(' · ')})),
+        el('span', {class: 'c' + (sortKey === 'kebab' ? ' sel' : ''), text: fmt(p.kebab)}),
+        el('span', {class: 'c' + (sortKey === 'bread' ? ' sel' : '')}, fmt(p.bread), p.breadType ? el('small', {text: isHome(p.breadType) ? 'Hjemmelaget' : p.breadType.replace(/brød$/i, '')}) : null),
+        el('span', {class: 'c' + (sortKey === 'value' ? ' sel' : ''), text: fmt(p.cat.value)}),
+        el('span', {class: 't disp', text: fmt(sortKey === 'total' ? p.total : val(p, sortKey))})))));
     box.append(el('div', {class: 'two'},
       el('div', {class: 'main'},
         el('div', {class: 'bhead'}, el('h2', {class: 'sec disp', text: 'TOPPLISTE'}),
           el('div', {class: 'pills'}, opts.map(([k, l]) => el('button', {class: 'pill' + (sortKey === k ? ' on' : ''), text: l, onclick: () => { sortKey = k; playAnim(); renderTopp(); }})))),
-        table),
+        table,
+        el('p', {class: 'ksub', style: 'margin-top:10px', text: 'Hvert sted får snittet av alle vurderinger, fra alle besøk og alle testere.'})),
       el('div', {class: 'side'}, el('h2', {class: 'sec disp', text: 'DOMMERPANELET', style: 'margin:0'}), jury())));
   }
 
@@ -453,16 +457,7 @@
     return geo[addr];
   }
   function placesAgg() {
-    const m = new Map();
-    for (const t of tests) {
-      if (!m.has(t.placeKey)) m.set(t.placeKey, { key: t.placeKey, name: t.place, address: t.address, tests: [] });
-      m.get(t.placeKey).tests.push(t);
-    }
-    return [...m.values()].map(p => {
-      const avgOf = k => { const v = p.tests.map(t => t[k]).filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
-      const latest = [...p.tests].sort((a, b) => (b.date || '').localeCompare(a.date || ''))[0];
-      return { ...p, total: avgOf('total'), kebab: avgOf('kebab'), bread: avgOf('bread'), what: latest.what, img: p.tests.map(t => t.imgKebab).find(Boolean) || null, g: p.address ? geo[p.address] || null : null };
-    });
+    return places.map(p => ({ ...p, g: p.address ? geo[p.address] || null : null }));
   }
   const km = (a, b) => { const R = 6371, r = x => x * Math.PI / 180, dLat = r(b.lat - a.lat), dLon = r(b.lon - a.lon); const h = Math.sin(dLat / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dLon / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); };
   const fmtKm = d => d < 1 ? Math.round(d * 1000 / 10) * 10 + ' m' : (Math.round(d * 10) / 10).toString().replace('.', ',') + ' km';
@@ -514,7 +509,7 @@
           el('a', {href: gmaps(p), target: '_blank', rel: 'noopener', text: 'Åpne i Google Maps'}),
           p.g ? el('a', {href: gdir(p), target: '_blank', rel: 'noopener', text: 'Veibeskrivelse'}) : null)),
       el('div', {style: 'text-align:right'}, el('div', {class: 'disp', style: 'font-size:26px;color:var(--gold);line-height:1', text: fmt(p.total)}),
-        el('div', {class: 'ksub', text: p.tests.length + (p.tests.length === 1 ? ' test' : ' tester')}))));
+        el('div', {class: 'ksub', text: p.ratings + (p.ratings === 1 ? ' vurdering' : ' vurderinger')}))));
     const title = city === 'Alle' ? 'Beste steder totalt' : city === 'Nær meg' ? 'Nærmest deg' : 'Best i ' + city;
     box.append(el('div', {class: 'kwrap'}, mapEl,
       el('div', {class: 'klist'}, el('div', {class: 'kick', text: title.toUpperCase(), style: 'margin-bottom:10px'}),
@@ -531,7 +526,7 @@
     list.filter(p => p.g).forEach((p, i) => {
       const icon = L.divIcon({ className: '', html: `<div class="kpin${i === 0 && city !== 'Nær meg' ? ' top' : ''}">${fmt(p.total)}</div>`, iconSize: [44, 44], iconAnchor: [22, 22] });
       const pop = document.createElement('div');
-      pop.append(el('b', {text: p.name}), el('div', {text: `${fmt(p.total)} · ${p.tests.length} ${p.tests.length === 1 ? 'test' : 'tester'}`}), el('div', {text: p.address || ''}),
+      pop.append(el('b', {text: p.name}), el('div', {text: `${fmt(p.total)} · ${p.ratings} ${p.ratings === 1 ? 'vurdering' : 'vurderinger'}`}), el('div', {text: p.address || ''}),
         el('a', {href: gdir(p), target: '_blank', rel: 'noopener', text: 'Veibeskrivelse →'}));
       L.marker([p.g.lat, p.g.lon], { icon, title: p.name }).addTo(kmap).bindPopup(pop);
       pts.push([p.g.lat, p.g.lon]);
@@ -555,6 +550,7 @@
     if (location.hash.slice(1) !== v) history.replaceState(null, '', '#' + v);
     if (anim) { playAnim(); render(); }
   }
+  $('#home').addEventListener('click', e => { e.preventDefault(); if (view !== 'siste') setView('siste', true); window.scrollTo({ top: 0, behavior: 'smooth' }); });
   $('#tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b && b.dataset.v !== view) setView(b.dataset.v, true); });
   window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (VIEWS.includes(h) && h !== view) setView(h, true); });
   { const h = location.hash.slice(1); if (VIEWS.includes(h)) setView(h); }
@@ -588,7 +584,7 @@
     try {
       const data = await fetchData();
       const json = JSON.stringify(data.tests);
-      if (json !== last) { last = json; tests = data.tests; if (!loaded) playAnim(); render(); }
+      if (json !== last) { last = json; tests = data.tests; places = data.places || []; if (!loaded) playAnim(); render(); }
       loaded = true;
       $('#status').classList.add('hidden');
       $('#updated').textContent = 'Oppdatert ' + new Date().toLocaleTimeString('nb-NO', {hour: '2-digit', minute: '2-digit'});
