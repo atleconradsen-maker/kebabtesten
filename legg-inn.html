@@ -60,7 +60,13 @@
   .add button{flex:0 0 auto;padding:0 18px;border-radius:12px;border:1px solid var(--sauce);background:transparent;color:var(--sauce2);font-weight:800;cursor:pointer}
   .quick{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
   .quick button{font-size:14px;font-weight:800;padding:10px 14px;border-radius:999px;border:1.5px solid var(--gold);background:rgba(255,198,41,.08);color:var(--gold);cursor:pointer;min-height:44px}
-  .quick button.on{background:var(--gold);color:#17110e}
+  .quick{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  .quick .qlbl{font-size:12px;color:var(--muted);margin-right:2px}
+  .quick button{font-size:13px!important;padding:8px 12px!important;min-height:40px!important}
+  .sel{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .sel:empty{display:none}
+  .selchip{display:inline-flex;align-items:center;gap:4px;padding:4px 4px 4px 12px;border-radius:999px;background:var(--gold);color:#17110e;font-weight:800;font-size:14px}
+  .selchip button{width:30px;height:30px;border-radius:50%;border:0;background:rgba(0,0,0,.12);color:#17110e;font-size:18px;line-height:1;cursor:pointer}
   .empty-t{border:1.5px dashed var(--gold);display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--muted);line-height:1.45}
   .empty-t b{color:var(--text);font-size:16px}
   .bar{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(transparent,var(--bg) 30%);padding:24px 16px 18px}
@@ -122,13 +128,10 @@
   <form id="f" autocomplete="off" novalidate>
     <div style="display:flex;flex-direction:column;gap:20px">
       <div>
-        <span class="lbl">Hvem tester?</span>
-        <div class="quick" id="quick" style="margin:0 0 10px"></div>
-        <div class="add">
-          <input type="text" id="nyNavn" list="navn" placeholder="Nytt navn" maxlength="40">
-          <button type="button" id="leggTil">Legg til</button>
-        </div>
-        <datalist id="navn"></datalist>
+        <label class="lbl" for="nyNavn">Hvem tester?</label>
+        <div class="sel" id="sel"></div>
+        <div class="ac"><input type="text" id="nyNavn" placeholder="Søk etter navn, eller skriv et nytt" maxlength="40" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="nameSugg" aria-expanded="false"><div class="sugg hidden" id="nameSugg" role="listbox"></div></div>
+        <div class="quick" id="quick"></div>
       </div>
       <div class="placebox">
         <label class="lbl" for="sted">Sted</label>
@@ -170,8 +173,8 @@
 </div>
 <div class="bar"><div class="in"><button class="save" id="save" form="f" type="submit">Lagre test</button></div></div>
 
-<script src="config.js?v=202611250832"></script>
-<script src="parse.js?v=202611250832"></script>
+<script src="config.js?v=202611250840"></script>
+<script src="parse.js?v=202611250840"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -261,7 +264,7 @@
   const avg = a => { const x = a.filter(v => v != null); return x.length ? x.reduce((s, v) => s + v, 0) / x.length : null; };
   function drawTesters() {
     if (!state.testere.length) {
-      $('#testers').replaceChildren(el('div', { class: 'tester empty-t' }, el('b', { text: 'Velg hvem som tester' }), el('div', { text: 'Trykk på navnet ditt øverst under «Hvem tester?», så kommer scorene for kjøtt, saus, fyll, porsjon, pris og brød her.' })));
+      $('#testers').replaceChildren(el('div', { class: 'tester empty-t' }, el('b', { text: 'Velg hvem som tester' }), el('div', { text: 'Søk opp deg selv og de andre øverst under «Hvem tester?», så kommer scorene for kjøtt, saus, fyll, porsjon, pris og brød her.' })));
       return;
     }
     $('#testers').replaceChildren(...state.testere.map((t, i) => {
@@ -286,17 +289,43 @@
         note);
     }));
   }
-  function drawQuick() {
-    const names = [...state.testere.map(t => t.navn), ...known.filter(n => !state.testere.some(t => t.navn.toLowerCase() === n.toLowerCase()))];
-    $('#quick').replaceChildren(...names.map(n => {
-      const on = state.testere.some(t => t.navn.toLowerCase() === n.toLowerCase());
-      return el('button', { type: 'button', class: on ? 'on' : '', 'aria-pressed': String(on), text: (on ? '✓ ' : '+ ') + n,
-        onclick: () => { if (on) { state.testere = state.testere.filter(t => t.navn.toLowerCase() !== n.toLowerCase()); drawTesters(); drawQuick(); } else addTester(n); } });
-    }));
+  // ----- testere: valgte som brikker, søk for resten, maks fire forslag -----
+  let nameCount = new Map(), coCount = new Map();
+  const isSel = n => state.testere.some(t => t.navn.toLowerCase() === n.toLowerCase());
+  const meName = () => { try { return localStorage.getItem('kt-me') || ''; } catch { return ''; } };
+  const nameKey = n => String(n).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/ø/g, 'o').replace(/æ/g, 'ae').replace(/å/g, 'a');
+  function drawSelected() {
+    const me = meName().toLowerCase();
+    $('#sel').replaceChildren(...state.testere.map(t => el('span', { class: 'selchip' },
+      t.navn + (t.navn.toLowerCase() === me ? ' (deg)' : ''),
+      el('button', { type: 'button', 'aria-label': 'Fjern ' + t.navn, text: '×', onclick: () => { state.testere = state.testere.filter(x => x !== t); drawTesters(); drawQuick(); } }))));
   }
+  function drawQuick() {
+    drawSelected();
+    const me = meName();
+    const pool = me && coCount.size ? [...coCount.entries()] : [...nameCount.entries()];
+    const sugg = pool.sort((a, b) => b[1] - a[1]).map(([n]) => n).filter(n => !isSel(n)).slice(0, 4);
+    $('#quick').replaceChildren(...(sugg.length ? [el('span', { class: 'qlbl', text: me && coCount.size ? 'Ofte med deg:' : 'Forslag:' })] : []),
+      ...sugg.map(n => el('button', { type: 'button', text: '+ ' + n, onclick: () => addTester(n) })));
+  }
+  const nameIn = $('#nyNavn'), nameSugg = $('#nameSugg');
+  function drawNameSugg() {
+    const q = nameIn.value.trim();
+    if (!q) { showList(nameSugg, nameIn, []); return; }
+    const k = nameKey(q);
+    const hits = [...nameCount.entries()].filter(([n]) => !isSel(n) && nameKey(n).split(/\s+/).concat(nameKey(n)).some(w => w.startsWith(k) || nameKey(n).includes(k)))
+      .sort((a, b) => b[1] - a[1]).slice(0, 6).map(([n]) => n);
+    const exact = [...nameCount.keys()].some(n => nameKey(n) === k);
+    const nodes = hits.map(n => el('button', { type: 'button', role: 'option', onclick: () => pickName(n) }, el('b', { text: n }), el('small', { text: `${nameCount.get(n)} ${nameCount.get(n) === 1 ? 'test' : 'tester'}` })));
+    if (!exact && !isSel(q) && q.length >= 3) nodes.push(el('button', { type: 'button', role: 'option', onclick: () => pickName(q) }, el('b', { text: '+ Legg til «' + q + '» som ny' }), el('small', { text: 'Ny testperson' })));
+    showList(nameSugg, nameIn, nodes);
+  }
+  function pickName(n) { addTester(n); nameIn.value = ''; showList(nameSugg, nameIn, []); }
+  nameIn.addEventListener('input', drawNameSugg);
+  nameIn.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); const first = nameSugg.querySelector('button'); if (first && !nameSugg.classList.contains('hidden')) first.click(); else if (nameIn.value.trim()) pickName(nameIn.value.trim()); }
+  });
   drawTesters();
-  $('#leggTil').addEventListener('click', () => { addTester($('#nyNavn').value); $('#nyNavn').value = ''; });
-  $('#nyNavn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#leggTil').click(); } });
 
   // known names and places from the sheet
   (async () => {
@@ -314,11 +343,12 @@
       const tests = parsed.tests;
       knownPlaces = parsed.places || [];
       refreshPlace();
-      const names = new Map(); tests.forEach(t => t.scores.forEach(s => names.set(s.name, (names.get(s.name) || 0) + 1)));
-      known = [...names.entries()].sort((a, b) => b[1] - a[1]).map(([n]) => n).filter(n => n && n !== 'Anonym');
-      $('#navn').replaceChildren(...known.map(n => el('option', { value: n })));
+      const names = new Map(); tests.forEach(t => t.scores.forEach(s => { if (s.name && s.name !== 'Anonym') names.set(s.name, (names.get(s.name) || 0) + 1); }));
+      nameCount = names;
+      known = [...names.entries()].sort((a, b) => b[1] - a[1]).map(([n]) => n);
+      const me = (meName() || '').toLowerCase();
+      if (me) tests.forEach(t => { if (t.scores.some(s => s.name.toLowerCase() === me)) t.scores.forEach(s => { if (s.name.toLowerCase() !== me && s.name !== 'Anonym') coCount.set(s.name, (coCount.get(s.name) || 0) + 1); }); });
     } catch {}
-    if (!known.length) known = ['Atle Conradsen', 'Itrat Zishan', 'Tobias Frost', 'Truls Blingø'];
     let me = null; try { me = localStorage.getItem('kt-me'); } catch {}
     if (me && !state.testere.length) addTester(me);
     drawQuick();
