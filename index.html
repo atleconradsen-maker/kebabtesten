@@ -214,6 +214,13 @@
   .trophy{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;border:2px solid var(--gold);background:linear-gradient(135deg,rgba(255,198,41,.2),rgba(255,106,43,.08))}
   .trophy b{display:block;font-size:14px}.trophy small{color:var(--muted);font-size:12px}
   .tro-y{flex:0 0 auto;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#fff1a8,#ffc629 45%,#b8860b);color:#17110e;font-size:18px;border:2px solid #7a5a00}
+  .intro{text-align:left}
+  .intro-hero{font-size:44px;text-align:center;letter-spacing:6px;margin:4px 0 6px}
+  .intro h3{text-align:center;font-size:28px;line-height:1.05}
+  .intro>.ksub{text-align:center}
+  .intro-btns{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:18px}
+  .btn-primary{width:100%;min-height:52px;border:0;border-radius:16px;background:var(--gold);color:#17110e;font:800 17px Inter,system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 0 #b8860b}
+  .btn-primary:active{transform:translateY(2px);box-shadow:0 2px 0 #b8860b}
   .ann{text-align:center}
   .ann h3{font-size:30px}
   .ann-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 10px;margin-top:12px;border:2px solid var(--gold);border-radius:18px;background:linear-gradient(135deg,rgba(255,198,41,.16),rgba(255,106,43,.08))}
@@ -355,8 +362,8 @@
 </div>
 <div class="lightbox hidden" id="lb"><img alt=""><div></div></div>
 
-<script src="config.js?v=202611252011"></script>
-<script src="parse.js?v=202611252011"></script>
+<script src="config.js?v=202611252157"></script>
+<script src="parse.js?v=202611252157"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -845,6 +852,38 @@
       el('div', { class: 'sub', text: (c.final ? `Mest bidrag i hele ${c.year}: ` : 'Leder året så langt: ') + `${c.people[0].pts} poeng (` + champSub(c.people[0]) + ')' + (c.people.length > 1 ? ' hver' : '') + (c.final ? '' : ` · kåres 1. januar ${c.year + 1}`) }));
   }
 
+  // Velkomst første gang man er inne: forklarer badges og kåringer
+  function intro(after) {
+    const k = 'kt-intro-v1';
+    try { if (localStorage.getItem(k)) return false; localStorage.setItem(k, '1'); } catch { return false; }
+    // Første besøk: ikke vis kunngjøring for denne måneden i tillegg
+    try { const n = new Date(); localStorage.setItem('kt-kunngjort', `${n.getFullYear()}-${n.getMonth()}`); } catch {}
+    const dlg = el('div', { class: 'overlay', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'introT' });
+    let done = false;
+    const close = () => { if (done) return; done = true; dlg.remove(); document.removeEventListener('keydown', esc); if (after) setTimeout(after, 400); };
+    const esc = e => { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', esc);
+    const row = (icon, title, text) => el('div', { class: 'bdg on' }, el('span', { class: 'bi', text: icon }), el('span', {}, el('b', { text: title }), el('small', { text })));
+    dlg.append(el('div', { class: 'sheet intro' },
+      el('button', { type: 'button', class: 'x', 'aria-label': 'Lukk', text: '×', onclick: close }),
+      el('div', { class: 'intro-hero', 'aria-hidden': 'true', text: '🥙🏅🤠' }),
+      el('h3', { class: 'disp', id: 'introT', text: 'VELKOMMEN TIL KEBABTESTEN!' }),
+      el('p', { class: 'ksub', style: 'margin:0 0 14px' }, 'Her tester vi kebab, gir poeng og samler badges. Slik funker det:'),
+      el('div', { class: 'blist' },
+        row('🥙', 'Legg inn tester', 'Gi kjøtt, saus, fyll, porsjon, pris og brød en score fra 1 til 10'),
+        row('🏅', 'Samle badges', '15 badges å jakte på, fra «Første bit» til «Spydmester». De er dine for alltid'),
+        row('👍', 'Gi cred', 'Lik anmeldelser og kommentarer du er enig i'),
+        row('🤠', 'Bli månedens babcowboy/babgirl', 'Mest bidrag i måneden vinner. En test gir 3 poeng og en kommentar 1'),
+        row('🏆', 'Bli årets', 'Årets vinner får et merke med årstallet (som ’26) på profilbildet for alltid')),
+      el('div', { class: 'intro-btns' },
+        el('button', { type: 'button', class: 'btn-primary', text: 'Kom i gang', onclick: close }),
+        el('button', { type: 'button', class: 'linkbtn', text: 'Se alle badges', onclick: () => { done = true; dlg.remove(); document.removeEventListener('keydown', esc); openInfo(); } }))));
+    dlg.addEventListener('click', e => { if (e.target === dlg) close(); });
+    document.body.append(dlg);
+    dlg.querySelector('.btn-primary').focus();
+    return true;
+  }
+
   // Kunngjøring første gang man åpner siden etter at en vinner er kåret
   function announce() {
     const now = new Date(), ym = `${now.getFullYear()}-${now.getMonth()}`, k = 'kt-kunngjort';
@@ -1158,7 +1197,7 @@
       if (json !== last || lkJson !== lastLikes) {
         last = json; lastLikes = lkJson; if (lk) likes = lk;
         tests = data.tests; places = data.places || [];
-        if (!loaded) playAnim(); render(); ensureGeo(); setTimeout(() => { if (!announce()) celebrate(); else setTimeout(celebrate, 8000); }, 1600);
+        if (!loaded) playAnim(); render(); ensureGeo(); setTimeout(() => { if (intro(celebrate)) return; if (!announce()) celebrate(); else setTimeout(celebrate, 8000); }, 1600);
       }
       loaded = true;
       $('#status').classList.add('hidden');
