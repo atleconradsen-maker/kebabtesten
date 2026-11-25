@@ -130,8 +130,7 @@
       <div>
         <label class="lbl" for="nyNavn">Hvem tester?</label>
         <div class="sel" id="sel"></div>
-        <div class="ac"><input type="text" id="nyNavn" placeholder="Søk etter navn, eller skriv et nytt" maxlength="40" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="nameSugg" aria-expanded="false"><div class="sugg hidden" id="nameSugg" role="listbox"></div></div>
-        <div class="quick" id="quick"></div>
+        <div class="ac"><input type="text" id="nyNavn" placeholder="Kallenavn på tester" maxlength="40" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="nameSugg" aria-expanded="false"><div class="sugg hidden" id="nameSugg" role="listbox"></div></div>
       </div>
       <div class="placebox">
         <label class="lbl" for="sted">Sted</label>
@@ -173,8 +172,8 @@
 </div>
 <div class="bar"><div class="in"><button class="save" id="save" form="f" type="submit">Lagre test</button></div></div>
 
-<script src="config.js?v=202611250840"></script>
-<script src="parse.js?v=202611250840"></script>
+<script src="config.js?v=202611251609"></script>
+<script src="parse.js?v=202611251609"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -264,7 +263,7 @@
   const avg = a => { const x = a.filter(v => v != null); return x.length ? x.reduce((s, v) => s + v, 0) / x.length : null; };
   function drawTesters() {
     if (!state.testere.length) {
-      $('#testers').replaceChildren(el('div', { class: 'tester empty-t' }, el('b', { text: 'Velg hvem som tester' }), el('div', { text: 'Søk opp deg selv og de andre øverst under «Hvem tester?», så kommer scorene for kjøtt, saus, fyll, porsjon, pris og brød her.' })));
+      $('#testers').replaceChildren(el('div', { class: 'tester empty-t' }, el('b', { text: 'Velg hvem som tester' }), el('div', { text: 'Skriv kallenavnet ditt og de andre øverst under «Hvem tester?», så kommer scorene for kjøtt, saus, fyll, porsjon, pris og brød her.' })));
       return;
     }
     $('#testers').replaceChildren(...state.testere.map((t, i) => {
@@ -300,14 +299,7 @@
       t.navn + (t.navn.toLowerCase() === me ? ' (deg)' : ''),
       el('button', { type: 'button', 'aria-label': 'Fjern ' + t.navn, text: '×', onclick: () => { state.testere = state.testere.filter(x => x !== t); drawTesters(); drawQuick(); } }))));
   }
-  function drawQuick() {
-    drawSelected();
-    const me = meName();
-    const pool = me && coCount.size ? [...coCount.entries()] : [...nameCount.entries()];
-    const sugg = pool.sort((a, b) => b[1] - a[1]).map(([n]) => n).filter(n => !isSel(n)).slice(0, 4);
-    $('#quick').replaceChildren(...(sugg.length ? [el('span', { class: 'qlbl', text: me && coCount.size ? 'Ofte med deg:' : 'Forslag:' })] : []),
-      ...sugg.map(n => el('button', { type: 'button', text: '+ ' + n, onclick: () => addTester(n) })));
-  }
+  function drawQuick() { drawSelected(); }
   const nameIn = $('#nyNavn'), nameSugg = $('#nameSugg');
   function drawNameSugg() {
     const q = nameIn.value.trim();
@@ -317,7 +309,7 @@
       .sort((a, b) => b[1] - a[1]).slice(0, 6).map(([n]) => n);
     const exact = [...nameCount.keys()].some(n => nameKey(n) === k);
     const nodes = hits.map(n => el('button', { type: 'button', role: 'option', onclick: () => pickName(n) }, el('b', { text: n }), el('small', { text: `${nameCount.get(n)} ${nameCount.get(n) === 1 ? 'test' : 'tester'}` })));
-    if (!exact && !isSel(q) && q.length >= 3) nodes.push(el('button', { type: 'button', role: 'option', onclick: () => pickName(q) }, el('b', { text: '+ Legg til «' + q + '» som ny' }), el('small', { text: 'Ny testperson' })));
+    if (!exact && !isSel(q) && q.length >= 3) nodes.push(el('button', { type: 'button', role: 'option', onclick: () => pickName(q) }, el('b', { text: '+ Legg til «' + q + '» som ny' }), el('small', { text: 'Ny tester' })));
     showList(nameSugg, nameIn, nodes);
   }
   function pickName(n) { addTester(n); nameIn.value = ''; showList(nameSugg, nameIn, []); }

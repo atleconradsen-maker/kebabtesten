@@ -319,8 +319,8 @@
 </div>
 <div class="lightbox hidden" id="lb"><img alt=""><div></div></div>
 
-<script src="config.js?v=202611250840"></script>
-<script src="parse.js?v=202611250840"></script>
+<script src="config.js?v=202611251609"></script>
+<script src="parse.js?v=202611251609"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -756,19 +756,19 @@
       document.addEventListener('keydown', esc);
       const pick = n => { setMe(n); close(n); render(); };
       const key = t => String(t).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
-      const inp = el('input', { type: 'text', placeholder: 'Søk etter navnet ditt', maxlength: '40', 'aria-label': 'Navnet ditt', autocomplete: 'off' });
+      const inp = el('input', { type: 'text', placeholder: 'Kallenavnet ditt', maxlength: '40', 'aria-label': 'Kallenavnet ditt', autocomplete: 'off' });
       const list = el('div', { class: 'pills' });
       const draw = () => {
         const q = key(inp.value.trim());
-        const hits = (q ? ranked.filter(n => key(n).includes(q)) : ranked).slice(0, 6);
+        const hits = q ? ranked.filter(n => key(n).includes(q)).slice(0, 6) : [];
         const exact = ranked.some(n => key(n) === q);
         list.replaceChildren(...hits.map(n => el('button', { type: 'button', class: 'pill', text: n, onclick: () => pick(n) })),
           ...(q && !exact && inp.value.trim().length >= 3 ? [el('button', { type: 'button', class: 'pill on', text: '+ Jeg er ny: ' + inp.value.trim(), onclick: () => pick(inp.value.trim().slice(0, 40)) })] : []));
       };
       inp.addEventListener('input', draw);
       dlg.append(el('div', { class: 'sheet' },
-        el('h3', { class: 'disp', id: 'whoT', text: change ? 'BYTT NAVN' : 'HVEM ER DU?' }),
-        el('p', { class: 'ksub', style: 'margin:0 0 14px', text: 'Velg navnet ditt én gang, så husker telefonen det.' }),
+        el('h3', { class: 'disp', id: 'whoT', text: change ? 'BYTT KALLENAVN' : 'HVEM ER DU?' }),
+        el('p', { class: 'ksub', style: 'margin:0 0 14px', text: 'Skriv kallenavnet ditt én gang, så husker telefonen det.' }),
         el('form', { class: 'whoform', style: 'margin:0 0 12px', onsubmit: e => { e.preventDefault(); const b = list.querySelector('button'); if (b) b.click(); else if (inp.value.trim()) pick(inp.value.trim().slice(0, 40)); } }, inp, el('button', { type: 'submit', class: 'okbtn', text: 'OK' })),
         list,
         el('button', { type: 'button', class: 'linkbtn', style: 'margin-top:14px', text: 'Avbryt', onclick: () => close(null) })));
