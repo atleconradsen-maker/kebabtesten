@@ -4,10 +4,10 @@
  * Limes inn i regnearket «Kebabtesten – tester» under Utvidelser → Apps Script.
  * Publiseres som nettapp: Utfør som «Meg», Tilgang «Alle».
  *
- * Bytt PIN under før du publiserer. Siden spør om PIN-en første gang
- * man legger inn en test, så bare dere som kjenner den kan skrive til arket.
+ * PIN = '' betyr at alle kan legge inn uten kode. Sett en kode (f.eks. '4821')
+ * og NO_PIN: false i config.js hvis dere vil stenge det igjen.
  */
-const PIN = 'BYTT-MEG';
+const PIN = '';
 const BILDE_MAPPE_ID = '19XtfpZtR_9CSl4mOpMWhAPOHvvrKQtt6'; // Drive: Kebabtesten/Bilder
 const HEADER_RAD = 2; // rad med kolonnenavn (rad 1 er gruppeoverskriftene)
 
