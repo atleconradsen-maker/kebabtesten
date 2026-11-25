@@ -84,6 +84,15 @@
   .pinfo .btns button{padding:9px 13px;border-radius:999px;border:1px solid currentColor;background:none;color:inherit;font-weight:800;font-size:13px;cursor:pointer;min-height:40px}
   .pinfo .btns button.pri{background:var(--gold);border-color:var(--gold);color:#17110e}
   .hint{font-size:12px;color:var(--dim);margin-top:6px}
+  .at{margin-top:12px;padding:12px 13px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+  .at.warn{background:#3a2a10;border-color:#5a4318;color:#ffd27a}
+  .at p{margin:0 0 8px;font-size:13px;color:inherit}
+  .at .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .at .chips button{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:9px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--text);cursor:pointer;text-align:left;min-height:44px}
+  .at .chips button b{font-size:14px}
+  .at .chips button small{font-size:11px;color:var(--muted)}
+  .sugg .head{padding:8px 14px 6px;font-size:11px;font-weight:800;letter-spacing:1px;color:var(--gold);border-top:1px solid var(--line2);background:#21170f}
+  .sugg .head:first-child{border-top:0}
   body{background:radial-gradient(700px 320px at 0 -100px,rgba(232,64,42,.25),transparent 70%),var(--bg)}
   header h1{color:var(--gold)}
   .lbl{color:var(--gold)}
@@ -106,12 +115,13 @@
     <div style="display:flex;flex-direction:column;gap:20px">
       <div class="placebox">
         <label class="lbl" for="sted">Sted</label>
-        <div class="ac"><input type="text" id="sted" placeholder="Søk eller skriv navnet på sjappa" maxlength="80" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="sugg" aria-expanded="false"><div class="sugg hidden" id="sugg" role="listbox"></div></div>
+        <div class="ac"><input type="text" id="sted" placeholder="Navnet på sjappa, eller start med adressen under" maxlength="80" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="sugg" aria-expanded="false"><div class="sugg hidden" id="sugg" role="listbox"></div></div>
         <div id="placeInfo" aria-live="polite"></div>
-        <div id="addrWrap" class="hidden" style="margin-top:12px">
+        <div id="addrWrap" style="margin-top:12px">
           <label class="lbl" for="adresse">Adresse</label>
           <div class="ac"><input type="text" id="adresse" placeholder="Søk etter gateadresse" maxlength="120" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="addrSugg" aria-expanded="false"><div class="sugg hidden" id="addrSugg" role="listbox"></div></div>
           <div class="hint">Forslag fra Kartverkets adresseregister. Velg riktig adresse, så blir den lik hver gang.</div>
+          <div id="atAddr" aria-live="polite"></div>
         </div>
       </div>
       <div class="row2">
@@ -280,7 +290,7 @@
     const q = stedIn.value.trim();
     const info = $('#placeInfo');
     place.name = q; place.similar = null;
-    if (!q) { place.mode = 'none'; info.replaceChildren(); $('#addrWrap').classList.add('hidden'); return; }
+    if (!q) { place.mode = 'none'; info.replaceChildren(); $('#addrWrap').classList.remove('hidden'); return; }
     const exact = knownPlaces.find(p => KTParse.placeKey(p.name) === KTParse.placeKey(q));
     if (exact) {
       place.mode = 'known'; place.name = exact.name; place.address = exact.address || '';
@@ -302,16 +312,105 @@
     info.replaceChildren(el('div', { class: 'pinfo new', text: 'Nytt sted. Legg inn adressen, så blir det enkelt å finne igjen.' }));
     $('#addrWrap').classList.remove('hidden');
   }
+  const placeBtn = p => el('button', { type: 'button', role: 'option', onclick: () => choosePlace(p) }, el('b', { text: p.name }), el('small', { text: p.address || 'Adresse mangler' }));
+  let brTimer = 0, brSeq = 0, brItems = [];
+  function renderSugg() {
+    const q = stedIn.value.trim(), k = KTParse.placeKey(q);
+    const own = !q ? [] : knownPlaces.filter(p => KTParse.placeKey(p.name).includes(k) || KTParse.similarPlace(p.name, q)).slice(0, 5);
+    const nodes = [];
+    if (own.length) nodes.push(el('div', { class: 'head', text: 'DERE HAR TESTET' }), ...own.map(placeBtn));
+    const fresh = brItems.filter(b => !knownPlaces.some(p => KTParse.similarPlace(p.name, b.name)));
+    if (fresh.length) nodes.push(el('div', { class: 'head', text: 'FRA BRØNNØYSUNDREGISTRENE' }), ...fresh.map(b => el('button', { type: 'button', role: 'option', onclick: () => chooseBusiness(b) }, el('b', { text: b.name }), el('small', { text: b.address || '' }))));
+    showList(sugg, stedIn, nodes);
+  }
   stedIn.addEventListener('input', () => {
     place.confirmedNew = false;
-    const q = stedIn.value.trim(), k = KTParse.placeKey(q);
-    const items = !q ? [] : knownPlaces
-      .filter(p => KTParse.placeKey(p.name).includes(k) || KTParse.similarPlace(p.name, q))
-      .slice(0, 6)
-      .map(p => el('button', { type: 'button', role: 'option', onclick: () => choosePlace(p) }, el('b', { text: p.name }), el('small', { text: p.address || 'Adresse mangler' })));
-    showList(sugg, stedIn, items);
-    refreshPlace();
+    brItems = []; renderSugg(); refreshPlace(); checkNameAgainstAddress();
+    clearTimeout(brTimer);
+    const q = stedIn.value.trim();
+    if (q.length < 3 || knownPlaces.some(p => KTParse.placeKey(p.name) === KTParse.placeKey(q))) return;
+    brTimer = setTimeout(async () => {
+      const seq = ++brSeq;
+      try {
+        const j = await brreg({ navn: q, naeringskode: '56', size: '8' });
+        if (seq !== brSeq) return;
+        brItems = (j._embedded?.underenheter || []).filter(u => !u.nedleggelsesdato).map(u => ({ name: pretty(u.navn), address: brAddr(u) }));
+        if (document.activeElement === stedIn) renderSugg();
+      } catch {}
+    }, 400);
   });
+  function chooseBusiness(b) {
+    stedIn.value = b.name; place.confirmedNew = true;
+    if (b.address) { addrIn.value = b.address; }
+    showList(sugg, stedIn, []); refreshPlace(); checkNameAgainstAddress();
+  }
+
+  // ----- hvem holder til på adressen? Brønnøysund (næringskode 56 = servering) + OpenStreetMap -----
+  const BRREG = 'https://data.brreg.no/enhetsregisteret/api/underenheter';
+  async function brreg(params) {
+    const qs = new URLSearchParams(params).toString();
+    try {
+      const r = await fetch(BRREG + '?' + qs, { headers: { Accept: 'application/json' } });
+      if (!r.ok) throw new Error(r.status);
+      return await r.json();
+    } catch (e) {
+      if (!cfg.SCRIPT_URL) throw e; // reserve: hent via mottakeren i regnearket
+      const r = await fetch(cfg.SCRIPT_URL + '?action=brreg&' + qs);
+      return await r.json();
+    }
+  }
+  const cap = w => w ? w.charAt(0).toUpperCase() + w.slice(1) : w;
+  const pretty = n => String(n || '').toLowerCase().replace(/\s+(as|asa|enk|da|ans|nuf|sa)\.?$/i, '').replace(/\s+/g, ' ').trim()
+    .split(' ').map(w => w.split('-').map(cap).join('-')).join(' ');
+  const brAddr = u => { const a = u.beliggenhetsadresse || {}; return [(a.adresse || []).join(' '), [a.postnummer, a.poststed ? cap(a.poststed.toLowerCase()) : ''].filter(Boolean).join(' ')].filter(Boolean).join(', '); };
+  const streetKey = t => KTParse.placeKey(String(t || '').split(',')[0]);
+  async function overpass(lat, lon) {
+    const q = `[out:json][timeout:8];nwr(around:70,${lat},${lon})["amenity"~"fast_food|restaurant|cafe"]["name"];out tags 25;`;
+    const r = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'data=' + encodeURIComponent(q) });
+    const j = await r.json();
+    return (j.elements || []).map(e => e.tags || {});
+  }
+  let atFound = [], atSeq = 0;
+  async function lookupAt(a) {
+    const box = $('#atAddr'), seq = ++atSeq;
+    atFound = [];
+    box.replaceChildren(el('div', { class: 'hint', text: 'Sjekker hvem som holder til på adressen …' }));
+    const [br, osm] = await Promise.allSettled([
+      a.postnummer ? brreg({ 'beliggenhetsadresse.postnummer': a.postnummer, naeringskode: '56', size: '200' }) : Promise.resolve({}),
+      a.lat ? overpass(a.lat, a.lon) : Promise.resolve([])
+    ]);
+    if (seq !== atSeq) return;
+    const list = [];
+    const add = (name, src, detail) => { if (name && !list.some(x => KTParse.similarPlace(x.name, name))) list.push({ name, src, detail }); };
+    const gate = streetKey(a.gate);
+    if (br.status === 'fulfilled') for (const u of (br.value._embedded?.underenheter || [])) {
+      if (u.nedleggelsesdato) continue;
+      const k = KTParse.placeKey((u.beliggenhetsadresse?.adresse || []).join(' '));
+      if (k && gate && (k === gate || k.startsWith(gate) || gate.startsWith(k))) add(pretty(u.navn), 'Brønnøysundregistrene', u.naeringskode1?.beskrivelse || '');
+    }
+    if (osm.status === 'fulfilled') for (const t of osm.value) add(t.name, 'Kart', /kebab/i.test(t.cuisine || '') ? 'Kebab' : (t.amenity === 'fast_food' ? 'Gatekjøkken' : 'Servering'));
+    atFound = list;
+    if (br.status === 'rejected' && osm.status === 'rejected') { box.replaceChildren(); return; }
+    if (!list.length) { box.replaceChildren(el('div', { class: 'hint', text: 'Fant ingen registrerte serveringssteder på adressen. Skriv navnet som det står på skiltet.' })); return; }
+    checkNameAgainstAddress();
+  }
+  function checkNameAgainstAddress() {
+    const box = $('#atAddr');
+    if (!atFound.length || $('#addrWrap').classList.contains('hidden')) { if (!box.querySelector('.hint')) box.replaceChildren(); return; }
+    const q = stedIn.value.trim();
+    const match = q && atFound.find(f => KTParse.similarPlace(f.name, q));
+    const chips = el('div', { class: 'chips' }, atFound.slice(0, 8).map(f => el('button', { type: 'button', onclick: () => { stedIn.value = f.name; place.confirmedNew = true; refreshPlace(); checkNameAgainstAddress(); } }, el('b', { text: f.name }), el('small', { text: [f.detail, f.src].filter(Boolean).join(' · ') }))));
+    if (match && KTParse.placeKey(match.name) === KTParse.placeKey(q)) {
+      box.replaceChildren(el('div', { class: 'at' }, el('p', { text: '✓ «' + match.name + '» er registrert på denne adressen.' })));
+    } else if (match) {
+      box.replaceChildren(el('div', { class: 'at warn' }, el('p', {}, 'Registrert navn er ', el('b', { text: '«' + match.name + '»' }), '. Trykk for å bruke det:'), chips));
+    } else if (q) {
+      box.replaceChildren(el('div', { class: 'at warn' }, el('p', {}, 'Fant ikke ', el('b', { text: '«' + q + '»' }), ' på denne adressen. Registrert her:'), chips));
+    } else {
+      box.replaceChildren(el('div', { class: 'at' }, el('p', { text: 'Serveringssteder på denne adressen. Trykk for å bruke navnet:' }), chips));
+    }
+  }
+
   stedIn.addEventListener('focus', () => { if (!stedIn.value.trim() && knownPlaces.length) showList(sugg, stedIn, knownPlaces.slice(0, 8).map(p => el('button', { type: 'button', role: 'option', onclick: () => choosePlace(p) }, el('b', { text: p.name }), el('small', { text: p.address || 'Adresse mangler' })))); });
   document.addEventListener('click', e => { if (!e.target.closest('.ac')) { showList(sugg, stedIn, []); showList(addrSugg, addrIn, []); } });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { showList(sugg, stedIn, []); showList(addrSugg, addrIn, []); } });
@@ -328,8 +427,12 @@
         const r = await fetch('https://ws.geonorge.no/adresser/v1/sok?' + new URLSearchParams({ sok: q, fuzzy: 'true', treffPerSide: '6', asciiKompatibel: 'false' }));
         const j = await r.json();
         if (seq !== addrSeq) return;
-        const hits = (j.adresser || []).map(a => `${a.adressetekst}, ${a.postnummer} ${a.poststed ? a.poststed.charAt(0) + a.poststed.slice(1).toLowerCase() : ''}`.trim());
-        showList(addrSugg, addrIn, [...new Set(hits)].map(h => el('button', { type: 'button', role: 'option', onclick: () => { addrIn.value = h; showList(addrSugg, addrIn, []); } }, el('b', { text: h }))));
+        const seen = new Set();
+        const hits = (j.adresser || []).map(a => ({
+          label: `${a.adressetekst}, ${a.postnummer} ${a.poststed ? a.poststed.charAt(0) + a.poststed.slice(1).toLowerCase() : ''}`.trim(),
+          gate: a.adressetekst, postnummer: a.postnummer, lat: a.representasjonspunkt?.lat, lon: a.representasjonspunkt?.lon
+        })).filter(h => !seen.has(h.label) && seen.add(h.label));
+        showList(addrSugg, addrIn, hits.map(h => el('button', { type: 'button', role: 'option', onclick: () => { addrIn.value = h.label; showList(addrSugg, addrIn, []); lookupAt(h); } }, el('b', { text: h.label }))));
       } catch { showList(addrSugg, addrIn, []); }
     }, 280);
   });

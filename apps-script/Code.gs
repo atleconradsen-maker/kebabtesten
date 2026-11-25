@@ -88,7 +88,15 @@ function doPost(e) {
   }
 }
 
-function doGet() {
+function doGet(e) {
+  // Reserve for oppslag i Brønnøysundregistrene hvis nettleseren ikke får lov til å spørre direkte.
+  const p = (e && e.parameter) || {};
+  if (p.action === 'brreg') {
+    const lov = ['navn', 'naeringskode', 'size', 'beliggenhetsadresse.postnummer', 'beliggenhetsadresse.adresse'];
+    const qs = lov.filter(k => p[k]).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(String(p[k]).slice(0, 120))).join('&');
+    const r = UrlFetchApp.fetch('https://data.brreg.no/enhetsregisteret/api/underenheter?' + qs, { muteHttpExceptions: true, headers: { Accept: 'application/json' } });
+    return ContentService.createTextOutput(r.getContentText()).setMimeType(ContentService.MimeType.JSON);
+  }
   return svar({ ok: true, melding: 'Kebabtesten-mottakeren kjører.' });
 }
 
