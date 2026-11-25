@@ -159,15 +159,14 @@
         <div id="testers" style="display:flex;flex-direction:column;gap:12px"></div>
       </div>
 
-      <label id="pinWrap"><span class="lbl">PIN-kode</span><input type="password" id="pin" inputmode="numeric" placeholder="Fås av Atle"></label>
       <div class="msg hidden" id="msg"></div>
     </div>
   </form>
 </div>
 <div class="bar"><div class="in"><button class="save" id="save" form="f" type="submit">Lagre test</button></div></div>
 
-<script src="config.js"></script>
-<script src="parse.js"></script>
+<script src="config.js?v=202611250806"></script>
+<script src="parse.js?v=202611250806"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -181,7 +180,6 @@
   const CATS = [['kjott', 'Kjøtt'], ['saus', 'Saus'], ['fyll', 'Fyll / grønt'], ['porsjon', 'Porsjon'], ['verdi', 'Pris / verdi']];
 
   if (!cfg.SCRIPT_URL) $('#setup').classList.remove('hidden');
-  if (cfg.NO_PIN || store.get('kt-pin')) $('#pinWrap').classList.add('hidden');
   $('#dato').value = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 
   // ----- pills -----
@@ -468,8 +466,7 @@
     if (place.mode === 'new' && !adresse) return show('err', 'Legg inn adressen til det nye stedet.');
     if (!state.testere.length) return show('err', 'Legg til minst én testperson.');
     if (!state.testere.some(t => CATS.some(([k]) => t[k] != null) || t.brod != null)) return show('err', 'Gi minst én score.');
-    const pin = $('#pin').value.trim() || store.get('kt-pin') || '';
-    if (!pin && !cfg.NO_PIN) return show('err', 'Skriv inn PIN-koden.');
+    const pin = '';
     const [y, m, d] = $('#dato').value.split('-');
     const body = {
       pin,
@@ -482,12 +479,10 @@
       const r = await fetch(cfg.SCRIPT_URL, { method: 'POST', body: JSON.stringify(body) });
       const j = await r.json();
       if (!j.ok) {
-        if (/PIN/i.test(j.feil || '')) { store.set('kt-pin', ''); $('#pinWrap').classList.remove('hidden'); }
+        if (/PIN/i.test(j.feil || '')) throw new Error('mottakeren i regnearket krever fortsatt PIN. Sett const PIN = \'\' i Apps Script og implementer en ny versjon.');
         throw new Error(j.feil || 'Ukjent feil');
       }
-      if (pin) store.set('kt-pin', pin);
       store.set('kt-me', state.testere[0].navn);
-      $('#pinWrap').classList.add('hidden');
       show('ok', `Lagret! ${j.rader} ${j.rader === 1 ? 'rad' : 'rader'} lagt inn. Testen dukker opp på <a href="./">Kebabtesten</a> innen et minutt.`);
       btn.textContent = 'Lagret ✓';
       setTimeout(() => { location.href = './'; }, 2500);
