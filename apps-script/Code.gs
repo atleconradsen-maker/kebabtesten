@@ -10,6 +10,7 @@ const HEADER_RAD = 2; // rad med kolonnenavn (rad 1 er gruppeoverskriftene)
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
+    if (data.action === 'like') return like(data);
 
     const lock = LockService.getScriptLock();
     lock.waitLock(20000);
@@ -80,6 +81,30 @@ function doPost(e) {
     }
   } catch (err) {
     return svar({ ok: false, feil: String(err && err.message || err) });
+  }
+}
+
+// 👍 på kommentarer: ett trykk legger til, ett til fjerner. Én like per navn per kommentar.
+function like(data) {
+  const id = tekst(data.id, 40), fra = tekst(data.fra, 40);
+  if (!/^k[a-z0-9]+$/.test(id) || !fra) return svar({ ok: false, feil: 'Mangler kommentar eller navn' });
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let ark = ss.getSheetByName('Likes');
+    if (!ark) { ark = ss.insertSheet('Likes'); ark.appendRow(['Tid', 'Kommentar-ID', 'Fra']); }
+    const n = ark.getLastRow() - 1;
+    const rader = n > 0 ? ark.getRange(2, 1, n, 3).getValues() : [];
+    const i = rader.findIndex(r => String(r[1]) === id && String(r[2]).toLowerCase() === fra.toLowerCase());
+    if (i >= 0) ark.deleteRow(i + 2);
+    else {
+      const rad = ark.getLastRow() + 1;
+      ark.getRange(rad, 1, 1, 3).setNumberFormat('@').setValues([[Utilities.formatDate(new Date(), 'Europe/Oslo', 'yyyy-MM-dd HH:mm'), id, fra]]);
+    }
+    return svar({ ok: true, liked: i < 0 });
+  } finally {
+    lock.releaseLock();
   }
 }
 

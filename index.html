@@ -175,6 +175,47 @@
   .av{background:var(--gold)!important;color:#17110e!important}
   .tag.home{background:rgba(255,198,41,.16)!important;color:var(--gold)!important}
   footer{border-top:2px dashed var(--line)}
+  button.judge{font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%}
+  button.judge:hover,button.award.folk:hover{border-color:var(--gold)}
+  .award.folk{padding:14px 16px;gap:2px}
+  .award.folk .who{font-size:17px;margin:2px 0 0}
+  .award.folk .avs{display:flex;margin:-4px -4px 0 0}
+  .award.folk .av{width:40px;height:40px;font-size:14px;border:2px solid #241a15;cursor:pointer;margin-left:-10px}
+  .award.folk .av:first-child{margin-left:0}
+  .cm-name.big{font-size:19px}
+  .cm-name.big:hover{color:var(--gold)}
+  .cmts{display:flex;flex-direction:column;gap:10px}
+  .cmt{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+  .cmt .av{width:40px;height:40px;font-size:14px;border:0;cursor:pointer;flex:0 0 auto}
+  .cm-h{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+  .cm-name{background:none;border:0;padding:0;font:inherit;font-weight:800;color:var(--text);cursor:pointer}
+  .cm-name:hover{color:var(--gold)}
+  .cm-t{margin:4px 0 0;color:#e9dccb;font-size:15px;line-height:1.45;overflow-wrap:anywhere}
+  .like{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:52px;min-height:52px;justify-content:center;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--muted);cursor:pointer;font-size:18px}
+  .like b{font-size:13px;color:var(--text)}
+  .like.on{border-color:var(--gold);background:rgba(255,198,41,.14)}
+  .like.on b{color:var(--gold)}
+  .like:active{transform:scale(.94)}
+  .linkbtn{background:none;border:0;padding:0;color:var(--gold);font:inherit;font-weight:700;cursor:pointer;text-decoration:underline}
+  .overlay{position:fixed;inset:0;z-index:70;background:rgba(10,7,5,.8);display:flex;align-items:flex-end;justify-content:center;padding:0}
+  @media (min-width:640px){.overlay{align-items:center;padding:20px}}
+  .sheet{position:relative;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;background:#1f1612;border:1px solid var(--line);border-radius:22px 22px 0 0;padding:22px 18px 28px;animation:rise .3s ease both}
+  @media (min-width:640px){.sheet{border-radius:22px}}
+  .sheet h3{margin:0 0 6px;font-size:26px;color:var(--gold)}
+  .sheet .x{position:absolute;top:12px;right:12px;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:22px;cursor:pointer}
+  .whoform{display:flex;gap:8px;margin-top:14px}
+  .whoform input{flex:1;min-width:0;height:48px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:0 14px;font:inherit;font-size:16px;color:var(--text)}
+  .okbtn{padding:0 16px;border-radius:12px;border:0;background:var(--gold);color:#17110e;font-weight:800;cursor:pointer}
+  .ph-top{display:flex;gap:14px;align-items:center;padding-right:44px}
+  .big-av{width:64px;height:64px;font-size:22px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto}
+  .badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+  .badge-t{font-size:12px;font-weight:800;padding:6px 10px;border-radius:999px;background:rgba(255,198,41,.14);color:var(--gold)}
+  .pstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:16px}
+  .pstat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center;display:flex;flex-direction:column;gap:2px}
+  .pstat b{font-size:22px;color:var(--gold)}
+  .pstat span{font-size:11px;color:var(--muted)}
+  .plist{display:flex;flex-direction:column;gap:8px}
+  .prow{display:flex;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
   .km{display:inline-flex;align-items:flex-end;gap:2px;line-height:1;max-width:100%}
   .km .kk{position:relative;width:14px;height:21px;flex:0 0 auto}
   .km .kk svg{position:absolute;inset:0;width:100%;height:100%}
@@ -278,8 +319,8 @@
 </div>
 <div class="lightbox hidden" id="lb"><img alt=""><div></div></div>
 
-<script src="config.js?v=202611250828"></script>
-<script src="parse.js?v=202611250828"></script>
+<script src="config.js?v=202611250832"></script>
+<script src="parse.js?v=202611250832"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -382,7 +423,8 @@
     );
     box.append(el('section', {class: 'hero'}, photo, info));
     box.append(el('section', {style: 'margin-top:40px'}, el('h2', {class: 'sec disp', text: 'KÅRINGER'}), awards()));
-    box.append(el('section', {style: 'margin-top:40px'}, el('h2', {class: 'sec disp', text: 'DOMMERPANELET'}), el('div', {class: 'jurygrid'}, jury())));
+    box.append(el('section', {style: 'margin-top:40px'}, el('h2', {class: 'sec disp', text: 'FOLKETS KÅRINGER'}), folkAwards()));
+    box.append(el('section', {style: 'margin-top:40px', id: 'kommentarer'}, el('h2', {class: 'sec disp', text: 'KOMMENTARER'}), commentsBlock()));
   }
 
   function awards() {
@@ -416,7 +458,7 @@
     if (!js.length) return [empty('Ingen dommere ennå', 'Testpersonene dukker opp her.')];
     const kind = js.length > 1 ? js.reduce((a, b) => b.avg > a.avg ? b : a) : null;
     const hard = js.length > 1 ? js.reduce((a, b) => b.avg < a.avg ? b : a) : null;
-    return stagger(js.map(j => el('div', {class: 'judge'},
+    return stagger(js.map(j => el('button', {type: 'button', class: 'judge', onclick: () => openProfile(j.name), 'aria-label': 'Profil for ' + j.name},
       el('div', {class: 'av disp', text: (j.name.replace(/\(.*?\)/g, '').trim().split(/\s+/).map(w => (w.match(/\p{L}/u) || [''])[0]).join('').slice(0, 2) || '?').toUpperCase()}),
       el('div', {style: 'flex:1;min-width:0'}, el('div', {class: 'jn', text: j.name}),
         el('div', {class: 'st'}, 'Snitt gitt ', el('b', {text: fmt(j.avg)}), ` · ${j.totals.length} ${j.totals.length === 1 ? 'test' : 'tester'}`),
@@ -572,6 +614,201 @@
   }
   function alertBox(msg) { const s = $('#status'); s.textContent = msg; s.classList.remove('hidden'); setTimeout(() => s.classList.add('hidden'), 6000); }
 
+  // ---------- folk: navn, likes, kåringer og profiler ----------
+  const SHEET = `https://docs.google.com/spreadsheets/d/${(window.KTConfig || {}).SHEET_ID}/gviz/tq`;
+  function gvizJsonp(qs) {
+    return new Promise((resolve, reject) => {
+      const cb = '__kt' + Date.now() + Math.floor(Math.random() * 1e6);
+      const sc = document.createElement('script');
+      const done = () => { delete window[cb]; sc.remove(); clearTimeout(to); };
+      const to = setTimeout(() => { done(); reject(new Error('timeout')); }, 12000);
+      window[cb] = res => { done(); res && res.status !== 'error' && res.table ? resolve(res.table) : reject(new Error('gviz')); };
+      sc.onerror = () => { done(); reject(new Error('load')); };
+      sc.src = `${SHEET}?${qs}&tqx=out:json;responseHandler:${cb}&_=${Date.now()}`;
+      document.head.append(sc);
+    });
+  }
+  let likes = new Map(); // kommentar-id -> Set(navn i små bokstaver)
+  async function fetchLikes() {
+    const table = await gvizJsonp('sheet=Likes&headers=1');
+    const rows = KTParse.gvizToRows(table).slice(1);
+    const m = new Map();
+    rows.forEach(r => { const id = String(r[1] || '').trim(), fra = String(r[2] || '').trim().toLowerCase(); if (id && fra) { if (!m.has(id)) m.set(id, new Set()); m.get(id).add(fra); } });
+    return m;
+  }
+  const getMe = () => { try { return localStorage.getItem('kt-me') || ''; } catch { return ''; } };
+  const setMe = n => { try { localStorage.setItem('kt-me', n); } catch {} };
+  const cid = str => { let h = 5381; for (const ch of str) h = ((h << 5) + h + ch.codePointAt(0)) | 0; return 'k' + (h >>> 0).toString(36); };
+  const initials = n => (String(n).replace(/\(.*?\)/g, '').trim().split(/\s+/).map(w => (w.match(/\p{L}/u) || [''])[0]).join('').slice(0, 2) || '?').toUpperCase();
+  const likeCount = id => (likes.get(id) || new Set()).size;
+  const iLike = id => { const me = getMe().toLowerCase(); return !!me && (likes.get(id) || new Set()).has(me); };
+  function allComments() {
+    const out = [];
+    tests.forEach(t => t.notes.forEach(n => out.push({ id: cid(`${t.date}|${t.placeKey}|${n.name}|${n.text}`), name: n.name || 'Anonym', text: n.text, place: t.place, date: t.date })));
+    return out;
+  }
+  function toast(msg) { const st = $('#status'); st.textContent = msg; st.classList.remove('hidden'); clearTimeout(toast.t); toast.t = setTimeout(() => st.classList.add('hidden'), 6000); }
+
+  async function toggleLike(c) {
+    const cfg = window.KTConfig || {};
+    if (!cfg.SCRIPT_URL) return toast('Likes er ikke koblet til ennå.');
+    let me = getMe();
+    if (!me) { me = await askWho(); if (!me) return; }
+    const key = me.toLowerCase();
+    if (!likes.has(c.id)) likes.set(c.id, new Set());
+    const set = likes.get(c.id), had = set.has(key);
+    had ? set.delete(key) : set.add(key);
+    render();
+    try {
+      const r = await fetch(cfg.SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'like', id: c.id, fra: me }) });
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.feil || 'feil');
+      if (typeof j.liked === 'boolean' && j.liked === had) { j.liked ? set.add(key) : set.delete(key); render(); }
+    } catch (e) {
+      had ? set.add(key) : set.delete(key); render();
+      toast(/PIN|Mangler sted|minst én/i.test(String(e.message)) ? 'Likes virker når mottakeren i regnearket er oppdatert.' : 'Kunne ikke lagre liken. Prøv igjen.');
+    }
+  }
+
+  function peopleStats() {
+    const m = new Map();
+    const get = n => { if (!m.has(n)) m.set(n, { name: n, entries: [], totals: [], likes: 0, comments: 0, discovered: 0, cities: new Map() }); return m.get(n); };
+    for (const t of tests) for (const sc of t.scores) {
+      const p = get(sc.name);
+      p.entries.push({ t, s: sc });
+      if (sc.total != null) p.totals.push(sc.total);
+      const c = t.address && geo[t.address] ? geo[t.address].kommune : null;
+      if (c) p.cities.set(c, (p.cities.get(c) || 0) + 1);
+    }
+    for (const pl of places) {
+      const first = [...pl.tests].sort((a, b) => (a.date || '9').localeCompare(b.date || '9') || parseInt(a.id.slice(1)) - parseInt(b.id.slice(1)))[0];
+      if (first) first.scores.forEach(sc => get(sc.name).discovered++);
+    }
+    for (const c of allComments()) { const p = get(c.name); p.comments++; p.likes += likeCount(c.id); }
+    return [...m.values()].map(p => {
+      const avgGiven = p.totals.length ? p.totals.reduce((a, b) => a + b, 0) / p.totals.length : null;
+      const fav = [...p.entries].filter(e => e.s.total != null).sort((a, b) => b.s.total - a.s.total)[0];
+      return { ...p, avg: avgGiven, fav: fav ? fav.t.place : '' };
+    }).filter(p => p.name && p.name !== 'Anonym');
+  }
+  function folkTitles(ps = peopleStats()) {
+    // Ved uavgjort deles tittelen
+    const leaders = (f, min = 1) => { const l = ps.filter(p => f(p) >= min); if (!l.length) return []; const mx = Math.max(...l.map(f)); return l.filter(p => f(p) === mx); };
+    const titles = [];
+    const add = (key, title, people, sub) => { if (people.length && people.length < ps.length || (people.length === 1)) titles.push({ key, title, people, sub }); };
+    add('maskin', 'KEBABMASKINEN', leaders(p => p.entries.length), p => `${p.entries.length} ${p.entries.length === 1 ? 'test' : 'tester'}`);
+    add('stemme', 'FOLKETS STEMME', leaders(p => p.likes), p => `${p.likes} 👍 på kommentarene`);
+    add('oppdager', 'OPPDAGEREN', leaders(p => p.discovered), p => `Først på ${p.discovered} ${p.discovered === 1 ? 'sted' : 'steder'}`);
+    const rated = ps.filter(p => p.avg != null);
+    if (rated.length > 1) {
+      const hi = Math.max(...rated.map(p => p.avg)), lo = Math.min(...rated.map(p => p.avg));
+      if (hi > lo) {
+        add('snill', 'SNILLEST', rated.filter(p => p.avg === hi), p => `Gir i snitt ${fmt(p.avg)}`);
+        add('streng', 'STRENGEST', rated.filter(p => p.avg === lo), p => `Gir i snitt ${fmt(p.avg)}`);
+      }
+    }
+    const cities = new Set(); ps.forEach(p => p.cities.forEach((_, c) => cities.add(c)));
+    [...cities].map(c => ({ c, people: leaders(p => p.cities.get(c) || 0) }))
+      .filter(h => h.people.length)
+      .sort((x, y) => (y.people[0].cities.get(y.c)) - (x.people[0].cities.get(x.c)))
+      .forEach(h => titles.push({ key: 'lokal-' + h.c, title: 'LOKAL HELT I ' + h.c.toUpperCase(), people: h.people, sub: p => { const n = p.cities.get(h.c); return `${n} ${n === 1 ? 'test' : 'tester'} i ${h.c}`; } }));
+    return titles;
+  }
+  const joinNames = ns => ns.length <= 1 ? (ns[0] || '') : ns.slice(0, -1).join(', ') + ' og ' + ns[ns.length - 1];
+  function folkAwards() {
+    const titles = folkTitles();
+    if (!titles.length) return empty('Ingen kåringer ennå', 'Kåringene dukker opp når dere har testet litt.');
+    return el('div', { class: 'awards' }, stagger(titles.map(t => el('div', { class: 'award folk' },
+      el('div', { class: 'h' }, el('div', { class: 'kick', text: t.title }),
+        el('div', { class: 'avs' }, t.people.slice(0, 3).map(p => el('button', { type: 'button', class: 'av disp', text: initials(p.name), 'aria-label': 'Profil for ' + p.name, onclick: () => openProfile(p.name) })))),
+      el('div', { class: 'who' }, t.people.flatMap((p, i) => [i ? (i === t.people.length - 1 ? ' og ' : ', ') : '', el('button', { type: 'button', class: 'cm-name big', text: p.name, onclick: () => openProfile(p.name) })]).filter(x => x !== '')),
+      el('div', { class: 'sub', text: t.sub(t.people[0]) + (t.people.length > 1 ? ' hver' : '') })))));
+  }
+
+  let showAllComments = false;
+  function commentRow(c) {
+    const n = likeCount(c.id), mine = iLike(c.id);
+    return el('div', { class: 'cmt' },
+      el('button', { type: 'button', class: 'av disp', text: initials(c.name), 'aria-label': 'Profil for ' + c.name, onclick: () => openProfile(c.name) }),
+      el('div', { style: 'flex:1;min-width:0' },
+        el('div', { class: 'cm-h' }, el('button', { type: 'button', class: 'cm-name', text: c.name, onclick: () => openProfile(c.name) }), el('span', { class: 'ksub', text: [c.place, dateLbl(c.date)].filter(Boolean).join(' · ') })),
+        el('p', { class: 'cm-t', text: '«' + c.text + '»' })),
+      el('button', { type: 'button', class: 'like' + (mine ? ' on' : ''), 'aria-pressed': String(mine), 'aria-label': (mine ? 'Fjern like' : 'Lik') + ` (${n})`, onclick: () => toggleLike(c) }, '👍', el('b', { text: String(n) })));
+  }
+  function commentsBlock() {
+    const list = allComments().sort((a, b) => likeCount(b.id) - likeCount(a.id) || (b.date || '').localeCompare(a.date || ''));
+    if (!list.length) return empty('Ingen kommentarer ennå', 'Skriv en kommentar når du legger inn en test, så kan de andre gi den 👍.');
+    const shown = showAllComments ? list : list.slice(0, 5);
+    const me = getMe();
+    return el('div', { class: 'cmts' },
+      stagger(shown.map(commentRow)),
+      list.length > 5 ? el('button', { type: 'button', class: 'pill', style: 'align-self:flex-start', text: showAllComments ? 'Vis færre' : `Vis alle ${list.length}`, onclick: () => { showAllComments = !showAllComments; render(); } }) : null,
+      el('div', { class: 'ksub' }, me ? ['Du liker som ', el('b', { text: me }), ' · ', el('button', { type: 'button', class: 'linkbtn', text: 'bytt', onclick: () => askWho(true) })] : 'Trykk 👍 på en kommentar du er enig i.'));
+  }
+
+  // «Hvem er du?» – velg navn én gang, telefonen husker det
+  function askWho(change) {
+    return new Promise(resolve => {
+      const names = peopleStats().map(p => p.name).sort((a, b) => a.localeCompare(b, 'nb'));
+      const dlg = el('div', { class: 'overlay', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'whoT' });
+      const close = v => { dlg.remove(); document.removeEventListener('keydown', esc); resolve(v); };
+      const esc = e => { if (e.key === 'Escape') close(null); };
+      document.addEventListener('keydown', esc);
+      const pick = n => { setMe(n); close(n); render(); };
+      const inp = el('input', { type: 'text', placeholder: 'Eller skriv navnet ditt', maxlength: '40', 'aria-label': 'Navnet ditt' });
+      dlg.append(el('div', { class: 'sheet' },
+        el('h3', { class: 'disp', id: 'whoT', text: change ? 'BYTT NAVN' : 'HVEM ER DU?' }),
+        el('p', { class: 'ksub', style: 'margin:0 0 14px', text: 'Velg navnet ditt én gang, så husker telefonen det.' }),
+        el('div', { class: 'pills' }, names.map(n => el('button', { type: 'button', class: 'pill', text: n, onclick: () => pick(n) }))),
+        el('form', { class: 'whoform', onsubmit: e => { e.preventDefault(); const v = inp.value.trim().slice(0, 40); if (v) pick(v); } }, inp, el('button', { type: 'submit', class: 'okbtn', text: 'Det er meg' })),
+        el('button', { type: 'button', class: 'linkbtn', style: 'margin-top:12px', text: 'Avbryt', onclick: () => close(null) })));
+      dlg.addEventListener('click', e => { if (e.target === dlg) close(null); });
+      document.body.append(dlg);
+      setTimeout(() => (names.length ? dlg.querySelector('.pill') : inp).focus(), 30);
+    });
+  }
+
+  // Profil per person
+  function openProfile(name) {
+    const ps = peopleStats();
+    const p = ps.find(x => x.name.toLowerCase() === String(name).toLowerCase());
+    if (!p) return;
+    const titles = folkTitles(ps).filter(t => t.people.some(x => x.name === p.name));
+    const myComments = allComments().filter(c => c.name.toLowerCase() === p.name.toLowerCase()).sort((a, b) => likeCount(b.id) - likeCount(a.id));
+    const dlg = el('div', { class: 'overlay', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Profil for ' + p.name });
+    const close = () => { dlg.remove(); document.removeEventListener('keydown', esc); };
+    const esc = e => { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', esc);
+    const stat = (n, l) => el('div', { class: 'pstat' }, el('b', { class: 'disp', text: n }), el('span', { text: l }));
+    dlg.append(el('div', { class: 'sheet profile' },
+      el('button', { type: 'button', class: 'x', 'aria-label': 'Lukk', text: '×', onclick: close }),
+      el('div', { class: 'ph-top' }, el('span', { class: 'av disp big-av', text: initials(p.name) }),
+        el('div', {}, el('h3', { class: 'disp', text: p.name }), p.fav ? el('div', { class: 'ksub', text: '❤️ Favoritt: ' + p.fav }) : null)),
+      titles.length ? el('div', { class: 'badges' }, titles.map(t => el('span', { class: 'badge-t', text: '🏆 ' + t.title.charAt(0) + t.title.slice(1).toLowerCase() }))) : null,
+      el('div', { class: 'pstats' }, stat(String(p.entries.length), p.entries.length === 1 ? 'test' : 'tester'), stat(fmt(p.avg), 'snitt gitt'), stat(String(p.likes), '👍 fått'), stat(String(p.discovered), 'steder først')),
+      el('div', { class: 'lbl', style: 'margin:18px 0 8px', text: 'TESTENE' }),
+      el('div', { class: 'plist' }, [...p.entries].sort((a, b) => (b.t.date || '').localeCompare(a.t.date || '')).map(e => el('div', { class: 'prow' },
+        el('div', { style: 'flex:1;min-width:0' }, el('b', { text: e.t.place }), el('div', { class: 'ksub', text: [e.t.what, dateLbl(e.t.date)].filter(Boolean).join(' · ') })),
+        kebabMeter(e.s.total, 'xs')))),
+      myComments.length ? el('div', { class: 'lbl', style: 'margin:18px 0 8px', text: 'KOMMENTARENE' }) : null,
+      myComments.length ? el('div', { class: 'cmts' }, myComments.map(commentRow)) : null));
+    dlg.addEventListener('click', e => { if (e.target === dlg) close(); });
+    document.body.append(dlg);
+    dlg.querySelector('.x').focus();
+  }
+
+  // Finn kommune for adressene i bakgrunnen (trengs for «Lokal helt»)
+  let geoRun = false;
+  async function ensureGeo() {
+    if (geoRun) return;
+    const missing = [...new Set(places.filter(p => p.address && !geo[p.address]).map(p => p.address))];
+    if (!missing.length) return;
+    geoRun = true;
+    await Promise.allSettled(missing.map(geocode));
+    geoRun = false;
+    render();
+  }
+
   // ---------- navigation ----------
   const VIEWS = ['siste', 'toppliste', 'steder', 'kart'];
   function setView(v, anim) {
@@ -610,12 +847,18 @@
       return KTParse.parseSheet(text);
     }
   }
-  let last = '', loaded = false;
+  let last = '', lastLikes = '', loaded = false;
   async function load() {
     try {
       const data = await fetchData();
       const json = JSON.stringify(data.tests);
-      if (json !== last) { last = json; tests = data.tests; places = data.places || []; if (!loaded) playAnim(); render(); }
+      const lk = await fetchLikes().catch(() => null);
+      const lkJson = lk ? JSON.stringify([...lk.entries()].map(([k, v]) => [k, [...v]])) : lastLikes;
+      if (json !== last || lkJson !== lastLikes) {
+        last = json; lastLikes = lkJson; if (lk) likes = lk;
+        tests = data.tests; places = data.places || [];
+        if (!loaded) playAnim(); render(); ensureGeo();
+      }
       loaded = true;
       $('#status').classList.add('hidden');
       $('#updated').textContent = 'Oppdatert ' + new Date().toLocaleTimeString('nb-NO', {hour: '2-digit', minute: '2-digit'});
