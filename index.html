@@ -749,22 +749,33 @@
   // «Hvem er du?» – velg navn én gang, telefonen husker det
   function askWho(change) {
     return new Promise(resolve => {
-      const names = peopleStats().map(p => p.name).sort((a, b) => a.localeCompare(b, 'nb'));
+      const ranked = peopleStats().sort((a, b) => b.entries.length - a.entries.length).map(p => p.name);
       const dlg = el('div', { class: 'overlay', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'whoT' });
       const close = v => { dlg.remove(); document.removeEventListener('keydown', esc); resolve(v); };
       const esc = e => { if (e.key === 'Escape') close(null); };
       document.addEventListener('keydown', esc);
       const pick = n => { setMe(n); close(n); render(); };
-      const inp = el('input', { type: 'text', placeholder: 'Eller skriv navnet ditt', maxlength: '40', 'aria-label': 'Navnet ditt' });
+      const key = t => String(t).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+      const inp = el('input', { type: 'text', placeholder: 'Søk etter navnet ditt', maxlength: '40', 'aria-label': 'Navnet ditt', autocomplete: 'off' });
+      const list = el('div', { class: 'pills' });
+      const draw = () => {
+        const q = key(inp.value.trim());
+        const hits = (q ? ranked.filter(n => key(n).includes(q)) : ranked).slice(0, 6);
+        const exact = ranked.some(n => key(n) === q);
+        list.replaceChildren(...hits.map(n => el('button', { type: 'button', class: 'pill', text: n, onclick: () => pick(n) })),
+          ...(q && !exact && inp.value.trim().length >= 3 ? [el('button', { type: 'button', class: 'pill on', text: '+ Jeg er ny: ' + inp.value.trim(), onclick: () => pick(inp.value.trim().slice(0, 40)) })] : []));
+      };
+      inp.addEventListener('input', draw);
       dlg.append(el('div', { class: 'sheet' },
         el('h3', { class: 'disp', id: 'whoT', text: change ? 'BYTT NAVN' : 'HVEM ER DU?' }),
         el('p', { class: 'ksub', style: 'margin:0 0 14px', text: 'Velg navnet ditt én gang, så husker telefonen det.' }),
-        el('div', { class: 'pills' }, names.map(n => el('button', { type: 'button', class: 'pill', text: n, onclick: () => pick(n) }))),
-        el('form', { class: 'whoform', onsubmit: e => { e.preventDefault(); const v = inp.value.trim().slice(0, 40); if (v) pick(v); } }, inp, el('button', { type: 'submit', class: 'okbtn', text: 'Det er meg' })),
-        el('button', { type: 'button', class: 'linkbtn', style: 'margin-top:12px', text: 'Avbryt', onclick: () => close(null) })));
+        el('form', { class: 'whoform', style: 'margin:0 0 12px', onsubmit: e => { e.preventDefault(); const b = list.querySelector('button'); if (b) b.click(); else if (inp.value.trim()) pick(inp.value.trim().slice(0, 40)); } }, inp, el('button', { type: 'submit', class: 'okbtn', text: 'OK' })),
+        list,
+        el('button', { type: 'button', class: 'linkbtn', style: 'margin-top:14px', text: 'Avbryt', onclick: () => close(null) })));
+      draw();
       dlg.addEventListener('click', e => { if (e.target === dlg) close(null); });
       document.body.append(dlg);
-      setTimeout(() => (names.length ? dlg.querySelector('.pill') : inp).focus(), 30);
+      setTimeout(() => inp.focus(), 30);
     });
   }
 
