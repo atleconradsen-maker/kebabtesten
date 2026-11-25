@@ -27,6 +27,7 @@
   input[type=date]{-webkit-appearance:none;appearance:none;text-align:left;line-height:1.2}
   input[type=date]::-webkit-date-and-time-value{text-align:left}
   .pills.even .pill{flex:1}
+  input.other{margin-top:10px}
   .pills{display:flex;gap:8px;flex-wrap:wrap}
   .pill{padding:11px 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font-weight:700;font-size:14px;cursor:pointer;min-height:44px}
   .pill.on{border-color:var(--sauce);background:rgba(255,106,43,.14);color:#ff9a6a}
@@ -183,11 +184,22 @@
   $('#dato').value = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 
   // ----- pills -----
+  const other = {};
   document.querySelectorAll('.pills').forEach(box => {
     const g = box.dataset.group;
-    const draw = () => box.replaceChildren(...OPTS[g].map(o => el('button', { type: 'button', class: 'pill' + (state[g] === o ? ' on' : ''), text: o, 'aria-pressed': String(state[g] === o), onclick: () => { state[g] = state[g] === o && g === 'brodtype' ? '' : o; draw(); } })));
+    let txt = null;
+    if (OPTS[g].includes('Annet')) {
+      txt = el('input', { type: 'text', maxlength: '40', class: 'other hidden', placeholder: g === 'hva' ? 'Hva spiste dere? F.eks. Iskender, durum, lahmacun' : 'Hvordan ble den servert? F.eks. i boks, på pommes', 'aria-label': g === 'hva' ? 'Hva spiste dere (fritekst)' : 'Servert som (fritekst)' });
+      other[g] = txt;
+      box.after(txt);
+    }
+    const draw = () => {
+      box.replaceChildren(...OPTS[g].map(o => el('button', { type: 'button', class: 'pill' + (state[g] === o ? ' on' : ''), text: o, 'aria-pressed': String(state[g] === o), onclick: () => { state[g] = state[g] === o && g === 'brodtype' ? '' : o; draw(); if (txt && state[g] === 'Annet') txt.focus(); } })));
+      if (txt) txt.classList.toggle('hidden', state[g] !== 'Annet');
+    };
     draw();
   });
+  const choice = g => state[g] === 'Annet' && other[g] && other[g].value.trim() ? other[g].value.trim().slice(0, 40) : state[g];
   // ----- chili -----
   const drawChili = () => $('#chili').replaceChildren(...[1, 2, 3, 4, 5].map(n => {
     const b = el('button', { type: 'button', 'aria-label': `Sterkhet ${n} av 5`, onclick: () => { state.sterkhet = state.sterkhet === n ? 0 : n; drawChili(); } });
@@ -470,7 +482,7 @@
     const [y, m, d] = $('#dato').value.split('-');
     const body = {
       pin,
-      test: { dato: d && m && y ? `${d}.${m}.${y}` : '', sted, adresse, hva: state.hva, servert: state.servert, pris: $('#pris').value, sterkhet: state.sterkhet || '', brodtype: state.brodtype },
+      test: { dato: d && m && y ? `${d}.${m}.${y}` : '', sted, adresse, hva: choice('hva'), servert: choice('servert'), pris: $('#pris').value, sterkhet: state.sterkhet || '', brodtype: state.brodtype },
       testere: state.testere.map(t => ({ ...t })),
       bildeKebab: state.bilder.kebab || '', bildeSjappa: state.bilder.sjappa || ''
     };
