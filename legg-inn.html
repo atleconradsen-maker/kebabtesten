@@ -58,7 +58,9 @@
   .add input{flex:1}
   .add button{flex:0 0 auto;padding:0 18px;border-radius:12px;border:1px solid var(--sauce);background:transparent;color:var(--sauce2);font-weight:800;cursor:pointer}
   .quick{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-  .quick button{font-size:13px;padding:8px 12px;border-radius:999px;border:1px dashed var(--line);background:none;color:var(--muted);cursor:pointer}
+  .quick button{font-size:14px;font-weight:800;padding:10px 14px;border-radius:999px;border:1.5px solid var(--gold);background:rgba(255,198,41,.08);color:var(--gold);cursor:pointer;min-height:44px}
+  .empty-t{border:1.5px dashed var(--gold);display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--muted);line-height:1.45}
+  .empty-t b{color:var(--text);font-size:16px}
   .bar{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(transparent,var(--bg) 30%);padding:24px 16px 18px}
   .bar .in{max-width:560px;margin:0 auto}
   .save{width:100%;padding:17px;border-radius:999px;border:0;background:var(--sauce);color:var(--bg);font-weight:800;font-size:17px;cursor:pointer}
@@ -217,11 +219,16 @@
   function addTester(name) {
     name = String(name || '').trim().slice(0, 40);
     if (!name || state.testere.some(t => t.navn.toLowerCase() === name.toLowerCase())) return;
+    if (!state.testere.length) store.set('kt-me', name);
     state.testere.push({ navn: name, kjott: null, saus: null, fyll: null, porsjon: null, verdi: null, brod: null, kommentar: '' });
     drawTesters(); drawQuick();
   }
   const avg = a => { const x = a.filter(v => v != null); return x.length ? x.reduce((s, v) => s + v, 0) / x.length : null; };
   function drawTesters() {
+    if (!state.testere.length) {
+      $('#testers').replaceChildren(el('div', { class: 'tester empty-t' }, el('b', { text: 'Hvem testet?' }), el('div', { text: 'Trykk på navnet ditt under, eller skriv inn et nytt, så får du opp scorene for kjøtt, saus, fyll, porsjon, pris og brød.' })));
+      return;
+    }
     $('#testers').replaceChildren(...state.testere.map((t, i) => {
       const kebab = avg(CATS.map(([k]) => t[k]));
       const total = kebab != null && t.brod != null ? kebab * 0.8 + t.brod * 0.2 : (kebab ?? t.brod);
@@ -247,6 +254,7 @@
     const left = known.filter(n => !state.testere.some(t => t.navn.toLowerCase() === n.toLowerCase()));
     $('#quick').replaceChildren(...left.map(n => el('button', { type: 'button', text: '+ ' + n, onclick: () => addTester(n) })));
   }
+  drawTesters();
   $('#leggTil').addEventListener('click', () => { addTester($('#nyNavn').value); $('#nyNavn').value = ''; });
   $('#nyNavn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#leggTil').click(); } });
 
@@ -271,6 +279,8 @@
       $('#navn').replaceChildren(...known.map(n => el('option', { value: n })));
     } catch {}
     if (!known.length) known = ['Atle Conradsen', 'Itrat Zishan', 'Tobias Frost', 'Truls Blingø'];
+    let me = null; try { me = localStorage.getItem('kt-me'); } catch {}
+    if (me && !state.testere.length) addTester(me);
     drawQuick();
   })();
 
@@ -468,6 +478,7 @@
         throw new Error(j.feil || 'Ukjent feil');
       }
       if (pin) store.set('kt-pin', pin);
+      store.set('kt-me', state.testere[0].navn);
       $('#pinWrap').classList.add('hidden');
       show('ok', `Lagret! ${j.rader} ${j.rader === 1 ? 'rad' : 'rader'} lagt inn. Testen dukker opp på <a href="./">Kebabtesten</a> innen et minutt.`);
       btn.textContent = 'Lagret ✓';
