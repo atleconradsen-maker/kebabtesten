@@ -207,6 +207,8 @@
   .bdg b{display:block;font-size:14px}.bdg small{color:var(--muted);font-size:12px}
   .unlock{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:80;width:min(92vw,380px);text-align:center;padding:18px 16px;border-radius:20px;background:#1f1612;border:2px solid var(--gold);box-shadow:0 10px 40px rgba(0,0,0,.6);animation:pop .5s cubic-bezier(.2,1.4,.4,1) both;display:flex;flex-direction:column;gap:4px;align-items:center}
   .unlock .u-big{font-size:40px}
+  .award.champ{border-color:var(--gold);background:linear-gradient(135deg,rgba(255,198,41,.16),rgba(255,106,43,.08))}
+  .confetti{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:90}
   .unlock b{font-size:24px;color:var(--gold)}
   @keyframes pop{from{transform:translate(-50%,40px) scale(.8);opacity:0}to{transform:translate(-50%,0) scale(1);opacity:1}}
   .revs{display:flex;flex-direction:column;gap:8px}
@@ -340,8 +342,8 @@
 </div>
 <div class="lightbox hidden" id="lb"><img alt=""><div></div></div>
 
-<script src="config.js?v=202611251942"></script>
-<script src="parse.js?v=202611251942"></script>
+<script src="config.js?v=202611252004"></script>
+<script src="parse.js?v=202611252004"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -763,14 +765,41 @@
     return titles;
   }
   const joinNames = ns => ns.length <= 1 ? (ns[0] || '') : ns.slice(0, -1).join(', ') + ' og ' + ns[ns.length - 1];
+  // Månedens babcowboy/babgirl: mest bidrag forrige måned (test = 3 poeng, kommentar = 1)
+  const MND = ['januar', 'februar', 'mars', 'april', 'mai', 'juni', 'juli', 'august', 'september', 'oktober', 'november', 'desember'];
+  function monthBoard(ym) {
+    const m = new Map();
+    const add = (n, pts, kind) => { if (!n || n === 'Anonym') return; if (!m.has(n)) m.set(n, { name: n, pts: 0, tests: 0, comments: 0 }); const o = m.get(n); o.pts += pts; o[kind]++; };
+    tests.filter(t => (t.date || '').slice(0, 7) === ym).forEach(t => { t.scores.forEach(sc => add(sc.name, 3, 'tests')); t.notes.forEach(n => add(n.name, 1, 'comments')); });
+    const l = [...m.values()]; if (!l.length) return [];
+    const mx = Math.max(...l.map(o => o.pts)); return l.filter(o => o.pts === mx);
+  }
+  function monthChamp() {
+    const now = new Date(), prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const ym = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const done = monthBoard(ym(prev));
+    if (done.length) return { final: true, month: MND[prev.getMonth()], people: done };
+    const live = monthBoard(ym(now));
+    return live.length ? { final: false, month: MND[now.getMonth()], people: live } : null;
+  }
+  const champSub = o => `${o.tests} ${o.tests === 1 ? 'test' : 'tester'}` + (o.comments ? ` og ${o.comments} ${o.comments === 1 ? 'kommentar' : 'kommentarer'}` : '');
+  function champCard() {
+    const c = monthChamp(); if (!c) return null;
+    return el('div', { class: 'award folk champ' },
+      el('div', { class: 'h' }, el('div', { class: 'kick', text: '🤠 MÅNEDENS BABCOWBOY / BABGIRL' }),
+        el('div', { class: 'avs' }, c.people.slice(0, 3).map(p => el('button', { type: 'button', class: 'av disp', text: initials(p.name), 'aria-label': 'Profil for ' + p.name, onclick: () => openProfile(p.name) })))),
+      el('div', { class: 'who' }, c.people.flatMap((p, i) => [i ? (i === c.people.length - 1 ? ' og ' : ', ') : '', el('button', { type: 'button', class: 'cm-name big', text: p.name, onclick: () => openProfile(p.name) })]).filter(x => x !== '')),
+      el('div', { class: 'sub', text: (c.final ? `Mest bidrag i ${c.month}: ` : `Leder ${c.month} så langt: `) + champSub(c.people[0]) + (c.people.length > 1 ? ' hver' : '') + (c.final ? '' : ' · kåres 1. ' + MND[(MND.indexOf(c.month) + 1) % 12]) }));
+  }
   function folkAwards() {
     const titles = folkTitles();
-    if (!titles.length) return empty('Ingen kåringer ennå', 'Kåringene dukker opp når dere har testet litt.');
-    return el('div', { class: 'awards' }, stagger(titles.map(t => el('div', { class: 'award folk' },
+    const champ = champCard();
+    if (!titles.length && !champ) return empty('Ingen kåringer ennå', 'Kåringene dukker opp når dere har testet litt.');
+    return el('div', { class: 'awards' }, stagger([champ, ...titles.map(t => el('div', { class: 'award folk' },
       el('div', { class: 'h' }, el('div', { class: 'kick', text: t.title }),
         el('div', { class: 'avs' }, t.people.slice(0, 3).map(p => el('button', { type: 'button', class: 'av disp', text: initials(p.name), 'aria-label': 'Profil for ' + p.name, onclick: () => openProfile(p.name) })))),
       el('div', { class: 'who' }, t.people.flatMap((p, i) => [i ? (i === t.people.length - 1 ? ' og ' : ', ') : '', el('button', { type: 'button', class: 'cm-name big', text: p.name, onclick: () => openProfile(p.name) })]).filter(x => x !== '')),
-      el('div', { class: 'sub', text: t.sub(t.people[0]) + (t.people.length > 1 ? ' hver' : '') })))));
+      el('div', { class: 'sub', text: t.sub(t.people[0]) + (t.people.length > 1 ? ' hver' : '') })))].filter(Boolean)));
   }
 
 
@@ -809,6 +838,7 @@
     const esc = e => { if (e.key === 'Escape') close(); };
     document.addEventListener('keydown', esc);
     const FOLK = [
+      ['🤠', 'Månedens babcowboy / babgirl', 'Mest bidrag forrige måned. En test gir 3 poeng og en kommentar 1 poeng. Kåres den 1. hver måned'],
       ['🏆', 'Kebabmaskinen', 'Den som har vært med på flest tester'],
       ['👍', 'Folkets stemme', 'Flest likes på anmeldelser og kommentarer'],
       ['🧭', 'Oppdageren', 'Først ute på flest nye steder'],
@@ -832,6 +862,36 @@
     dlg.querySelector('.x').focus();
   }
 
+  // Konfetti (ren canvas, ingen bibliotek)
+  function confetti() {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const c = el('canvas', { class: 'confetti', 'aria-hidden': 'true' });
+    document.body.append(c);
+    const dpr = Math.min(2, devicePixelRatio || 1), W = innerWidth, H = innerHeight;
+    c.width = W * dpr; c.height = H * dpr;
+    const x = c.getContext('2d'); x.scale(dpr, dpr);
+    const COLORS = ['#ffc629', '#ff6a2b', '#e8412c', '#fff4e0', '#7bc96f', '#c0612b'];
+    const bits = [];
+    const burst = (ox, dir) => { for (let i = 0; i < 90; i++) { const a = -Math.PI / 2 + dir * (0.25 + Math.random() * 0.55), v = 9 + Math.random() * 10;
+      bits.push({ x: ox, y: H, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 4, w: 6 + Math.random() * 6, h: 8 + Math.random() * 8, r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: COLORS[i % COLORS.length], kebab: Math.random() < .06 }); } };
+    burst(0, 1); burst(W, -1);
+    setTimeout(() => { for (let i = 0; i < 70; i++) bits.push({ x: Math.random() * W, y: -20, vx: (Math.random() - .5) * 3, vy: 2 + Math.random() * 3, w: 6 + Math.random() * 6, h: 8 + Math.random() * 8, r: Math.random() * 6, vr: (Math.random() - .5) * .3, c: COLORS[i % COLORS.length], kebab: Math.random() < .08 }); }, 350);
+    const t0 = performance.now(); let last = t0;
+    (function step(now) {
+      x.clearRect(0, 0, W, H);
+      const age = now - t0, k = Math.min(3, (now - last) / 16.7); last = now;
+      for (const b of bits) {
+        const drag = Math.pow(b.vy > 0 ? .96 : .985, k);
+        b.vy += .3 * k; b.vx *= drag; b.vy *= drag; b.x += (b.vx + Math.sin((now + b.r * 300) / 300) * .8) * k; b.y += b.vy * k; b.r += b.vr * k;
+        x.save(); x.translate(b.x, b.y); x.rotate(b.r); x.globalAlpha = age > 3200 ? Math.max(0, 1 - (age - 3200) / 800) : 1;
+        if (b.kebab) { x.font = '22px serif'; x.fillText('🥙', -11, 8); }
+        else { x.fillStyle = b.c; x.fillRect(-b.w / 2, -b.h / 2 * Math.abs(Math.cos(b.r)), b.w, b.h * Math.abs(Math.cos(b.r)) + 1); }
+        x.restore();
+      }
+      if (age < 4000) requestAnimationFrame(step); else c.remove();
+    })(t0);
+  }
+
   // Feiring når du har låst opp noe nytt siden sist
   function celebrate() {
     const me = getMe(); if (!me) return;
@@ -848,6 +908,7 @@
       el('div', { text: joinNames(fresh.map(b => b.name)) }),
       el('button', { type: 'button', class: 'linkbtn', text: 'Se profilen din', onclick: () => { pop.remove(); openProfile(p.name); } }));
     document.body.append(pop);
+    confetti();
     setTimeout(() => pop.remove(), 7000);
     pop.addEventListener('click', e => { if (e.target === pop || e.target.tagName !== 'BUTTON') pop.remove(); });
   }
@@ -922,7 +983,8 @@
       el('button', { type: 'button', class: 'x', 'aria-label': 'Lukk', text: '×', onclick: close }),
       el('div', { class: 'ph-top' }, el('span', { class: 'av disp big-av', text: initials(p.name) }),
         el('div', {}, el('h3', { class: 'disp', text: p.name }), p.fav ? el('div', { class: 'ksub', text: '❤️ Favoritt: ' + p.fav }) : null)),
-      titles.length ? el('div', { class: 'badges' }, titles.map(t => el('span', { class: 'badge-t', text: '🏆 ' + t.title.charAt(0) + t.title.slice(1).toLowerCase() }))) : null,
+      (() => { const ch = monthChamp(), isCh = ch && ch.final && ch.people.some(x => x.name === p.name);
+        return titles.length || isCh ? el('div', { class: 'badges' }, isCh ? el('span', { class: 'badge-t', text: `🤠 Månedens babcowboy/babgirl (${ch.month})` }) : null, titles.map(t => el('span', { class: 'badge-t', text: '🏆 ' + t.title.charAt(0) + t.title.slice(1).toLowerCase() }))) : null; })(),
       (() => { const bs = badgesOf(p), got = bs.filter(b => b.done); return el('div', {},
         el('div', { class: 'lbl', style: 'margin:18px 0 8px;display:flex;justify-content:space-between;align-items:center' }, `BADGES · ${got.length} AV ${bs.length}`, el('button', { type: 'button', class: 'linkbtn', text: 'Hva er dette?', onclick: () => { close(); openInfo(); } })),
         (() => { const locked = bs.filter(b => !b.done).sort((a, b) => b.have / b.goal - a.have / a.goal);
