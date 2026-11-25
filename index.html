@@ -188,7 +188,8 @@
   .klinks a:hover{text-decoration:underline}
   .kpin{width:44px;height:44px;border-radius:50%;background:var(--sauce);border:3px solid #fff4e0;box-shadow:0 4px 12px rgba(0,0,0,.5);display:grid;place-items:center;color:#fff4e0;font:400 13px 'Archivo Black',Impact,sans-serif}
   .kpin.top{background:var(--gold);color:#17110e}
-  .leaflet-container{font-family:Inter,system-ui,sans-serif}
+  .leaflet-container{font-family:Inter,system-ui,sans-serif;background:#1d1511}
+  .kt-tiles{filter:invert(1) hue-rotate(180deg) brightness(.8) contrast(.9) saturate(.6)}
   .leaflet-popup-content{font-size:13px;line-height:1.5}
   .leaflet-popup-content b{font-size:15px}
   .leaflet-popup-content a{color:#c2410c;font-weight:800}
@@ -521,7 +522,7 @@
     if (kmap) { kmap.remove(); kmap = null; }
     mapEl.replaceChildren();
     kmap = L.map(mapEl, { scrollWheelZoom: false, attributionControl: true });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd', attribution: '© OpenStreetMap-bidragsytere © CARTO' }).addTo(kmap);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>-bidragsytere', className: 'kt-tiles' }).addTo(kmap);
     const pts = [];
     list.filter(p => p.g).forEach((p, i) => {
       const icon = L.divIcon({ className: '', html: `<div class="kpin${i === 0 && city !== 'Nær meg' ? ' top' : ''}">${fmt(p.total)}</div>`, iconSize: [44, 44], iconAnchor: [22, 22] });
