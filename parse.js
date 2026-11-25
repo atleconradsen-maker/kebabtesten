@@ -70,9 +70,34 @@
     return s.slice(0, 1000);
   }
 
+  // Samme sted uansett store/små bokstaver, mellomrom, bindestrek og aksenter
+  function placeKey(name) {
+    return String(name || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/å/g, 'a')
+      .normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+  }
+  function lev(a, b) {
+    const m = a.length, n = b.length; if (!m) return n; if (!n) return m;
+    let prev = Array.from({length: n + 1}, (_, j) => j);
+    for (let i = 1; i <= m; i++) {
+      const cur = [i];
+      for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = cur;
+    }
+    return prev[n];
+  }
+  // true når to navn trolig er samme sted skrevet litt ulikt
+  function similarPlace(a, b) {
+    const x = placeKey(a), y = placeKey(b);
+    if (!x || !y) return false;
+    if (x === y) return true;
+    if (Math.min(x.length, y.length) >= 5 && (x.includes(y) || y.includes(x))) return true;
+    return lev(x, y) <= Math.max(1, Math.floor(Math.max(x.length, y.length) / 6));
+  }
+
   const FIELDS = {
     date: ['dato', 'date'],
     place: ['sted', 'kebabsjappa', 'sjappa', 'restaurant'],
+    address: ['adresse', 'address'],
     what: ['hva', 'hva spiste dere', 'kjotttype', 'type kebab'],
     served: ['servert som', 'servering', 'type'],
     price: ['pris kr', 'pris', 'pris i kr'],
@@ -90,7 +115,7 @@
     imgShop: ['bilde sjappa', 'bilde av sjappa', 'bilde sted']
   };
   const CATS = ['meat', 'sauce', 'fill', 'portion', 'value'];
-  const SHARED = ['date', 'place', 'what', 'served', 'price', 'heat', 'breadType'];
+  const SHARED = ['date', 'place', 'address', 'what', 'served', 'price', 'heat', 'breadType'];
 
   function parseRows(rows) {
     if (!rows.length) return { tests: [] };
@@ -108,6 +133,7 @@
     const get = (r, k) => idx[k] != null ? r[idx[k]] : '';
 
     const tests = new Map();
+    const places = new Map();
     let prev = null;
     rows.slice(1).forEach((r, n) => {
       const cur = {};
@@ -118,11 +144,17 @@
       const base = isNew ? cur : prev;
       if (isNew) prev = cur;
       const date = parseDate(base.date);
-      const place = String(base.place).trim().slice(0, 80);
-      const key = (date || 'u' + n) + '|' + place.toLowerCase();
+      const rawPlace = String(base.place).trim().slice(0, 80);
+      const pk = placeKey(rawPlace);
+      if (!places.has(pk)) places.set(pk, { name: rawPlace, address: '' });
+      const pinfo = places.get(pk);
+      const addr = String(base.address || '').trim();
+      if (addr && !pinfo.address) pinfo.address = addr.slice(0, 120);
+      const place = pinfo.name;
+      const key = (date || 'u' + n) + '|' + pk;
       if (!tests.has(key)) {
         tests.set(key, {
-          id: 't' + (n + 2), date, place,
+          id: 't' + (n + 2), date, place, placeKey: pk,
           what: String(base.what || '').trim().slice(0, 40),
           served: String(base.served || '').trim().slice(0, 40),
           price: toNum(base.price),
@@ -157,15 +189,15 @@
       CATS.forEach(c => cat[c] = avg(t.scores.map(s => s[c])));
       const kebab = avg(t.scores.map(s => s.kebab));
       const bread = avg(t.scores.map(s => s.bread));
-      return { ...t, cat, kebab, bread, total: combine(kebab, bread) };
+      return { ...t, address: (places.get(t.placeKey) || {}).address || '', cat, kebab, bread, total: combine(kebab, bread) };
     });
-    return { tests: out };
+    return { tests: out, places: [...places.values()] };
   }
   function combine(k, b) {
     if (k != null && b != null) return k * W_KEBAB + b * W_BREAD;
     return k != null ? k : b;
   }
 
-  const api = { parseCSV, parseRows, parseSheet: t => parseRows(parseCSV(t)), gvizToRows, parseDate, imageUrl, W_KEBAB, W_BREAD };
+  const api = { placeKey, similarPlace, parseCSV, parseRows, parseSheet: t => parseRows(parseCSV(t)), gvizToRows, parseDate, imageUrl, W_KEBAB, W_BREAD };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.KTParse = api;
 })(typeof self !== 'undefined' ? self : this);

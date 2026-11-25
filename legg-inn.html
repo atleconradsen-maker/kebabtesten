@@ -64,6 +64,21 @@
   .msg.info{background:var(--panel);border:1px solid var(--line);color:var(--muted)}
   .msg a{color:inherit;font-weight:800}
   .hidden{display:none!important}
+  .ac{position:relative}
+  .sugg{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:20;background:#2a1e18;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 14px 30px rgba(0,0,0,.5)}
+  .sugg button{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line2);padding:12px 14px;cursor:pointer;color:var(--text)}
+  .sugg button:first-child{border-top:0}
+  .sugg button:hover,.sugg button:focus{background:rgba(255,198,41,.08);outline:none}
+  .sugg b{display:block;font-size:15px}
+  .sugg small{color:var(--muted);font-size:12px}
+  .pinfo{margin-top:10px;padding:11px 13px;border-radius:12px;font-size:14px;line-height:1.45}
+  .pinfo.known{background:#1f3322;color:#a8eaa3}
+  .pinfo.warn{background:#3a2a10;color:#ffd27a}
+  .pinfo.new{background:var(--panel);border:1px solid var(--line);color:var(--muted)}
+  .pinfo .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+  .pinfo .btns button{padding:9px 13px;border-radius:999px;border:1px solid currentColor;background:none;color:inherit;font-weight:800;font-size:13px;cursor:pointer;min-height:40px}
+  .pinfo .btns button.pri{background:var(--gold);border-color:var(--gold);color:#17110e}
+  .hint{font-size:12px;color:var(--dim);margin-top:6px}
   body{background:radial-gradient(700px 320px at 0 -100px,rgba(232,64,42,.25),transparent 70%),var(--bg)}
   header h1{color:var(--gold)}
   .lbl{color:var(--gold)}
@@ -88,8 +103,16 @@
         <label><span class="lbl">Dato</span><input type="date" id="dato" required></label>
         <label><span class="lbl">Pris (kr)</span><input type="number" id="pris" inputmode="numeric" min="0" placeholder="149"></label>
       </div>
-      <label><span class="lbl">Sted</span><input type="text" id="sted" list="steder" placeholder="F.eks. Smakfull Kebab" required maxlength="80"></label>
-      <datalist id="steder"></datalist>
+      <div class="placebox">
+        <label class="lbl" for="sted">Sted</label>
+        <div class="ac"><input type="text" id="sted" placeholder="Søk eller skriv navnet på sjappa" maxlength="80" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="sugg" aria-expanded="false"><div class="sugg hidden" id="sugg" role="listbox"></div></div>
+        <div id="placeInfo" aria-live="polite"></div>
+        <div id="addrWrap" class="hidden" style="margin-top:12px">
+          <label class="lbl" for="adresse">Adresse</label>
+          <div class="ac"><input type="text" id="adresse" placeholder="Søk etter gateadresse" maxlength="120" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="addrSugg" aria-expanded="false"><div class="sugg hidden" id="addrSugg" role="listbox"></div></div>
+          <div class="hint">Forslag fra Kartverkets adresseregister. Velg riktig adresse, så blir den lik hver gang.</div>
+        </div>
+      </div>
 
       <div><span class="lbl">Hva spiste dere?</span><div class="pills" data-group="hva"></div></div>
       <div><span class="lbl">Servert som</span><div class="pills" data-group="servert"></div></div>
@@ -226,23 +249,99 @@
         sc.src = `${base}?gid=0&headers=${cfg.HEADER_ROWS || 1}&tqx=out:json;responseHandler:${cb}`;
         document.head.append(sc);
       });
-      const { tests } = KTParse.parseRows(KTParse.gvizToRows(table));
+      const parsed = KTParse.parseRows(KTParse.gvizToRows(table));
+      const tests = parsed.tests;
+      knownPlaces = parsed.places || [];
+      refreshPlace();
       const names = new Map(); tests.forEach(t => t.scores.forEach(s => names.set(s.name, (names.get(s.name) || 0) + 1)));
       known = [...names.entries()].sort((a, b) => b[1] - a[1]).map(([n]) => n).filter(n => n && n !== 'Anonym');
       $('#navn').replaceChildren(...known.map(n => el('option', { value: n })));
-      $('#steder').replaceChildren(...[...new Set(tests.map(t => t.place))].map(p => el('option', { value: p })));
     } catch {}
     if (!known.length) known = ['Atle Conradsen', 'Itrat Zishan', 'Tobias Frost', 'Truls Blingø'];
     drawQuick();
   })();
+
+  // ----- sted: kjente steder, likhetssjekk og adresse -----
+  let knownPlaces = [];
+  const place = { mode: 'none', name: '', address: '', confirmedNew: false, similar: null };
+  const stedIn = $('#sted'), sugg = $('#sugg'), addrIn = $('#adresse'), addrSugg = $('#addrSugg');
+  function showList(box, input, items) {
+    box.replaceChildren(...items);
+    const open = items.length > 0;
+    box.classList.toggle('hidden', !open); input.setAttribute('aria-expanded', String(open));
+  }
+  function choosePlace(p) {
+    stedIn.value = p.name; place.confirmedNew = false; showList(sugg, stedIn, []); refreshPlace();
+  }
+  function refreshPlace() {
+    const q = stedIn.value.trim();
+    const info = $('#placeInfo');
+    place.name = q; place.similar = null;
+    if (!q) { place.mode = 'none'; info.replaceChildren(); $('#addrWrap').classList.add('hidden'); return; }
+    const exact = knownPlaces.find(p => KTParse.placeKey(p.name) === KTParse.placeKey(q));
+    if (exact) {
+      place.mode = 'known'; place.name = exact.name; place.address = exact.address || '';
+      info.replaceChildren(el('div', { class: 'pinfo known' }, el('b', { text: '✓ ' + exact.name }), exact.address ? ' · ' + exact.address : ' · mangler adresse, legg den inn under'));
+      $('#addrWrap').classList.toggle('hidden', !!exact.address);
+      return;
+    }
+    const sim = place.confirmedNew ? null : knownPlaces.find(p => KTParse.similarPlace(p.name, q));
+    if (sim) {
+      place.mode = 'similar'; place.similar = sim;
+      info.replaceChildren(el('div', { class: 'pinfo warn' }, 'Finnes allerede: ', el('b', { text: '«' + sim.name + '»' }), sim.address ? ' (' + sim.address + ')' : '', '. Er det samme sted?',
+        el('div', { class: 'btns' },
+          el('button', { type: 'button', class: 'pri', text: 'Ja, bruk ' + sim.name, onclick: () => choosePlace(sim) }),
+          el('button', { type: 'button', text: 'Nei, det er et nytt sted', onclick: () => { place.confirmedNew = true; refreshPlace(); } }))));
+      $('#addrWrap').classList.add('hidden');
+      return;
+    }
+    place.mode = 'new'; place.address = '';
+    info.replaceChildren(el('div', { class: 'pinfo new', text: 'Nytt sted. Legg inn adressen, så blir det enkelt å finne igjen.' }));
+    $('#addrWrap').classList.remove('hidden');
+  }
+  stedIn.addEventListener('input', () => {
+    place.confirmedNew = false;
+    const q = stedIn.value.trim(), k = KTParse.placeKey(q);
+    const items = !q ? [] : knownPlaces
+      .filter(p => KTParse.placeKey(p.name).includes(k) || KTParse.similarPlace(p.name, q))
+      .slice(0, 6)
+      .map(p => el('button', { type: 'button', role: 'option', onclick: () => choosePlace(p) }, el('b', { text: p.name }), el('small', { text: p.address || 'Adresse mangler' })));
+    showList(sugg, stedIn, items);
+    refreshPlace();
+  });
+  stedIn.addEventListener('focus', () => { if (!stedIn.value.trim() && knownPlaces.length) showList(sugg, stedIn, knownPlaces.slice(0, 8).map(p => el('button', { type: 'button', role: 'option', onclick: () => choosePlace(p) }, el('b', { text: p.name }), el('small', { text: p.address || 'Adresse mangler' })))); });
+  document.addEventListener('click', e => { if (!e.target.closest('.ac')) { showList(sugg, stedIn, []); showList(addrSugg, addrIn, []); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { showList(sugg, stedIn, []); showList(addrSugg, addrIn, []); } });
+
+  // Adressesøk mot Kartverket (ws.geonorge.no). Faller tilbake til fritekst om det ikke svarer.
+  let addrTimer = 0, addrSeq = 0;
+  addrIn.addEventListener('input', () => {
+    clearTimeout(addrTimer);
+    const q = addrIn.value.trim();
+    if (q.length < 3) { showList(addrSugg, addrIn, []); return; }
+    addrTimer = setTimeout(async () => {
+      const seq = ++addrSeq;
+      try {
+        const r = await fetch('https://ws.geonorge.no/adresser/v1/sok?' + new URLSearchParams({ sok: q, fuzzy: 'true', treffPerSide: '6', asciiKompatibel: 'false' }));
+        const j = await r.json();
+        if (seq !== addrSeq) return;
+        const hits = (j.adresser || []).map(a => `${a.adressetekst}, ${a.postnummer} ${a.poststed ? a.poststed.charAt(0) + a.poststed.slice(1).toLowerCase() : ''}`.trim());
+        showList(addrSugg, addrIn, [...new Set(hits)].map(h => el('button', { type: 'button', role: 'option', onclick: () => { addrIn.value = h; showList(addrSugg, addrIn, []); } }, el('b', { text: h }))));
+      } catch { showList(addrSugg, addrIn, []); }
+    }, 280);
+  });
 
   // ----- submit -----
   function show(kind, html) { const m = $('#msg'); m.className = 'msg ' + kind; m.innerHTML = html; m.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
   $('#f').addEventListener('submit', async e => {
     e.preventDefault();
     if (!cfg.SCRIPT_URL) return show('err', 'Innleggingen er ikke koblet til regnearket ennå.');
-    const sted = $('#sted').value.trim();
-    if (!sted) return show('err', 'Skriv inn stedet.');
+    refreshPlace();
+    if (place.mode === 'none') return show('err', 'Skriv inn stedet.');
+    if (place.mode === 'similar') return show('err', `Er «${stedIn.value.trim()}» det samme som «${place.similar.name}»? Velg ja eller nei under stedet.`);
+    const sted = place.name;
+    const adresse = (place.mode === 'known' && place.address) ? place.address : addrIn.value.trim();
+    if (place.mode === 'new' && !adresse) return show('err', 'Legg inn adressen til det nye stedet.');
     if (!state.testere.length) return show('err', 'Legg til minst én testperson.');
     if (!state.testere.some(t => CATS.some(([k]) => t[k] != null) || t.brod != null)) return show('err', 'Gi minst én score.');
     const pin = $('#pin').value.trim() || store.get('kt-pin') || '';
@@ -250,7 +349,7 @@
     const [y, m, d] = $('#dato').value.split('-');
     const body = {
       pin,
-      test: { dato: d && m && y ? `${d}.${m}.${y}` : '', sted, hva: state.hva, servert: state.servert, pris: $('#pris').value, sterkhet: state.sterkhet || '', brodtype: state.brodtype },
+      test: { dato: d && m && y ? `${d}.${m}.${y}` : '', sted, adresse, hva: state.hva, servert: state.servert, pris: $('#pris').value, sterkhet: state.sterkhet || '', brodtype: state.brodtype },
       testere: state.testere.map(t => ({ ...t })),
       bildeKebab: state.bilder.kebab || '', bildeSjappa: state.bilder.sjappa || ''
     };

@@ -25,8 +25,26 @@ function doPost(e) {
       const kol = navn => kolonner.indexOf(navn.toLowerCase());
 
       const t = data.test || {};
-      const sted = tekst(t.sted, 80);
+      let sted = tekst(t.sted, 80);
+      let adresse = tekst(t.adresse, 120);
       if (!sted) return svar({ ok: false, feil: 'Mangler sted' });
+
+      // Samme sted skal alltid skrives likt: bruk skrivemåten som allerede står i arket,
+      // og fyll inn adressen på tidligere rader hvis den manglet.
+      const stedKol = kol('Sted'), adrKol = kol('Adresse');
+      const forste = HEADER_RAD + 1, antall = Math.max(0, ark.getLastRow() - HEADER_RAD);
+      if (stedKol >= 0 && antall > 0) {
+        const steder = ark.getRange(forste, stedKol + 1, antall, 1).getValues().map(r => String(r[0]).trim());
+        const adresser = adrKol >= 0 ? ark.getRange(forste, adrKol + 1, antall, 1).getValues().map(r => String(r[0]).trim()) : [];
+        const n = stedNokkel(sted);
+        const treff = steder.map((v, i) => i).filter(i => steder[i] && stedNokkel(steder[i]) === n);
+        if (treff.length) {
+          sted = steder[treff[0]];
+          const kjent = treff.map(i => adresser[i]).find(a => a);
+          if (kjent) adresse = kjent;
+          else if (adresse && adrKol >= 0) treff.forEach(i => ark.getRange(forste + i, adrKol + 1).setValue(adresse));
+        }
+      }
       const testere = (data.testere || []).filter(p => tekst(p.navn, 40));
       if (!testere.length) return svar({ ok: false, feil: 'Legg inn minst én testperson' });
 
@@ -39,6 +57,7 @@ function doPost(e) {
         const sett = (navn, verdi) => { const k = kol(navn); if (k >= 0 && verdi !== '' && verdi != null) rad[k] = verdi; };
         sett('Dato', tekst(t.dato, 12));
         sett('Sted', sted);
+        sett('Adresse', adresse);
         sett('Hva', tekst(t.hva, 40));
         sett('Servert som', tekst(t.servert, 40));
         sett('Pris (kr)', tall(t.pris, 0, 10000));
@@ -82,6 +101,11 @@ function lagreBilde(dataUrl, navn) {
   const blob = Utilities.newBlob(bytes, m[1], navn + (m[1] === 'image/png' ? '.png' : '.jpg'));
   const fil = DriveApp.getFolderById(BILDE_MAPPE_ID).createFile(blob);
   return fil.getUrl();
+}
+
+function stedNokkel(navn) {
+  return String(navn || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/å/g, 'a')
+    .normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
 }
 
 function tekst(v, maks) {

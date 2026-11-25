@@ -175,6 +175,8 @@
   .av{background:var(--gold)!important;color:#17110e!important}
   .tag.home{background:rgba(255,198,41,.16)!important;color:var(--gold)!important}
   footer{border-top:2px dashed var(--line)}
+  .addr{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:13px;font-weight:600;color:var(--gold);text-decoration:none}
+  .addr:hover{text-decoration:underline}
   @media (prefers-reduced-motion:reduce){.ticker .track{animation:none}}
 </style>
 </head>
@@ -291,6 +293,8 @@
   const latest = () => [...tests].sort((a, b) => (b.date || '').localeCompare(a.date || '') || b.id.localeCompare(a.id))[0];
   const sub = t => [t.what, t.served, dateLbl(t.date)].filter(Boolean).join(' · ');
   const bar = (v, i) => { const b = el('div', {class: 'bar'}, el('i', {style: `width:${v ? v * 10 : 0}%`})); b.style.setProperty('--i', i); return b; };
+  const PIN_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 10-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>';
+  const mapLink = t => t.address ? el('a', {class: 'addr', href: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(t.place + ', ' + t.address), target: '_blank', rel: 'noopener'}, svg(PIN_SVG), t.address) : null;
   const empty = (title, text) => el('div', {class: 'empty'}, el('strong', {text: title}), text);
 
   // ---------- siste test ----------
@@ -317,7 +321,7 @@
       breadN);
     const info = el('div', {class: 'info'},
       el('div', {}, el('div', {class: 'kick', text: 'Siste test'}), el('h3', {class: 'disp', text: t.place}),
-        el('div', {class: 'meta', text: [t.what, t.served, kr(t.price)].filter(Boolean).join(' · ')})),
+        el('div', {class: 'meta', text: [t.what, t.served, kr(t.price)].filter(Boolean).join(' · ')}), mapLink(t)),
       el('div', {class: 'scoreRow'}, big, el('div', {style: 'padding-bottom:6px'}, el('div', {class: 'lbl', text: 'TOTALSCORE'}),
         el('div', {class: 'split'}, 'Kebab ', el('b', {text: fmt(t.kebab)}), ' (80 %) + brød ', el('b', {text: fmt(t.bread)}), ' (20 %)'), chili)),
       el('div', {class: 'lbl', text: 'KEBABEN', style: 'margin-bottom:-8px'}), cats, bread,
@@ -405,7 +409,7 @@
         el('div', {class: 'pic'}, t.imgKebab ? img(t.imgKebab, t.place, t.place) : svg(ICON.img),
           t.imgShop ? el('div', {class: 'mini'}, img(t.imgShop, t.place, t.place)) : null),
         el('div', {class: 'body'},
-          el('div', {class: 'ch'}, el('div', {}, el('h4', {text: t.place}), el('div', {class: 'sm', text: sub(t)}), t.price != null ? el('div', {class: 'sm', text: kr(t.price)}) : null), tot),
+          el('div', {class: 'ch'}, el('div', {}, el('h4', {text: t.place}), el('div', {class: 'sm', text: sub(t)}), t.price != null ? el('div', {class: 'sm', text: kr(t.price)}) : null, mapLink(t)), tot),
           el('div', {class: 'kv'},
             el('div', {}, el('b', {text: fmt(t.kebab)}), 'Kebab'),
             el('div', {}, el('b', {text: fmt(t.bread)}), t.breadType ? 'Brød · ' + t.breadType.toLowerCase() : 'Brød')),
