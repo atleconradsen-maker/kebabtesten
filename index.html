@@ -196,6 +196,19 @@
   .like.on{border-color:var(--gold);background:rgba(255,198,41,.14)}
   .like.on b{color:var(--gold)}
   .like:active{transform:scale(.94)}
+  .infobtn{margin-top:14px;width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:14px 16px;border-radius:16px;border:1px dashed var(--gold);background:rgba(255,198,41,.06);color:var(--text);font:inherit;cursor:pointer;min-height:56px}
+  .infobtn>span:first-child{font-size:24px}
+  .infobtn b{display:block}.infobtn small{color:var(--muted);font-size:12px}
+  .infobtn .arr{margin-left:auto;font-size:26px;color:var(--gold)}
+  .blist{display:flex;flex-direction:column;gap:6px}
+  .bdg{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.02);opacity:.45;filter:grayscale(1)}
+  .bdg.on{opacity:1;filter:none}
+  .bdg .bi{font-size:24px;width:32px;text-align:center;flex:0 0 auto}
+  .bdg b{display:block;font-size:14px}.bdg small{color:var(--muted);font-size:12px}
+  .unlock{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:80;width:min(92vw,380px);text-align:center;padding:18px 16px;border-radius:20px;background:#1f1612;border:2px solid var(--gold);box-shadow:0 10px 40px rgba(0,0,0,.6);animation:pop .5s cubic-bezier(.2,1.4,.4,1) both;display:flex;flex-direction:column;gap:4px;align-items:center}
+  .unlock .u-big{font-size:40px}
+  .unlock b{font-size:24px;color:var(--gold)}
+  @keyframes pop{from{transform:translate(-50%,40px) scale(.8);opacity:0}to{transform:translate(-50%,0) scale(1);opacity:1}}
   .revs{display:flex;flex-direction:column;gap:8px}
   .rev{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.02)}
   .rev .like{min-width:48px;min-height:48px}
@@ -327,8 +340,8 @@
 </div>
 <div class="lightbox hidden" id="lb"><img alt=""><div></div></div>
 
-<script src="config.js?v=202611251936"></script>
-<script src="parse.js?v=202611251936"></script>
+<script src="config.js?v=202611251942"></script>
+<script src="parse.js?v=202611251942"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -432,7 +445,8 @@
     );
     box.append(el('section', {class: 'hero'}, photo, info));
     box.append(el('section', {style: 'margin-top:40px'}, el('h2', {class: 'sec disp', text: 'KÅRINGER'}), awards()));
-    box.append(el('section', {style: 'margin-top:40px'}, el('h2', {class: 'sec disp', text: 'FOLKETS KÅRINGER'}), folkAwards()));
+    box.append(el('section', {style: 'margin-top:40px'}, el('h2', {class: 'sec disp', text: 'FOLKETS KÅRINGER'}), folkAwards(),
+      el('button', {type: 'button', class: 'infobtn', onclick: openInfo}, el('span', {text: '🏅'}), el('span', {}, el('b', {text: 'Badges og kåringer'}), el('small', {text: 'Se hva som finnes og hvordan du får dem'})), el('span', {class: 'arr', text: '›'}))));
     box.append(el('section', {style: 'margin-top:40px', id: 'kommentarer'}, el('h2', {class: 'sec disp', text: 'KOMMENTARER'}), commentsBlock()));
   }
 
@@ -664,10 +678,10 @@
         note ? el('div', { class: 'ksub rnote', text: '«' + note + '»' }) : null),
       el('button', { type: 'button', class: 'like' + (mine ? ' on' : ''), 'aria-pressed': String(mine), 'aria-label': (mine ? 'Fjern like på anmeldelsen til ' : 'Lik anmeldelsen til ') + sc.name + ` (${n})`, onclick: () => toggleLike(reviewItem(t, sc)) }, '👍', el('b', { text: String(n) })));
   }
-  function reviewChip(t, sc) {
+  function reviewChip(t, sc, compact) {
     const id = reviewId(t, sc), n = likeCount(id), mine = iLike(id);
     return el('button', { type: 'button', class: 'chip rchip' + (mine ? ' on' : ''), 'aria-pressed': String(mine), 'aria-label': `${sc.name} ${fmt(sc.total)}. ${mine ? 'Fjern like' : 'Lik anmeldelsen'} (${n})`, onclick: () => toggleLike(reviewItem(t, sc)) },
-      sc.name + ' ', el('b', { text: fmt(sc.total) }), el('span', { class: 'rl', text: ' 👍' + (n ? ' ' + n : '') }));
+      compact ? null : [sc.name + ' ', el('b', { text: fmt(sc.total) })], el('span', { class: 'rl', text: (compact ? '' : ' ') + '👍' + (n ? ' ' + n : '') }));
   }
   function allComments() {
     const out = [];
@@ -699,11 +713,17 @@
 
   function peopleStats() {
     const m = new Map();
-    const get = n => { if (!m.has(n)) m.set(n, { name: n, entries: [], totals: [], likes: 0, comments: 0, discovered: 0, cities: new Map() }); return m.get(n); };
+    const get = n => { if (!m.has(n)) m.set(n, { name: n, entries: [], totals: [], likes: 0, comments: 0, discovered: 0, cities: new Map(), same: new Map(), maxSame: 0, hot: 0, cheap: 0, bread10: 0, harsh: 0, photos: 0 }); return m.get(n); };
     for (const t of tests) for (const sc of t.scores) {
       const p = get(sc.name);
       p.entries.push({ t, s: sc });
       p.likes += likeCount(reviewId(t, sc));
+      p.same.set(t.placeKey, (p.same.get(t.placeKey) || 0) + 1); p.maxSame = Math.max(p.maxSame, p.same.get(t.placeKey));
+      if (t.heat === 5) p.hot++;
+      if (t.price != null && t.price < 100) p.cheap++;
+      if (sc.bread === 10) p.bread10++;
+      if (sc.total != null && sc.total < 4) p.harsh++;
+      if (t.imgKebab && t.imgShop) p.photos++;
       if (sc.total != null) p.totals.push(sc.total);
       const c = t.address && geo[t.address] ? geo[t.address].kommune : null;
       if (c) p.cities.set(c, (p.cities.get(c) || 0) + 1);
@@ -751,6 +771,85 @@
         el('div', { class: 'avs' }, t.people.slice(0, 3).map(p => el('button', { type: 'button', class: 'av disp', text: initials(p.name), 'aria-label': 'Profil for ' + p.name, onclick: () => openProfile(p.name) })))),
       el('div', { class: 'who' }, t.people.flatMap((p, i) => [i ? (i === t.people.length - 1 ? ' og ' : ', ') : '', el('button', { type: 'button', class: 'cm-name big', text: p.name, onclick: () => openProfile(p.name) })]).filter(x => x !== '')),
       el('div', { class: 'sub', text: t.sub(t.people[0]) + (t.people.length > 1 ? ' hver' : '') })))));
+  }
+
+
+  // ---------- badges: noe alle kan samle ----------
+  const BADGES = [
+    ['Antall tester', [
+      ['forste', '🥙', 'Første bit', 'Din første test', p => p.entries.length, 1],
+      ['stamgjest', '🔥', 'Stamgjest', 'Vær med på 5 tester', p => p.entries.length, 5],
+      ['veteran', '🏅', 'Kebabveteran', 'Vær med på 25 tester', p => p.entries.length, 25],
+      ['spydmester', '👑', 'Spydmester', 'Vær med på 50 tester', p => p.entries.length, 50]]],
+    ['Utforsking', [
+      ['pioner', '🧭', 'Pioner', 'Vær med på den første testen av et nytt sted', p => p.discovered, 1],
+      ['byhopper', '🗺️', 'Byhopper', 'Test kebab i 3 forskjellige byer', p => p.cities.size, 3],
+      ['lojal', '🔁', 'Lojal', 'Test samme sted 3 ganger', p => p.maxSame, 3]]],
+    ['Folket', [
+      ['likt', '👍', 'Likt', 'Få din første like', p => p.likes, 1],
+      ['ordsmed', '💬', 'Ordsmed', 'Skriv 10 kommentarer', p => p.comments, 10],
+      ['folkefavoritt', '⭐', 'Folkefavoritt', 'Få 25 likes til sammen', p => p.likes, 25]]],
+    ['Moro', [
+      ['ildsjel', '🌶️', 'Ildsjel', 'Spis en kebab med sterkhet 5', p => p.hot, 1],
+      ['gnier', '💸', 'Gnieren', 'Test en kebab under 100 kr', p => p.cheap, 1],
+      ['brodsnobb', '🍞', 'Brødsnobb', 'Gi 10 på brødet', p => p.bread10, 1],
+      ['aerlig', '🤢', 'Ærlig talt', 'Gi en kebab under 4 i snitt', p => p.harsh, 1],
+      ['fotograf', '📸', 'Fotografen', 'Vær med på 5 tester med bilde av både kebab og sjappe', p => p.photos, 5]]]
+  ];
+  const ALL_BADGES = BADGES.flatMap(([, l]) => l);
+  const badgesOf = p => ALL_BADGES.map(([key, icon, name, how, f, goal]) => ({ key, icon, name, how, goal, have: Math.min(f(p) || 0, goal), done: (f(p) || 0) >= goal }));
+  const badgeChip = b => el('span', { class: 'bdg' + (b.done ? ' on' : ''), title: b.how },
+    el('span', { class: 'bi', text: b.icon }), el('span', {}, el('b', { text: b.name }), el('small', { text: b.done ? b.how : `${b.have} av ${b.goal} · ${b.how}` })));
+
+  function openInfo() {
+    const ps = peopleStats();
+    const count = key => ps.filter(p => badgesOf(p).find(b => b.key === key).done).length;
+    const dlg = el('div', { class: 'overlay', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'infoT' });
+    const close = () => { dlg.remove(); document.removeEventListener('keydown', esc); };
+    const esc = e => { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', esc);
+    const FOLK = [
+      ['🏆', 'Kebabmaskinen', 'Den som har vært med på flest tester'],
+      ['👍', 'Folkets stemme', 'Flest likes på anmeldelser og kommentarer'],
+      ['🧭', 'Oppdageren', 'Først ute på flest nye steder'],
+      ['😇', 'Snillest', 'Gir høyest score i snitt'],
+      ['🧐', 'Strengest', 'Gir lavest score i snitt'],
+      ['📍', 'Lokal helt', 'Flest tester i en by – én kåring per by']];
+    dlg.append(el('div', { class: 'sheet' },
+      el('button', { type: 'button', class: 'x', 'aria-label': 'Lukk', text: '×', onclick: close }),
+      el('h3', { class: 'disp', id: 'infoT', text: 'BADGES' }),
+      el('p', { class: 'ksub', style: 'margin:0 0 6px' }, 'Badges samler du selv, og de forsvinner aldri. Alle kan få alle. Se dine på profilen din (trykk på navnet ditt).'),
+      BADGES.flatMap(([grp, list]) => [
+        el('div', { class: 'lbl', style: 'margin:18px 0 8px', text: grp.toUpperCase() }),
+        el('div', { class: 'blist' }, list.map(([key, icon, name, how]) => { const n = count(key); return el('div', { class: 'bdg on' },
+          el('span', { class: 'bi', text: icon }), el('span', {}, el('b', { text: name }), el('small', { text: how + (n ? ` · ${n} har den` : ' · ingen ennå') }))); }))]),
+      el('h3', { class: 'disp', style: 'margin-top:26px', text: 'KÅRINGER' }),
+      el('p', { class: 'ksub', style: 'margin:0 0 10px' }, 'Kåringene går til den som leder akkurat nå, og kan tas fra deg. Står det likt, deles tittelen.'),
+      el('div', { class: 'blist' }, FOLK.map(([i, n, h]) => el('div', { class: 'bdg on' }, el('span', { class: 'bi', text: i }), el('span', {}, el('b', { text: n }), el('small', { text: h }))))),
+      el('p', { class: 'ksub', style: 'margin-top:18px' }, 'Tips: Trykk 👍 på anmeldelser og kommentarer du er enig i. Det gir folk cred.')));
+    dlg.addEventListener('click', e => { if (e.target === dlg) close(); });
+    document.body.append(dlg);
+    dlg.querySelector('.x').focus();
+  }
+
+  // Feiring når du har låst opp noe nytt siden sist
+  function celebrate() {
+    const me = getMe(); if (!me) return;
+    const p = peopleStats().find(x => x.name.toLowerCase() === me.toLowerCase()); if (!p) return;
+    const done = badgesOf(p).filter(b => b.done);
+    const k = 'kt-badges-' + me.toLowerCase();
+    let seen; try { seen = JSON.parse(localStorage.getItem(k) || 'null'); } catch { seen = null; }
+    try { localStorage.setItem(k, JSON.stringify(done.map(b => b.key))); } catch {}
+    const fresh = seen ? done.filter(b => !seen.includes(b.key)) : done;
+    if (!fresh.length) return;
+    const pop = el('div', { class: 'unlock', role: 'status' },
+      el('div', { class: 'u-big', text: fresh.map(b => b.icon).slice(0, 4).join(' ') }),
+      el('b', { class: 'disp', text: fresh.length === 1 ? 'NY BADGE!' : fresh.length + ' NYE BADGES!' }),
+      el('div', { text: joinNames(fresh.map(b => b.name)) }),
+      el('button', { type: 'button', class: 'linkbtn', text: 'Se profilen din', onclick: () => { pop.remove(); openProfile(p.name); } }));
+    document.body.append(pop);
+    setTimeout(() => pop.remove(), 7000);
+    pop.addEventListener('click', e => { if (e.target === pop || e.target.tagName !== 'BUTTON') pop.remove(); });
   }
 
   let showAllComments = false;
@@ -824,11 +923,17 @@
       el('div', { class: 'ph-top' }, el('span', { class: 'av disp big-av', text: initials(p.name) }),
         el('div', {}, el('h3', { class: 'disp', text: p.name }), p.fav ? el('div', { class: 'ksub', text: '❤️ Favoritt: ' + p.fav }) : null)),
       titles.length ? el('div', { class: 'badges' }, titles.map(t => el('span', { class: 'badge-t', text: '🏆 ' + t.title.charAt(0) + t.title.slice(1).toLowerCase() }))) : null,
+      (() => { const bs = badgesOf(p), got = bs.filter(b => b.done); return el('div', {},
+        el('div', { class: 'lbl', style: 'margin:18px 0 8px;display:flex;justify-content:space-between;align-items:center' }, `BADGES · ${got.length} AV ${bs.length}`, el('button', { type: 'button', class: 'linkbtn', text: 'Hva er dette?', onclick: () => { close(); openInfo(); } })),
+        (() => { const locked = bs.filter(b => !b.done).sort((a, b) => b.have / b.goal - a.have / a.goal);
+          const box = el('div', { class: 'blist' }, [...got, ...locked.slice(0, 3)].map(badgeChip));
+          const rest = locked.slice(3);
+          return [box, rest.length ? el('button', { type: 'button', class: 'linkbtn', style: 'margin-top:8px', text: `Vis ${rest.length} til som du kan jakte på`, onclick: e => { box.append(...rest.map(badgeChip)); e.currentTarget.remove(); } }) : null]; })()); })(),
       el('div', { class: 'pstats' }, stat(String(p.entries.length), p.entries.length === 1 ? 'test' : 'tester'), stat(fmt(p.avg), 'snitt gitt'), stat(String(p.likes), '👍 fått'), stat(String(p.discovered), 'steder først')),
       el('div', { class: 'lbl', style: 'margin:18px 0 8px', text: 'TESTENE' }),
       el('div', { class: 'plist' }, [...p.entries].sort((a, b) => (b.t.date || '').localeCompare(a.t.date || '')).map(e => el('div', { class: 'prow' },
         el('div', { style: 'flex:1;min-width:0' }, el('b', { text: e.t.place }), el('div', { class: 'ksub', text: [e.t.what, dateLbl(e.t.date)].filter(Boolean).join(' · ') })),
-        kebabMeter(e.s.total, 'xs'), reviewChip(e.t, e.s)))),
+        el('div', { style: 'display:flex;flex-direction:column;align-items:flex-end;gap:6px' }, kebabMeter(e.s.total, 'xs'), reviewChip(e.t, e.s, true))))),
       myComments.length ? el('div', { class: 'lbl', style: 'margin:18px 0 8px', text: 'KOMMENTARENE' }) : null,
       myComments.length ? el('div', { class: 'cmts' }, myComments.map(commentRow)) : null));
     dlg.addEventListener('click', e => { if (e.target === dlg) close(); });
@@ -896,7 +1001,7 @@
       if (json !== last || lkJson !== lastLikes) {
         last = json; lastLikes = lkJson; if (lk) likes = lk;
         tests = data.tests; places = data.places || [];
-        if (!loaded) playAnim(); render(); ensureGeo();
+        if (!loaded) playAnim(); render(); ensureGeo(); setTimeout(celebrate, 1600);
       }
       loaded = true;
       $('#status').classList.add('hidden');
