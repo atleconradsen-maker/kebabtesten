@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kebabtesten</title>
 <meta name="description" content="Kebabtesten – vi tester kebab og brød, 1 til 10.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%23ff6a2b'/%3E%3Cpath d='M12 3v18M8 7h8l-1 3H9zM7 11.5h10l-1 3H8zM8 16h8l-1 2.5H9z' fill='none' stroke='%2315110f' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#15110f;--panel:#221b17;--panel2:#1d1714;--line:#3a2e27;--line2:#2e2520;--text:#f4ead8;--muted:#b9a995;--dim:#8d7c6a;--sauce:#ff6a2b;--sauce2:#ff7a3d;--gold:#ffb547;--r:18px}
+  :root{--bg:#17110e;--panel:#241a15;--panel2:#1d1511;--line:#3d2c22;--line2:#2f221b;--text:#fff4e0;--muted:#c4ad94;--dim:#957d66;--sauce:#e8402a;--sauce2:#ff5a3c;--gold:#ffc629;--r:18px}
   *{box-sizing:border-box}
   html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
   a{color:var(--sauce2)} button{font:inherit;color:inherit}
@@ -137,16 +137,90 @@
   @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
   @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  /* ---- kebab-skilt-stil ---- */
+  html,body{overflow-x:clip}
+  body{background:radial-gradient(900px 420px at 15% -120px,rgba(232,64,42,.28),transparent 70%),radial-gradient(700px 380px at 100% 0,rgba(255,198,41,.10),transparent 70%),var(--bg)}
+  .logo{width:104px;height:104px;flex:0 0 auto;filter:drop-shadow(0 8px 22px rgba(232,64,42,.45));transition:transform .6s cubic-bezier(.2,1.4,.4,1)}
+  .brand:hover .logo{transform:rotate(-8deg) scale(1.04)}
+  .brand h1{font-size:clamp(34px,7vw,56px);line-height:.9;letter-spacing:-1px}
+  .brand h1 .w1{color:var(--gold)}
+  .brand h1 .w2{color:var(--text);margin-left:.08em}
+  .brand p{max-width:420px;line-height:1.45;margin-top:8px}
+  @media (max-width:560px){.logo{width:76px;height:76px}}
+  .addbtn{background:var(--gold)!important;color:#17110e!important;box-shadow:0 4px 0 #b8860b;transform:translateY(-2px)}
+  .addbtn:active{transform:none;box-shadow:none}
+  nav.tabs button.on{background:var(--sauce)!important;color:#fff!important}
+  .ticker{overflow:hidden;background:var(--sauce);color:#fff4e0;border-radius:10px;transform:rotate(-1deg);margin:-12px -6px 0;box-shadow:0 6px 20px rgba(232,64,42,.25)}
+  .ticker .track{display:flex;width:max-content;animation:tick 38s linear infinite}
+  .ticker span{font-family:'Archivo Black',Impact,sans-serif;font-size:15px;letter-spacing:1.5px;padding:10px 0;white-space:nowrap}
+  @keyframes tick{to{transform:translateX(-50%)}}
+  h2.sec{display:inline-block;background:var(--gold);color:#17110e;padding:8px 16px 6px;border-radius:6px;transform:rotate(-1.5deg);box-shadow:4px 4px 0 var(--sauce);font-size:22px}
+  .kick{color:var(--gold)}
+  .photo .badge{background:var(--gold)!important;color:#17110e!important}
+  .big{color:var(--gold)!important;text-shadow:0 0 30px rgba(255,198,41,.25)}
+  .bar i{background:linear-gradient(90deg,var(--sauce),#ff8a1f)!important}
+  .award{background:linear-gradient(160deg,#2c1f18,#1d1511)}
+  .award .n{position:relative;z-index:0;color:#17110e!important;font-size:24px!important;width:70px;height:70px;display:grid;place-items:center;flex:0 0 auto;margin:-6px -6px 0 0}
+  .award .n::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--gold);clip-path:polygon(50% 0,61% 12%,75% 6%,79% 21%,94% 25%,88% 39%,100% 50%,88% 61%,94% 75%,79% 79%,75% 94%,61% 88%,50% 100%,39% 88%,25% 94%,21% 79%,6% 75%,12% 61%,0 50%,12% 39%,6% 25%,21% 21%,25% 6%,39% 12%);transform:rotate(-8deg)}
+  .award:first-child .n::before{background:var(--sauce)}
+  .award:first-child .n{color:#fff4e0!important}
+  .row .rk{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:17px!important;background:var(--line2);color:var(--muted)!important}
+  .row:nth-child(2) .rk{background:var(--gold);color:#17110e!important}
+  .row:nth-child(3) .rk{background:#e9dccb;color:#17110e!important}
+  .row:nth-child(4) .rk{background:#c98652;color:#17110e!important}
+  .row .t{color:var(--gold)!important}
+  .card .tot,.award .who{color:var(--text)}
+  .card .tot{color:var(--gold)!important}
+  .av{background:var(--gold)!important;color:#17110e!important}
+  .tag.home{background:rgba(255,198,41,.16)!important;color:var(--gold)!important}
+  footer{border-top:2px dashed var(--line)}
+  @media (prefers-reduced-motion:reduce){.ticker .track{animation:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div class="brand">
-      <div class="mark"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M8 6h8l-1 3H9z"/><path d="M7 11h10l-1 3H8z"/><path d="M8 16h8l-1 3H9z"/></svg></div>
+      <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Kebabtesten-logo">
+  <defs>
+    <linearGradient id="kt-meat" x1="0" x2="1">
+      <stop offset="0" stop-color="#7a2e12"/><stop offset=".45" stop-color="#c0612b"/><stop offset=".7" stop-color="#a94a1f"/><stop offset="1" stop-color="#6b250e"/>
+    </linearGradient>
+    <linearGradient id="kt-flame" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#e8402a"/><stop offset=".55" stop-color="#ff8a1f"/><stop offset="1" stop-color="#ffc629"/>
+    </linearGradient>
+    <path id="kt-top" d="M 38 120 A 82 82 0 0 1 202 120"/>
+    <path id="kt-bot" d="M 22 120 A 98 98 0 0 0 218 120"/>
+  </defs>
+  <!-- badge -->
+  <circle cx="120" cy="120" r="116" fill="#e8402a"/>
+  <circle cx="120" cy="120" r="108" fill="none" stroke="#fff4e0" stroke-width="3"/>
+  <circle cx="120" cy="120" r="70" fill="#17110e"/>
+  <circle cx="120" cy="120" r="70" fill="none" stroke="#ffc629" stroke-width="4"/>
+  <!-- arc text -->
+  <text font-family="'Archivo Black', Impact, 'Arial Black', sans-serif" font-size="28" font-weight="900" fill="#fff4e0" letter-spacing="2.5" text-anchor="middle"><textPath href="#kt-top" startOffset="50%">KEBABTESTEN</textPath></text>
+  <text font-family="'Archivo Black', Impact, 'Arial Black', sans-serif" font-size="14" font-weight="900" fill="#ffc629" letter-spacing="3" text-anchor="middle"><textPath href="#kt-bot" startOffset="50%">★ KJØTT · SAUS · BRØD ★</textPath></text>
+  <!-- flames -->
+  <path d="M90 178 C 82 166, 88 154, 97 148 C 96 157, 101 160, 104 156 C 101 145, 108 135, 116 128 C 116 140, 124 144, 126 152 C 129 149, 130 144, 129 139 C 140 148, 146 164, 140 178 Z" fill="url(#kt-flame)"/>
+  <path d="M108 180 C 101 172, 106 162, 113 158 C 113 164, 117 166, 119 163 C 118 155, 123 150, 128 146 C 128 154, 134 158, 135 164 C 138 162, 138 159, 137 156 C 145 164, 146 174, 141 180 Z" fill="url(#kt-flame)" opacity=".85" transform="translate(4 0)"/>
+  <!-- spit -->
+  <rect x="118" y="56" width="4" height="122" rx="2" fill="#fff4e0"/>
+  <circle cx="120" cy="56" r="5" fill="#ffc629"/>
+  <!-- doner cone -->
+  <path d="M95 70 h50 l-9 84 h-32z" fill="url(#kt-meat)"/>
+  <g stroke="#4a1a08" stroke-width="2.2" stroke-linecap="round" opacity=".55">
+    <path d="M97 82 h46"/><path d="M98 96 h44"/><path d="M100 110 h40"/><path d="M101 124 h38"/><path d="M103 138 h34"/>
+  </g>
+  <path d="M137 72 l-8 80" stroke="#ffb36b" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+  <rect x="93" y="66" width="54" height="7" rx="3" fill="#fff4e0"/>
+  <rect x="102" y="152" width="36" height="6" rx="3" fill="#fff4e0"/>
+  <!-- tiny stars -->
+  <circle cx="26" cy="120" r="3.5" fill="#ffc629"/><circle cx="214" cy="120" r="3.5" fill="#ffc629"/>
+</svg>
       <div>
-        <h1 class="disp">KEBAB<span>TESTEN</span></h1>
-        <p>Kebaben og brødet får hver sin score fra 1 til 10 · total = 80 % kebab + 20 % brød</p>
+        <h1 class="disp"><span class="w1">KEBAB</span><span class="w2">TESTEN</span></h1>
+        <p>Vi tester byens kebab. Kebab og brød scores fra 1 til 10, og totalen er 80 % kebab og 20 % brød.</p>
       </div>
     </div>
     <a href="legg-inn.html" class="addbtn">+ Legg inn test</a>
@@ -157,6 +231,7 @@
     </nav>
   </header>
 
+  <div class="ticker" aria-hidden="true"><div class="track"><span>HVITLØKSSAUS ✦ STERK SAUS ✦ BEGGE DELER ✦ EKSTRA KJØTT ✦ UTEN LØK ✦ MED ALT ✦ I PITA ✦ I RULL ✦ PÅ TALLERKEN ✦ KYLLING ELLER KJØTT? ✦ </span><span>HVITLØKSSAUS ✦ STERK SAUS ✦ BEGGE DELER ✦ EKSTRA KJØTT ✦ UTEN LØK ✦ MED ALT ✦ I PITA ✦ I RULL ✦ PÅ TALLERKEN ✦ KYLLING ELLER KJØTT? ✦ </span></div></div>
   <div class="status" id="status">Henter tester …</div>
   <main id="view-siste"></main>
   <main id="view-toppliste" class="hidden"></main>
