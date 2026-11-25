@@ -73,6 +73,10 @@
   .msg.info{background:var(--panel);border:1px solid var(--line);color:var(--muted)}
   .msg a{color:inherit;font-weight:800}
   .hidden{display:none!important}
+  .km{display:inline-flex;align-items:flex-end;gap:2px;line-height:1;max-width:100%}
+  .km .kk{position:relative;width:16px;height:24px;flex:0 0 auto}
+  .km .kk svg{position:absolute;inset:0;width:100%;height:100%}
+  .km .num{margin-left:8px;color:var(--gold);font-family:'Archivo Black';font-size:16px;align-self:center}
   .ac{position:relative}
   .sugg{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:20;background:#2a1e18;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 14px 30px rgba(0,0,0,.5)}
   .sugg button{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line2);padding:12px 14px;cursor:pointer;color:var(--text)}
@@ -166,8 +170,8 @@
 </div>
 <div class="bar"><div class="in"><button class="save" id="save" form="f" type="submit">Lagre test</button></div></div>
 
-<script src="config.js?v=202611250820"></script>
-<script src="parse.js?v=202611250820"></script>
+<script src="config.js?v=202611250828"></script>
+<script src="parse.js?v=202611250828"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -228,6 +232,23 @@
     });
   }
 
+  // ----- kebabmåler (samme som på forsiden) -----
+  const KB_EMPTY = '<svg class="e" viewBox="0 0 16 24" aria-hidden="true"><rect x="7.2" y="0.5" width="1.6" height="23" rx=".8" fill="#3d2c22"/><path d="M2.6 4.6h10.8l-2.5 14.2H5.1z" fill="#3d2c22"/><rect x="2" y="3" width="12" height="2.4" rx="1.2" fill="#4a362b"/></svg>';
+  const KB_FULL = '<svg class="f" viewBox="0 0 16 24" aria-hidden="true"><rect x="7.2" y="0.5" width="1.6" height="23" rx=".8" fill="#fff4e0"/><path d="M2.6 4.6h10.8l-2.5 14.2H5.1z" fill="#c0612b"/><path d="M3.2 8.2h9.6M3.7 11.6h8.6M4.3 15h7.4" stroke="#7a2e12" stroke-width="1.2" stroke-linecap="round"/><path d="M11.6 5.2l-1.8 12.6" stroke="#ffb36b" stroke-width="1" stroke-linecap="round" opacity=".7"/><rect x="2" y="3" width="12" height="2.4" rx="1.2" fill="#ffc629"/></svg>';
+  function kebabMeter(v, size = 'sm', showNum = true) {
+    const wrap = el('span', {class: 'km ' + size, role: 'img', 'aria-label': v == null ? 'Ingen score' : `${fmt(v)} av 10 kebaber`});
+    for (let i = 0; i < 10; i++) {
+      const f = v == null ? 0 : Math.max(0, Math.min(1, v - i));
+      const k = el('span', {class: 'kk'});
+      k.innerHTML = KB_EMPTY + (f > 0 ? KB_FULL : '');
+      if (f > 0) { const fs = k.querySelector('.f'); fs.style.clipPath = `inset(${Math.round((1 - f) * 100)}% 0 0 0)`; }
+      k.style.setProperty('--k', i);
+      wrap.append(k);
+    }
+    if (showNum) wrap.append(el('span', {class: 'num disp', text: '(' + fmt(v) + ')'}));
+    return wrap;
+  }
+
   // ----- testers -----
   let known = [];
   function addTester(name) {
@@ -257,6 +278,7 @@
       note.value = t.kommentar; note.addEventListener('input', () => { t.kommentar = note.value; });
       return el('div', { class: 'tester' },
         el('div', { class: 'th' }, el('b', { text: t.navn }), el('span', { class: 'tot', text: fmt(total) })),
+        el('div', { style: 'margin:2px 0 4px' }, kebabMeter(total, 'sm', false)),
         el('div', { class: 'sub', text: 'KEBABEN' }), CATS.map(([k, l]) => step(k, l)),
         el('div', { class: 'sub', text: 'BRØDET' }), step('brod', 'Brød'),
         el('div', { class: 'sum' }, el('span', {}, 'Kebab ', el('b', { text: fmt(kebab) }), ' · brød ', el('b', { text: t.brod == null ? '–' : String(t.brod) })),
