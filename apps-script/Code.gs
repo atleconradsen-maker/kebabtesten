@@ -3,18 +3,13 @@
  *
  * Limes inn i regnearket «Kebabtesten – tester» under Utvidelser → Apps Script.
  * Publiseres som nettapp: Utfør som «Meg», Tilgang «Alle».
- *
- * PIN = '' betyr at alle kan legge inn uten kode. Sett en kode (f.eks. '4821')
- * og NO_PIN: false i config.js hvis dere vil stenge det igjen.
  */
-const PIN = '';
 const BILDE_MAPPE_ID = '19XtfpZtR_9CSl4mOpMWhAPOHvvrKQtt6'; // Drive: Kebabtesten/Bilder
 const HEADER_RAD = 2; // rad med kolonnenavn (rad 1 er gruppeoverskriftene)
 
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
-    if (String(data.pin || '') !== PIN) return svar({ ok: false, feil: 'Feil PIN-kode' });
 
     const lock = LockService.getScriptLock();
     lock.waitLock(20000);

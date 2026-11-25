@@ -478,10 +478,8 @@
     if (place.mode === 'new' && !adresse) return show('err', 'Legg inn adressen til det nye stedet.');
     if (!state.testere.length) return show('err', 'Legg til minst én testperson.');
     if (!state.testere.some(t => CATS.some(([k]) => t[k] != null) || t.brod != null)) return show('err', 'Gi minst én score.');
-    const pin = '';
     const [y, m, d] = $('#dato').value.split('-');
     const body = {
-      pin,
       test: { dato: d && m && y ? `${d}.${m}.${y}` : '', sted, adresse, hva: choice('hva'), servert: choice('servert'), pris: $('#pris').value, sterkhet: state.sterkhet || '', brodtype: state.brodtype },
       testere: state.testere.map(t => ({ ...t })),
       bildeKebab: state.bilder.kebab || '', bildeSjappa: state.bilder.sjappa || ''
@@ -491,7 +489,7 @@
       const r = await fetch(cfg.SCRIPT_URL, { method: 'POST', body: JSON.stringify(body) });
       const j = await r.json();
       if (!j.ok) {
-        if (/PIN/i.test(j.feil || '')) throw new Error('mottakeren i regnearket krever fortsatt PIN. Sett const PIN = \'\' i Apps Script og implementer en ny versjon.');
+        if (/PIN/i.test(j.feil || '')) throw new Error('mottakeren i regnearket er en gammel versjon. Lim inn den nye koden i Apps Script og implementer en ny versjon.');
         throw new Error(j.feil || 'Ukjent feil');
       }
       store.set('kt-me', state.testere[0].navn);
