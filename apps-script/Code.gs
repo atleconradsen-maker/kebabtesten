@@ -68,12 +68,18 @@ function doPost(e) {
         sett('Brød', tall(p.brod, 1, 10));
         sett('Kommentar', tekst(p.kommentar, 300));
         if (i === 0) { sett('Bilde kebab', bildeKebab); sett('Bilde sjappa', bildeSjappa); }
+        sett('By', tekst(t.by, 60));
+        sett('Land', tekst(t.land, 60));
+        sett('Lat', tall(t.lat, -90, 90));
+        sett('Lon', tall(t.lon, -180, 180));
+        sett('Valuta', t.valuta === 'EUR' ? 'EUR' : '');
         return rad;
       });
 
       const start = Math.max(ark.getLastRow() + 1, HEADER_RAD + 1);
       const datoKol = kol('Dato');
       if (datoKol >= 0) ark.getRange(start, datoKol + 1, rader.length, 1).setNumberFormat('@'); // dato som tekst
+      ['By', 'Land', 'Valuta'].forEach(n => { const k = kol(n); if (k >= 0) ark.getRange(start, k + 1, rader.length, 1).setNumberFormat('@'); });
       ark.getRange(start, 1, rader.length, kolonner.length).setValues(rader);
       return svar({ ok: true, rader: rader.length });
     } finally {

@@ -96,6 +96,16 @@
   .sugg button:hover,.sugg button:focus{background:rgba(255,198,41,.08);outline:none}
   .sugg b{display:block;font-size:15px}
   .sugg small{color:var(--muted);font-size:12px}
+  .herebtn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;min-height:52px;margin-bottom:10px;border-radius:14px;border:1px solid var(--gold);background:rgba(245,182,50,.08);color:var(--text);font:inherit;font-weight:800;font-size:15px;cursor:pointer}
+  .herebtn:active{transform:scale(.98)}
+  .here{margin-bottom:12px;padding:12px;border-radius:14px;background:var(--panel);border:1px solid var(--line)}
+  .here .hl{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+  .here .hl button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--text);cursor:pointer;min-height:52px}
+  .here .hl button b{display:block;font-size:15px}.here .hl button small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+  .here .hl button .d{margin-left:auto;font-size:12px;font-weight:800;color:var(--gold);white-space:nowrap}
+  .cur{display:inline-flex;margin-left:6px;vertical-align:middle;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:2px;gap:2px}
+  .cur button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:800;font-size:12px;border-radius:7px;padding:3px 9px;cursor:pointer;min-height:26px}
+  .cur button.on{background:var(--gold);color:#171717}
   .pinfo{margin-top:10px;padding:11px 13px;border-radius:12px;font-size:14px;line-height:1.45}
   .pinfo.known{background:#1f3322;color:#a8eaa3}
   .pinfo.warn{background:#3a2a10;color:#ffd27a}
@@ -157,18 +167,20 @@
       </div>
       <div class="placebox">
         <label class="lbl n" for="sted">Hvor spiste dere?</label>
+        <button type="button" class="herebtn" id="hereBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Jeg er her nå – finn stedet</button>
+        <div id="hereBox" aria-live="polite"></div>
         <div class="ac"><input type="text" id="sted" placeholder="Navnet på sjappa, eller start med adressen under" maxlength="80" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="sugg" aria-expanded="false"><div class="sugg hidden" id="sugg" role="listbox"></div></div>
         <div id="placeInfo" aria-live="polite"></div>
         <div id="addrWrap" style="margin-top:12px">
           <label class="lbl" for="adresse">Adresse</label>
           <div class="ac"><input type="text" id="adresse" placeholder="Søk etter gateadresse" maxlength="120" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="addrSugg" aria-expanded="false"><div class="sugg hidden" id="addrSugg" role="listbox"></div></div>
-          <div class="hint">Forslag fra Kartverkets adresseregister. Velg riktig adresse, så blir den lik hver gang.</div>
+          <div class="hint">Norske adresser fra Kartverket. Finnes ikke adressen i Norge, søkes det i hele verden. Velg et forslag, så havner stedet på kartet.</div>
           <div id="atAddr" aria-live="polite"></div>
         </div>
       </div>
       <div class="row2">
         <label><span class="lbl">Dato</span><input type="date" id="dato" required></label>
-        <label><span class="lbl">Pris (kr)</span><input type="number" id="pris" inputmode="numeric" min="0" placeholder="149"></label>
+        <label><span class="lbl" id="prisLbl">Pris</span><span class="cur" role="group" aria-label="Valuta"><button type="button" data-cur="NOK" class="on" aria-pressed="true">kr</button><button type="button" data-cur="EUR" aria-pressed="false">€</button></span><input type="number" id="pris" inputmode="decimal" min="0" step="0.1" placeholder="149" style="margin-top:6px"></label>
       </div>
 
       <div><span class="lbl n">Hva spiste dere?</span><div class="pills" data-group="hva"></div></div>
@@ -195,8 +207,8 @@
 </div>
 <div class="bar"><div class="in"><div class="live off" id="live" aria-live="polite"><b>–</b><small>TOTAL</small></div><div class="liveTxt" id="liveTxt">Kebab × 80 %<br>Brød × 20 %</div><button class="save" id="save" form="f" type="submit">SEND INN</button></div></div>
 
-<script src="config.js?v=202611261000"></script>
-<script src="parse.js?v=202611261000"></script>
+<script src="config.js?v=202611262011"></script>
+<script src="parse.js?v=202611262011"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -205,7 +217,7 @@
   const cfg = window.KTConfig || {};
   const fmt = v => v == null ? '–' : (Math.round(v * 10) / 10).toFixed(1).replace('.', ',');
 
-  const state = { hva: 'Vanlig kebab', servert: 'Pita', brodtype: '', sterkhet: 0, bilder: {}, testere: [] };
+  const state = { hva: 'Vanlig kebab', servert: 'Pita', brodtype: '', sterkhet: 0, bilder: {}, testere: [], pos: null, valuta: 'NOK' };
   const OPTS = { hva: ['Vanlig kebab', 'Kyllingkebab', 'Blandet', 'Falafel', 'Annet'], servert: ['Pita', 'Rull', 'Tallerken', 'Annet'], brodtype: ['Hjemmelaget', 'Butikkbrød'] };
   const CATS = [['kjott', 'Kjøtt'], ['saus', 'Saus'], ['fyll', 'Fyll / grønt'], ['porsjon', 'Porsjon'], ['verdi', 'Pris / verdi']];
 
@@ -399,6 +411,7 @@
     const exact = knownPlaces.find(p => KTParse.placeKey(p.name) === KTParse.placeKey(q));
     if (exact) {
       place.mode = 'known'; place.name = exact.name; place.address = exact.address || '';
+      if (exact.lat != null) setPos({ lat: exact.lat, lon: exact.lon, by: exact.city || '', land: exact.country || '' });
       info.replaceChildren(el('div', { class: 'pinfo known' }, el('b', { text: '✓ ' + exact.name }), exact.address ? ' · ' + exact.address : ' · mangler adresse, legg den inn under'));
       $('#addrWrap').classList.toggle('hidden', !!exact.address);
       return;
@@ -523,7 +536,7 @@
   // Adressesøk mot Kartverket (ws.geonorge.no). Faller tilbake til fritekst om det ikke svarer.
   let addrTimer = 0, addrSeq = 0;
   addrIn.addEventListener('input', () => {
-    clearTimeout(addrTimer);
+    clearTimeout(addrTimer); state.pos = null;
     const q = addrIn.value.trim();
     if (q.length < 3) { showList(addrSugg, addrIn, []); return; }
     addrTimer = setTimeout(async () => {
@@ -535,11 +548,109 @@
         const seen = new Set();
         const hits = (j.adresser || []).map(a => ({
           label: `${a.adressetekst}, ${a.postnummer} ${a.poststed ? a.poststed.charAt(0) + a.poststed.slice(1).toLowerCase() : ''}`.trim(),
-          gate: a.adressetekst, postnummer: a.postnummer, lat: a.representasjonspunkt?.lat, lon: a.representasjonspunkt?.lon
+          gate: a.adressetekst, postnummer: a.postnummer, lat: a.representasjonspunkt?.lat, lon: a.representasjonspunkt?.lon, by: titleC(a.kommunenavn)
         })).filter(h => !seen.has(h.label) && seen.add(h.label));
-        showList(addrSugg, addrIn, hits.map(h => el('button', { type: 'button', role: 'option', onclick: () => { addrIn.value = h.label; showList(addrSugg, addrIn, []); lookupAt(h); } }, el('b', { text: h.label }))));
-      } catch { showList(addrSugg, addrIn, []); }
+        if (!hits.length) { searchWorld(q); return; }
+        showList(addrSugg, addrIn, [...hits.map(h => el('button', { type: 'button', role: 'option', onclick: () => { addrIn.value = h.label; showList(addrSugg, addrIn, []); setPos({ lat: h.lat, lon: h.lon, by: h.by, land: 'Norge' }); lookupAt(h); } }, el('b', { text: h.label }))),
+          el('button', { type: 'button', role: 'option', onclick: e => { e.stopPropagation(); searchWorld(q); } }, el('b', { text: '🌍 Søk i utlandet i stedet' }), el('small', { text: 'Hele verden, fra OpenStreetMap' }))]);
+      } catch { searchWorld(q); }
     }, 280);
+  });
+
+
+  // ----- valuta -----
+  function setCur(c) {
+    state.valuta = c === 'EUR' ? 'EUR' : 'NOK';
+    document.querySelectorAll('[data-cur]').forEach(b => { const on = b.dataset.cur === state.valuta; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+    $('#pris').placeholder = state.valuta === 'EUR' ? '8' : '149';
+  }
+  document.querySelectorAll('[data-cur]').forEach(b => b.addEventListener('click', e => { e.preventDefault(); state.curAuto = false; setCur(b.dataset.cur); }));
+  const isNorway = land => !land || /^(norge|norway|no)$/i.test(String(land).trim());
+  function setPos(pos) {
+    state.pos = pos && pos.lat != null ? pos : null;
+    if (state.pos && !isNorway(state.pos.land)) { setCur('EUR'); state.curAuto = true; }
+    else if (state.pos && state.curAuto) { setCur('NOK'); state.curAuto = false; }
+  }
+
+  // ----- verdenssøk (OpenStreetMap / Photon) -----
+  const titleC = t => String(t || '').toLowerCase().replace(/(^|[\s-])(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
+  const LAND = { ES: 'Spania', SE: 'Sverige', DK: 'Danmark', FI: 'Finland', DE: 'Tyskland', GR: 'Hellas', TR: 'Tyrkia', IT: 'Italia', FR: 'Frankrike', PT: 'Portugal', GB: 'Storbritannia', HR: 'Kroatia', CY: 'Kypros', NL: 'Nederland', BE: 'Belgia', PL: 'Polen', AT: 'Østerrike', CH: 'Sveits', US: 'USA', TH: 'Thailand', MT: 'Malta', IS: 'Island', EE: 'Estland', CZ: 'Tsjekkia', HU: 'Ungarn', IE: 'Irland' };
+  const landNo = (code, name) => { const c = String(code || '').toUpperCase(); return c === 'NO' ? 'Norge' : (LAND[c] || name || ''); };
+  function photonHit(f) {
+    const p = f.properties || {}, [lon, lat] = f.geometry.coordinates;
+    const street = [p.street, p.housenumber].filter(Boolean).join(' ');
+    const by = p.city || p.town || p.village || p.district || p.county || '';
+    const land = landNo(p.countrycode, p.country);
+    const label = [p.osm_key === 'amenity' || !street ? p.name : null, street, [p.postcode, by].filter(Boolean).join(' '), isNorway(land) ? null : land].filter(Boolean).join(', ');
+    return { label, name: p.osm_key === 'amenity' ? p.name : '', gate: street, lat, lon, by, land, flag: isNorway(land) ? '' : '🌍 ' };
+  }
+  async function photon(q, limit = 6) {
+    const r = await fetch('https://photon.komoot.io/api/?' + new URLSearchParams({ q, limit: String(limit), lang: 'en' }));
+    const j = await r.json();
+    const seen = new Set();
+    return (j.features || []).map(photonHit).filter(h => h.label && !seen.has(h.label) && seen.add(h.label));
+  }
+  async function photonReverse(lat, lon) {
+    try { const r = await fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lon}&lang=en&limit=1`); const f = ((await r.json()).features || [])[0]; return f ? photonHit(f) : null; } catch { return null; }
+  }
+  function worldList(hits) {
+    return hits.map(h => el('button', { type: 'button', role: 'option', onclick: () => {
+      addrIn.value = h.name && !stedIn.value.trim() ? h.label.split(', ').slice(1).join(', ') : h.label;
+      if (h.name && !stedIn.value.trim()) { stedIn.value = h.name; place.confirmedNew = true; refreshPlace(); }
+      showList(addrSugg, addrIn, []); setPos({ lat: h.lat, lon: h.lon, by: h.by, land: h.land }); lookupAt({ gate: h.gate, lat: h.lat, lon: h.lon });
+    } }, el('b', { text: h.flag + h.label })));
+  }
+  async function searchWorld(q) {
+    showList(addrSugg, addrIn, [el('div', { class: 'head', text: 'SØKER I HELE VERDEN …' })]);
+    try {
+      const hits = await photon(q);
+      showList(addrSugg, addrIn, hits.length ? [el('div', { class: 'head', text: 'FRA OPENSTREETMAP' }), ...worldList(hits)] : [el('div', { class: 'head', text: 'FANT INGENTING. SKRIV ADRESSEN SOM FRITEKST.' })]);
+    } catch { showList(addrSugg, addrIn, []); }
+  }
+
+  // ----- «Jeg er her nå»: finn spisesteder rundt deg -----
+  const distM = (a, b) => { const R = 6371000, r = x => x * Math.PI / 180, dLat = r(b.lat - a.lat), dLon = r(b.lon - a.lon); const h = Math.sin(dLat / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dLon / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); };
+  const isKebab = t => /kebab|k[eö]bap|d[oö]ner|shawarma|gyros|pita/i.test((t.cuisine || '') + ' ' + (t.name || ''));
+  $('#hereBtn').addEventListener('click', () => {
+    const box = $('#hereBox');
+    if (!navigator.geolocation) { box.replaceChildren(el('div', { class: 'pinfo warn', text: 'Telefonen din deler ikke posisjon. Søk på navn eller adresse i stedet.' })); return; }
+    box.replaceChildren(el('div', { class: 'here' }, el('div', { class: 'hint', style: 'margin:0', text: 'Finner deg og spisestedene rundt …' })));
+    navigator.geolocation.getCurrentPosition(async pos => {
+      const me = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+      const q = `[out:json][timeout:10];nwr(around:200,${me.lat},${me.lon})["amenity"~"fast_food|restaurant|cafe|bar|pub"]["name"];out center tags 40;`;
+      const [osm, rev] = await Promise.allSettled([
+        fetch('https://overpass-api.de/api/interpreter', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'data=' + encodeURIComponent(q) }).then(r => r.json()),
+        photonReverse(me.lat, me.lon)
+      ]);
+      const here = rev.status === 'fulfilled' ? rev.value : null;
+      const list = (osm.status === 'fulfilled' ? osm.value.elements || [] : []).map(e => {
+        const t = e.tags || {}, lat = e.lat ?? e.center?.lat, lon = e.lon ?? e.center?.lon;
+        const street = [t['addr:street'], t['addr:housenumber']].filter(Boolean).join(' ');
+        const by = t['addr:city'] || (here && here.by) || '';
+        const land = here ? here.land : '';
+        const addr = street ? [street, [t['addr:postcode'], by].filter(Boolean).join(' '), isNorway(land) ? null : land].filter(Boolean).join(', ') : '';
+        return { name: t.name, lat, lon, d: lat != null ? distM(me, { lat, lon }) : 9e9, kebab: isKebab(t), addr, by, land, kind: isKebab(t) ? 'Kebab' : t.amenity === 'fast_food' ? 'Gatekjøkken' : t.amenity === 'restaurant' ? 'Restaurant' : 'Servering' };
+      }).filter(x => x.name).sort((a, b) => (b.kebab - a.kebab) || a.d - b.d).slice(0, 10);
+      const own = knownPlaces.filter(p => p.lat != null && distM(me, p) < 250).map(p => ({ known: p, name: p.name, d: distM(me, p), addr: p.address }));
+      const pick = x => {
+        box.replaceChildren();
+        if (x.known) { choosePlace(x.known); return; }
+        stedIn.value = x.name; place.confirmedNew = false; refreshPlace();
+        const addr = x.addr || (here ? here.label : '');
+        if (addr) addrIn.value = addr;
+        setPos({ lat: x.lat ?? me.lat, lon: x.lon ?? me.lon, by: x.by || (here && here.by) || '', land: x.land || (here && here.land) || '' });
+        if (place.mode === 'similar' && place.similar && KTParse.placeKey(place.similar.name) === KTParse.placeKey(x.name)) choosePlace(place.similar);
+      };
+      const fmtD = d => d > 5000 ? '' : d < 1000 ? Math.round(d / 10) * 10 + ' m' : (d / 1000).toFixed(1).replace('.', ',') + ' km';
+      const btn = x => el('button', { type: 'button', onclick: () => pick(x) }, el('span', {}, el('b', { text: (x.known ? '✓ ' : x.kebab ? '🥙 ' : '') + x.name }), el('small', { text: x.known ? 'Dere har testet her før' : [x.kind, x.addr].filter(Boolean).join(' · ') })), el('span', { class: 'd', text: fmtD(x.d) }));
+      const all = [...own, ...list.filter(x => !own.some(o => KTParse.similarPlace(o.name, x.name)))];
+      const where = here ? [here.by, isNorway(here.land) ? null : here.land].filter(Boolean).join(', ') : '';
+      box.replaceChildren(el('div', { class: 'here' },
+        el('div', { style: 'display:flex;justify-content:space-between;gap:8px;align-items:center' }, el('b', { text: all.length ? 'Hvor er du?' : 'Fant ingen spisesteder rett ved deg' }), el('button', { type: 'button', style: 'background:none;border:0;color:var(--muted);font-size:22px;cursor:pointer;width:40px;height:40px', 'aria-label': 'Lukk', text: '×', onclick: () => box.replaceChildren() })),
+        where ? el('div', { class: 'hint', style: 'margin:2px 0 0', text: '📍 ' + where }) : null,
+        all.length ? el('div', { class: 'hl' }, all.map(btn)) : el('div', { class: 'hint', text: 'Skriv navnet på sjappa under. Posisjonen din brukes som adresse.' })));
+      if (!all.length && here) { addrIn.value = here.label; setPos({ lat: me.lat, lon: me.lon, by: here.by, land: here.land }); }
+    }, () => box.replaceChildren(el('div', { class: 'pinfo warn', text: 'Fikk ikke tilgang til posisjonen. Tillat posisjon for nettleseren, eller søk på navn eller adresse under.' })), { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
   });
 
   // ----- submit -----
@@ -556,8 +667,20 @@
     if (!state.testere.length) return show('err', 'Legg til minst én testperson.');
     if (!state.testere.some(t => CATS.some(([k]) => t[k] != null) || t.brod != null)) return show('err', 'Gi minst én score.');
     const [y, m, d] = $('#dato').value.split('-');
+    if (!state.pos && adresse && place.mode !== 'known') {
+      // Adressen er skrevet inn uten å velge et forslag: prøv å finne posisjonen likevel
+      const withTimeout = (pr, ms) => Promise.race([pr, new Promise(r => setTimeout(() => r(null), ms))]);
+      try {
+        const g = await withTimeout(fetch('https://ws.geonorge.no/adresser/v1/sok?' + new URLSearchParams({ sok: adresse, treffPerSide: '1', fuzzy: 'true' })).then(r => r.json()), 4000);
+        const a = g && (g.adresser || [])[0];
+        if (a && a.representasjonspunkt) setPos({ lat: a.representasjonspunkt.lat, lon: a.representasjonspunkt.lon, by: titleC(a.kommunenavn), land: 'Norge' });
+        else { const w = await withTimeout(photon(adresse, 1), 4000); if (w && w[0]) setPos({ lat: w[0].lat, lon: w[0].lon, by: w[0].by, land: w[0].land }); }
+      } catch {}
+    }
+    const P = state.pos || {};
     const body = {
-      test: { dato: d && m && y ? `${d}.${m}.${y}` : '', sted, adresse, hva: choice('hva'), servert: choice('servert'), pris: $('#pris').value, sterkhet: state.sterkhet || '', brodtype: state.brodtype },
+      test: { dato: d && m && y ? `${d}.${m}.${y}` : '', sted, adresse, hva: choice('hva'), servert: choice('servert'), pris: $('#pris').value, sterkhet: state.sterkhet || '', brodtype: state.brodtype,
+        by: P.by || '', land: P.land || '', lat: P.lat ?? '', lon: P.lon ?? '', valuta: state.valuta },
       testere: state.testere.map(t => ({ ...t })),
       bildeKebab: state.bilder.kebab || '', bildeSjappa: state.bilder.sjappa || ''
     };

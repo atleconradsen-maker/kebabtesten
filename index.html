@@ -383,6 +383,9 @@
   const fmt = v => v == null ? '–' : (Math.round(v * 10) / 10).toFixed(1).replace('.', ',');
   const fmtS = v => v == null ? '–' : (Number.isInteger(v) ? String(v) : fmt(v));
   const kr = v => v == null ? null : Math.round(v) + ' kr';
+  const EUR_NOK = 11.7; // omtrentlig kurs, bare for sammenligning
+  const priceNok = o => o && o.price != null ? (o.currency === 'EUR' ? o.price * EUR_NOK : o.price) : null;
+  const priceLbl = o => !o || o.price == null ? null : o.currency === 'EUR' ? `${String(Math.round(o.price * 10) / 10).replace('.', ',')} € (ca. ${Math.round(o.price * EUR_NOK)} kr)` : kr(o.price);
   const dateLbl = d => { if (!d) return ''; const [y, m, dd] = d.split('-').map(Number); return new Date(y, m - 1, dd).toLocaleDateString('nb-NO', {day: 'numeric', month: 'short', year: 'numeric'}); };
   const CAT_LBL = {meat: 'Kjøtt', sauce: 'Saus', fill: 'Fyll / grønt', portion: 'Porsjon', value: 'Pris / verdi'};
   const isHome = t => /hjemme|nybakt|egen/i.test(t || '');
@@ -440,8 +443,18 @@
   const store = { get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
   const geo = store.get('kt-geo') || {};
   const titleCase = t => String(t || '').toLowerCase().replace(/(^|[\s-])(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
-  async function geocode(addr) {
+  async function geocodeWorld(addr) {
+    const r = await fetch('https://photon.komoot.io/api/?' + new URLSearchParams({ q: addr, limit: '1' }));
+    const f = ((await r.json()).features || [])[0];
+    if (!f) return null;
+    const pr = f.properties || {};
+    geo[addr] = { lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0], kommune: pr.city || pr.town || pr.village || pr.county || '', land: pr.country || '' };
+    store.set('kt-geo', geo);
+    return geo[addr];
+  }
+  async function geocode(addr, abroad) {
     if (geo[addr]) return geo[addr];
+    if (abroad) return geocodeWorld(addr);
     const r = await fetch('https://ws.geonorge.no/adresser/v1/sok?' + new URLSearchParams({ sok: addr, treffPerSide: '1', fuzzy: 'true' }));
     const a = ((await r.json()).adresser || [])[0];
     if (!a || !a.representasjonspunkt) return null;
@@ -450,11 +463,12 @@
     return geo[addr];
   }
   function placesAgg() {
-    return places.map(p => ({ ...p, g: p.address ? geo[p.address] || null : null }));
+    return places.map(p => ({ ...p, g: p.lat != null ? { lat: p.lat, lon: p.lon, kommune: p.city || (geo[p.address] || {}).kommune || '' } : p.address ? geo[p.address] || null : null }));
   }
   const km = (a, b) => { const R = 6371, r = x => x * Math.PI / 180, dLat = r(b.lat - a.lat), dLon = r(b.lon - a.lon); const h = Math.sin(dLat / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dLon / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); };
   const fmtKm = d => d < 1 ? Math.round(d * 1000 / 10) * 10 + ' m' : (Math.round(d * 10) / 10).toString().replace('.', ',') + ' km';
   const gmaps = p => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.name + ', ' + (p.address || ''));
+ const gdirP = p => { const g = p.lat != null ? { lat: p.lat, lon: p.lon } : p.address ? geo[p.address] : null; return gdir({ ...p, g }); };
   const gdir = p => p.g ? `https://www.google.com/maps/dir/?api=1&destination=${p.g.lat},${p.g.lon}` : gmaps(p);
   let city = 'Alle', me = null, kmap = null, leafletP = null;
   function loadLeaflet() {
@@ -469,13 +483,13 @@
   let geocoding = false;
 
   let kFilter = 'Alle', kq = '', kSel = '', kmarkers = [];
-  const KF = [['Alle', () => true], ['Score 7+', p => (p.total ?? 0) >= 7], ['Hjemmelaget brød', p => isHome(p.breadType)], ['Under 150 kr', p => p.price != null && p.price < 150]];
+  const KF = [['Alle', () => true], ['Score 7+', p => (p.total ?? 0) >= 7], ['Hjemmelaget brød', p => isHome(p.breadType)], ['Under 150 kr', p => priceNok(p) != null && priceNok(p) < 150], ['🌍 Utlandet', p => p.abroad]];
   async function renderKart() {
     const box = $('#view-kart'); box.replaceChildren();
     if (!tests.length) { box.append(el('div', { class: 'sec' }, empty('Ingen steder ennå', 'Når dere har testet noen kebaber, dukker de opp på kartet.'))); return; }
     const all = placesAgg();
-    const missing = [...new Set(all.filter(p => p.address && !geo[p.address]).map(p => p.address))];
-    if (missing.length && !geocoding) { geocoding = true; Promise.allSettled(missing.map(geocode)).then(() => { geocoding = false; if (view === 'kart') renderKart(); }); }
+    const missing = all.filter(p => p.address && !p.g);
+    if (missing.length && !geocoding) { geocoding = true; Promise.allSettled(missing.map(p => geocode(p.address, p.abroad))).then(() => { geocoding = false; if (view === 'kart') renderKart(); }); }
     const key = s => String(s || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '');
     const f = (KF.find(x => x[0] === kFilter) || KF[0])[1];
     let list = all.filter(p => f(p) && (!kq || key([p.name, p.address, p.g?.kommune].join(' ')).includes(key(kq))));
@@ -502,9 +516,9 @@
       sheet.append(el('div', { class: 'grab' }),
         el('div', { class: 'krow' }, kimg,
           el('div', { style: 'flex:1;min-width:0' },
-            el('div', { class: 'kick', style: 'font-size:10px;letter-spacing:1.5px', text: [lp.q ? `#${lp.pos} I LIGAEN` : rank ? `#${rank} TOTALT` : null, p.dist != null ? fmtKm(p.dist) + ' UNNA' : p.g?.kommune?.toUpperCase()].filter(Boolean).join(' · ') }),
+            el('div', { class: 'kick', style: 'font-size:10px;letter-spacing:1.5px', text: [lp.q ? `#${lp.pos} I ${lp.borte ? 'BORTEKAMPEN' : 'LIGAEN'}` : rank ? `#${rank} TOTALT` : null, p.dist != null ? fmtKm(p.dist) + ' UNNA' : p.g?.kommune?.toUpperCase()].filter(Boolean).join(' · ') }),
             el('div', { class: 'kname', text: p.name }),
-            el('div', { class: 'ksub', text: [p.address || 'Adresse mangler', nv(p.ratings, 'vurdering', 'vurderinger'), p.price != null ? kr(p.price) : null].filter(Boolean).join(' · ') })),
+            el('div', { class: 'ksub', text: [p.address || 'Adresse mangler', nv(p.ratings, 'vurdering', 'vurderinger'), priceLbl(p)].filter(Boolean).join(' · ') })),
           el('div', { class: 'stamp' }, el('b', { text: fmt(p.total) }))),
         el('div', { class: 'kbtns' }, el('a', { class: 'btnL', href: placeUrl(p.key), text: 'Se stedet' }), el('a', { class: 'btn2', href: gdir(p), target: '_blank', rel: 'noopener' }, svg(ICO.pin), 'Vis rute')));
     };
@@ -525,7 +539,16 @@
     });
     if (me) { L.circleMarker([me.lat, me.lon], { radius: 9, color: '#F5F0E7', weight: 3, fillColor: '#4f8fe8', fillOpacity: 1 }).addTo(kmap); pts.push([me.lat, me.lon]); }
     const pad = { paddingTopLeft: [30, 130], paddingBottomRight: [30, 220], maxZoom: 15 };
-    if (pts.length) kmap.fitBounds(pts, pad); else kmap.setView([64.5, 12], 4);
+    // Ikke zoom ut til hele Europa: vis regionen der utvalgt sted (eller de fleste stedene) ligger
+    let fit = pts;
+    if (!me && pts.length > 1) {
+      const withG = list.filter(p => p.g);
+      const nAbroad = withG.filter(p => p.abroad).length, nHome = withG.length - nAbroad;
+      const wantAbroad = sel ? !!sel.abroad : nAbroad > nHome;
+      const sub = withG.filter(p => !!p.abroad === wantAbroad).map(p => [p.g.lat, p.g.lon]);
+      if (sub.length) fit = sub;
+    }
+    if (fit.length) kmap.fitBounds(fit, pad); else kmap.setView([64.5, 12], 4);
   }
   function nearMe() {
     if (!navigator.geolocation) return toast('Telefonen din deler ikke posisjon.');
@@ -611,19 +634,20 @@
 
   function peopleStats() {
     const m = new Map();
-    const get = n => { if (!m.has(n)) m.set(n, { name: n, entries: [], totals: [], likes: 0, comments: 0, discovered: 0, cities: new Map(), same: new Map(), maxSame: 0, hot: 0, cheap: 0, bread10: 0, harsh: 0, photos: 0 }); return m.get(n); };
+    const get = n => { if (!m.has(n)) m.set(n, { name: n, entries: [], totals: [], likes: 0, comments: 0, discovered: 0, cities: new Map(), same: new Map(), maxSame: 0, hot: 0, cheap: 0, bread10: 0, harsh: 0, photos: 0, abroad: 0 }); return m.get(n); };
     for (const t of tests) for (const sc of t.scores) {
       const p = get(sc.name);
       p.entries.push({ t, s: sc });
       p.likes += likeCount(reviewId(t, sc));
       p.same.set(t.placeKey, (p.same.get(t.placeKey) || 0) + 1); p.maxSame = Math.max(p.maxSame, p.same.get(t.placeKey));
       if (t.heat === 5) p.hot++;
-      if (t.price != null && t.price < 100) p.cheap++;
+      if (priceNok(t) != null && priceNok(t) < 100) p.cheap++;
+      if (t.abroad) p.abroad++;
       if (sc.bread === 10) p.bread10++;
       if (sc.total != null && sc.total < 4) p.harsh++;
       if (t.imgKebab && t.imgShop) p.photos++;
       if (sc.total != null) p.totals.push(sc.total);
-      const c = t.address && geo[t.address] ? geo[t.address].kommune : null;
+      const c = cityOf(t) || null;
       if (c) p.cities.set(c, (p.cities.get(c) || 0) + 1);
     }
     for (const pl of places) {
@@ -813,6 +837,7 @@
     ['Utforsking', [
       ['pioner', '🧭', 'Pioner', 'Vær med på den første testen av et nytt sted', p => p.discovered, 1],
       ['byhopper', '🗺️', 'Byhopper', 'Test kebab i 3 forskjellige byer', p => p.cities.size, 3],
+      ['turist', '🌍', 'Kebabturist', 'Test kebab i utlandet (bortekamp)', p => p.abroad, 1],
       ['lojal', '🔁', 'Lojal', 'Test samme sted 3 ganger', p => p.maxSame, 3]]],
     ['Folket', [
       ['likt', '👍', 'Likt', 'Få din første like', p => p.likes, 1],
@@ -1017,10 +1042,10 @@
   let geoRun = false;
   async function ensureGeo() {
     if (geoRun) return;
-    const missing = [...new Set(places.filter(p => p.address && !geo[p.address]).map(p => p.address))];
+    const missing = places.filter(p => p.address && p.lat == null && !geo[p.address]);
     if (!missing.length) return;
     geoRun = true;
-    await Promise.allSettled(missing.map(geocode));
+    await Promise.allSettled(missing.map(p => geocode(p.address, p.abroad)));
     geoRun = false;
     render();
   }
@@ -1044,7 +1069,7 @@
     illu: '<svg class="illu" viewBox="0 0 358 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(179 160) rotate(-14)"><ellipse cx="0" cy="96" rx="130" ry="14" fill="rgba(0,0,0,.25)"/><path d="M-120 -10 Q-128 70 -40 92 L40 92 Q128 70 120 -10 Z" fill="#E9C58A"/><path d="M-120 -10 Q-128 70 -40 92 L40 92 Q128 70 120 -10" fill="none" stroke="#B9884A" stroke-width="4"/><path d="M-118 -12 Q-80 -60 -40 -40 Q-10 -78 24 -46 Q60 -76 90 -40 Q122 -46 120 -10 Z" fill="#7A3E1E"/><path d="M-96 -30 Q-70 -50 -50 -36 M-20 -52 Q4 -64 20 -48 M40 -54 Q66 -64 84 -44" stroke="#A65A2C" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M-112 -14 Q-96 -36 -78 -22 Q-62 -42 -44 -22 Q-26 -40 -6 -20 Q14 -40 32 -20 Q52 -40 70 -20 Q90 -38 112 -14" stroke="#647C55" stroke-width="12" fill="none" stroke-linecap="round"/><circle cx="-62" cy="-30" r="13" fill="#D94B35"/><circle cx="16" cy="-34" r="13" fill="#D94B35"/><circle cx="78" cy="-30" r="12" fill="#D94B35"/><path d="M-100 -6 Q-60 18 -20 -2 Q20 20 60 -2 Q90 14 108 -6" stroke="#F5F0E7" stroke-width="9" fill="none" stroke-linecap="round"/><path d="M-40 92 L-30 30 L30 30 L40 92" fill="#d9d9d9" opacity=".9"/></g></svg>'
   };
   const PH_ICO = '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>';
-  const cityOf = addr => (addr && geo[addr]) ? geo[addr].kommune : '';
+  const cityOf = x => { if (x && typeof x === 'object') return x.city || (x.address && geo[x.address] ? geo[x.address].kommune : ''); return (x && geo[x]) ? geo[x].kommune : ''; };
   const placeUrl = key => '#sted/' + encodeURIComponent(key);
   const thumb = u => u ? u.replace(/sz=w\d+/, 'sz=w600') : u;
   const meterBar = v => el('div', { class: 'meter', role: 'img', 'aria-label': v == null ? 'Ingen score' : `${fmt(v)} av 10` },
@@ -1080,7 +1105,7 @@
   }
   let ligaKey = 'total', ligaCity = 'Alle';
   function ligaTable(k = ligaKey, city = ligaCity) {
-    const inCity = t => city === 'Alle' || cityOf(t.address) === city;
+    const inCity = t => city === 'BORTE' ? !!t.abroad : !t.abroad && (city === 'Alle' || cityOf(t) === city);
     const now = standings(tests.filter(inCity), k);
     const weekAgo = new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10);
     const before = standings(tests.filter(t => inCity(t) && t.date && t.date < weekAgo), k);
@@ -1095,11 +1120,13 @@
     return { rows: shown, out: anyQ ? now.filter(a => !a.q) : [], provisional: !anyQ };
   }
   function ligaPos(key) {
-    const t = ligaTable('total', 'Alle');
+    const pl = placeBy(key);
+    const t = ligaTable('total', pl && pl.abroad ? 'BORTE' : 'Alle');
     const r = t.rows.find(a => a.key === key);
-    if (r && !t.provisional) return { pos: r.pos, q: true };
+    const borte = !!(pl && pl.abroad);
+    if (r && !t.provisional) return { pos: r.pos, q: true, borte };
     const o = t.out.find(a => a.key === key) || (t.provisional && r);
-    return { pos: r ? r.pos : null, q: false, n: o ? o.n : 0 };
+    return { pos: r ? r.pos : null, q: false, n: o ? o.n : 0, borte };
   }
   const placeBy = key => places.find(p => p.key === key);
 
@@ -1113,7 +1140,7 @@
         el('span', { class: 'dt', text: dateLbl(t.date) })]),
       el('div', { class: 'tbody' },
         el('b', { text: t.place }),
-        el('div', { class: 'ksub', text: [cityOf(t.address), joinNames(t.scores.map(s => s.name).slice(0, 2)) + (t.scores.length > 2 ? ` +${t.scores.length - 2}` : '')].filter(Boolean).join(' · ') }),
+        el('div', { class: 'ksub', text: [cityOf(t), joinNames(t.scores.map(s => s.name).slice(0, 2)) + (t.scores.length > 2 ? ` +${t.scores.length - 2}` : '')].filter(Boolean).join(' · ') }),
         meterBar(t.total),
         likesN ? el('div', { class: 'likesm' }, svg(ICO.thumb), String(likesN)) : null));
   }
@@ -1121,7 +1148,7 @@
     const best = f => places.filter(p => f(p) != null).sort((x, y) => f(y) - f(x) || y.ratings - x.ratings)[0];
     const defs = [
       ['KEBABKONGEN', best(p => p.total), p => p.total, p => 'Høyeste snitt · ' + nv(p.ratings, 'vurdering', 'vurderinger')],
-      ['MEST FOR PENGENE', best(p => p.cat.value), p => p.cat.value, p => (p.price != null ? kr(p.price) + ' · ' : '') + fmt(p.cat.value) + ' i pris/verdi'],
+      ['MEST FOR PENGENE', best(p => p.cat.value), p => p.cat.value, p => (p.price != null ? priceLbl(p) + ' · ' : '') + fmt(p.cat.value) + ' i pris/verdi'],
       ['BESTE SAUS', best(p => p.cat.sauce), p => p.cat.sauce, p => fmt(p.cat.sauce) + ' på sausen'],
       ['BESTE BRØD', best(p => p.bread), p => p.bread, p => (p.breadType || 'Brødet') + ' · ' + fmt(p.bread)]
     ];
@@ -1132,7 +1159,7 @@
   let showAllAwards = false;
   function renderHjem() {
     const box = $('#view-hjem'); box.replaceChildren();
-    const nTests = tests.length, nPlaces = places.length, nCities = new Set(places.map(p => cityOf(p.address)).filter(Boolean)).size;
+    const nTests = tests.length, nPlaces = places.length, nCities = new Set(places.map(p => cityOf(p)).filter(Boolean)).size;
     box.append(el('section', { style: 'padding-top:10px' },
       el('div', { class: 'kick', text: `SESONG ${new Date().getFullYear()} · ${nv(nTests, 'TEST', 'TESTER')}` }),
       el('h1', { class: 'h1' }, 'Norges mest ', el('em', { text: 'uoffisielle' }), ' kebabliga'),
@@ -1144,7 +1171,7 @@
       else hero.append(el('div', { class: 'stripes' }), svg(ICO.illu));
       hero.append(el('span', { class: 'tagS', text: 'SISTE TEST' + (t.date ? ' · ' + dateLbl(t.date).toUpperCase() : '') }),
         el('div', { class: 'stamp' }, el('b', { text: fmt(t.total) }), el('small', { text: nv(t.scores.length, 'VURDERING', 'VURD.') })),
-        el('div', { class: 'hname' }, el('b', { text: t.place }), el('span', { text: [cityOf(t.address), t.what, t.served].filter(Boolean).join(' · ') })));
+        el('div', { class: 'hname' }, el('b', { text: t.place }), el('span', { text: [cityOf(t), t.what, t.served].filter(Boolean).join(' · ') })));
       box.append(hero);
     }
     box.append(el('div', { style: 'margin-top:16px;display:flex;flex-direction:column;gap:8px' },
@@ -1172,13 +1199,16 @@
   // ----- liga -----
   function renderLiga() {
     const box = $('#view-liga'); box.replaceChildren();
-    box.append(el('section', { style: 'padding-top:10px' }, el('div', { class: 'kick', text: `SESONG ${new Date().getFullYear()} · TABELL` }), el('h1', { class: 'h1', text: 'KEBABLIGAEN' })));
+    const borte = ligaCity === 'BORTE';
+    box.append(el('section', { style: 'padding-top:10px' }, el('div', { class: 'kick', text: borte ? 'KEBAB I UTLANDET · EGEN TABELL' : `SESONG ${new Date().getFullYear()} · TABELL` }), el('h1', { class: 'h1', text: borte ? 'BORTEKAMPEN' : 'KEBABLIGAEN' })));
     if (!places.length) { box.append(el('div', { class: 'sec' }, empty('Tabellen er tom', 'Når dere har testet noen kebaber, rangeres stedene her.'))); return; }
-    const cities = new Map(); places.forEach(p => { const c = cityOf(p.address); if (c) cities.set(c, (cities.get(c) || 0) + 1); });
-    if (ligaCity !== 'Alle' && !cities.has(ligaCity)) ligaCity = 'Alle';
+    const cities = new Map(); places.filter(p => !p.abroad).forEach(p => { const c = cityOf(p); if (c) cities.set(c, (cities.get(c) || 0) + 1); });
+    const anyAbroad = places.some(p => p.abroad);
+    if (ligaCity !== 'Alle' && !(ligaCity === 'BORTE' ? anyAbroad : cities.has(ligaCity))) ligaCity = 'Alle';
     box.append(el('div', { class: 'chipsRow', style: 'margin-top:16px' },
       el('button', { type: 'button', class: 'pill' + (ligaCity === 'Alle' ? ' on' : ''), text: 'Hele Norge', onclick: () => { ligaCity = 'Alle'; playAnim(); renderLiga(); } }),
-      [...cities.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([c]) => el('button', { type: 'button', class: 'pill' + (ligaCity === c ? ' on' : ''), text: c, onclick: () => { ligaCity = c; playAnim(); renderLiga(); } }))));
+      [...cities.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([c]) => el('button', { type: 'button', class: 'pill' + (ligaCity === c ? ' on' : ''), text: c, onclick: () => { ligaCity = c; playAnim(); renderLiga(); } })),
+      anyAbroad ? el('button', { type: 'button', class: 'pill' + (borte ? ' on' : ''), text: '🌍 Bortekamp', onclick: () => { ligaCity = 'BORTE'; playAnim(); renderLiga(); } }) : null));
     const opts = [['total', 'Total'], ['kebab', 'Kebab'], ['bread', 'Brød'], ['value', 'Pris/verdi']];
     box.append(el('div', { class: 'seg', role: 'tablist', 'aria-label': 'Sorter etter', style: 'margin-top:12px' }, opts.map(([k, l]) =>
       el('button', { type: 'button', role: 'tab', 'aria-selected': String(ligaKey === k), class: ligaKey === k ? 'on' : '', text: l, onclick: () => { ligaKey = k; playAnim(); renderLiga(); } }))));
@@ -1196,13 +1226,13 @@
       stagger(rows.map(a => { const [mt, mc] = mv(a), p = placeBy(a.key) || {};
         return el('a', { class: 'lrow', href: placeUrl(a.key) },
           el('div', { class: 'lpos' }, el('b', { text: String(a.pos) }), el('small', { class: mc, text: mt })),
-          el('div', { class: 'lname' }, el('b', { text: nameOf(a) }), el('small', { text: [cityOf(p.address), 'snitt ' + fmt(a.raw)].filter(Boolean).join(' · ') })),
+          el('div', { class: 'lname' }, el('b', { text: nameOf(a) }), el('small', { text: [cityOf(p), p.abroad ? p.country : null, 'snitt ' + fmt(a.raw)].filter(Boolean).join(' · ') })),
           el('div', { class: 'lnum', text: String(a.n) }),
           el('div', { class: 'lsc', text: fmt(a.liga) })); }))));
     if (out.length) {
       box.append(el('div', { class: 'divider', text: 'IKKE KVALIFISERT ENNÅ' }));
       out.sort((a, b) => b.n - a.n || b.raw - a.raw).forEach(a => { const p = placeBy(a.key) || {};
-        box.append(el('a', { class: 'uq', href: placeUrl(a.key) }, el('div', {}, el('b', { text: nameOf(a) }), el('div', { class: 'ksub', text: [cityOf(p.address), `${a.n} av ${MIN_Q} vurderinger`].filter(Boolean).join(' · ') })), el('span', { class: 's', text: fmt(a.raw) }))); });
+        box.append(el('a', { class: 'uq', href: placeUrl(a.key) }, el('div', {}, el('b', { text: nameOf(a) }), el('div', { class: 'ksub', text: [cityOf(p), `${a.n} av ${MIN_Q} vurderinger`].filter(Boolean).join(' · ') })), el('span', { class: 's', text: fmt(a.raw) }))); });
     }
     box.append(el('div', { class: 'note' }, svg(ICO.info), el('div', {}, `Et sted må ha ${MIN_Q} vurderinger for å komme inn i tabellen. Ligascoren trekkes mot snittet for alle steder til det finnes nok vurderinger, så én gladtest ikke vinner alene. `, el('a', { href: '#om', text: 'Slik regner vi' }))));
   }
@@ -1215,7 +1245,7 @@
     if (!types.includes(tType)) tType = 'Alle';
     const key = s => String(s || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '');
     const q = key(tq.trim());
-    let list = tests.filter(t => (tType === 'Alle' || t.what === tType) && (!q || key([t.place, t.address, cityOf(t.address), t.what, ...t.scores.map(s => s.name)].join(' ')).includes(q)));
+    let list = tests.filter(t => (tType === 'Alle' || t.what === tType) && (!q || key([t.place, t.address, cityOf(t), t.what, ...t.scores.map(s => s.name)].join(' ')).includes(q)));
     list = list.sort((a, b) => tSort === 'Best' ? (b.total ?? 0) - (a.total ?? 0) : (b.date || '').localeCompare(a.date || ''));
     const grid = el('div', { class: 'tgrid' }, stagger(list.map(testCard)));
     if (keepFocus && box.querySelector('.tgrid')) { box.querySelector('.tgrid').replaceWith(grid); const e = box.querySelector('.tempty'); if (e) e.remove(); if (!list.length) grid.after(el('div', { class: 'empty tempty', style: 'margin-top:16px', text: 'Ingen tester passer søket.' })); return; }
@@ -1235,7 +1265,7 @@
   let stedKey = '';
   async function sharePlace(p, lp) {
     const url = location.href.split('#')[0] + placeUrl(p.key);
-    const text = `${p.name}: ${fmt(p.total)} på Kebabtesten` + (lp && lp.q ? ` (#${lp.pos} i kebabligaen)` : '');
+    const text = `${p.name}: ${fmt(p.total)} på Kebabtesten` + (lp && lp.q ? ` (#${lp.pos} i ${lp.borte ? 'bortekampen' : 'kebabligaen'})` : '');
     try { if (navigator.share) { await navigator.share({ title: 'Kebabtesten', text, url }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
     try { await navigator.clipboard.writeText(text + ' ' + url); toast('Lenken er kopiert.'); } catch { toast(url); }
   }
@@ -1250,7 +1280,7 @@
     for (let i = -1200; i < 1200; i += 100) { x.beginPath(); x.moveTo(i, 950); x.lineTo(i + 800, 150); x.stroke(); }
     try { const im = new Image(); const svgTxt = ICO.illu.replace('<svg class="illu"', '<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640"'); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgTxt); await im.decode(); x.drawImage(im, 60, 250, 960, 640); } catch {}
     x.restore();
-    const tag = lp && lp.q ? `#${lp.pos} I KEBABLIGAEN` : 'NORGES MEST UOFFISIELLE KEBABLIGA';
+    const tag = lp && lp.q ? `#${lp.pos} I ${lp.borte ? 'BORTEKAMPEN' : 'KEBABLIGAEN'}` : 'NORGES MEST UOFFISIELLE KEBABLIGA';
     x.font = `700 34px Inter, sans-serif`; const tw = x.measureText(tag).width;
     x.fillStyle = '#171717'; x.fillRect(96, 286, tw + 48, 66); x.fillStyle = '#F5B632'; x.fillText(tag, 120, 331);
     x.fillStyle = '#F5B632'; x.beginPath(); x.arc(840, 770, 170, 0, Math.PI * 2); x.fill();
@@ -1260,7 +1290,7 @@
     const words = p.name.toUpperCase().split(/\s+/); let line = '', y = 1030; const lines = [];
     words.forEach(w => { const tl = line ? line + ' ' + w : w; if (x.measureText(tl).width > 960 && line) { lines.push(line); line = w; } else line = tl; }); lines.push(line);
     lines.slice(0, 2).forEach(l => { x.fillText(l, 60, y); y += 118; });
-    x.fillStyle = '#b3ac9f'; x.font = `500 40px Inter, sans-serif`; x.fillText([cityOf(p.address), p.what, p.price != null ? kr(p.price) : ''].filter(Boolean).join(' · '), 60, y - 40);
+    x.fillStyle = '#b3ac9f'; x.font = `500 40px Inter, sans-serif`; x.fillText([cityOf(p), p.what, priceLbl(p) || ''].filter(Boolean).join(' · '), 60, y - 40);
     const parts = [['Kjøtt', p.cat.meat], ['Saus', p.cat.sauce], ['Fyll', p.cat.fill], ['Porsjon', p.cat.portion], ['Pris/verdi', p.cat.value], ['Brød', p.bread]];
     let by = y + 30;
     parts.forEach(([l, v]) => { x.fillStyle = '#cfc8bb'; x.font = `600 34px Inter, sans-serif`; x.fillText(l, 60, by + 26); x.fillStyle = '#333'; x.fillRect(300, by, 600, 26); x.fillStyle = l === 'Brød' ? '#e2b77a' : '#F5B632'; x.fillRect(300, by, 60 * (v || 0), 26); x.fillStyle = '#F5F0E7'; x.font = `40px ${A}`; x.fillText(fmt(v), 940, by + 30); by += 64; });
@@ -1287,19 +1317,19 @@
       el('div', { class: 'bar' },
         el('button', { type: 'button', class: 'rbtn', 'aria-label': 'Tilbake', onclick: () => { if (history.length > 1 && document.referrer.split('#')[0] === location.href.split('#')[0]) history.back(); else location.hash = '#liga'; } }, svg(ICO.back)),
         el('button', { type: 'button', class: 'sharebtn', onclick: () => sharePlace(p, lp) }, svg(ICO.share), 'Del')),
-      lp.q ? el('div', { class: 'ligatag', text: `#${lp.pos} I KEBABLIGAEN` }) : el('div', { class: 'ligatag uq', text: `IKKE KVALIFISERT · ${lp.n || p.ratings} AV ${MIN_Q}` }));
+      lp.q ? el('div', { class: 'ligatag', text: `#${lp.pos} I ${lp.borte ? 'BORTEKAMPEN' : 'KEBABLIGAEN'}` }) : el('div', { class: 'ligatag uq', text: `IKKE KVALIFISERT · ${lp.n || p.ratings} AV ${MIN_Q}` }));
     box.append(hero);
     const chili = el('div', { class: 'heat', 'aria-label': p.tests[0] && p.tests[0].heat != null ? `Sterkhet ${p.tests[0].heat} av 5` : null });
     const heat = p.tests.map(t => t.heat).find(h => h != null);
     if (heat != null) for (let i = 1; i <= 5; i++) chili.append(svg(ICON.chili(i <= heat)));
     box.append(el('section', { class: 'stitle' },
       el('div', { style: 'flex:1;min-width:0' }, el('h1', { text: p.name }),
-        el('div', { class: 'ksub', style: 'font-size:13px;margin-top:8px', text: [p.address, p.what, p.served, kr(p.price)].filter(Boolean).join(' · ') }),
+        el('div', { class: 'ksub', style: 'font-size:13px;margin-top:8px', text: [p.address, p.abroad && p.country && !String(p.address).includes(p.country) ? p.country : null, p.what, p.served, priceLbl(p)].filter(Boolean).join(' · ') }),
         heat != null ? el('div', { style: 'margin-top:8px' }, chili) : null),
       el('div', { class: 'stamp', style: 'transform:rotate(6deg)' }, el('b', { text: fmt(p.total) }), el('small', { text: nv(p.ratings, 'VURDERING', 'VURD.') }))));
     box.append(el('div', { style: 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:16px' },
       el('a', { class: 'btnL', href: 'legg-inn.html?sted=' + encodeURIComponent(p.name) }, svg(ICO.plus), 'Test her'),
-      el('a', { class: 'btn2', href: gdir({ ...p, g: p.address ? geo[p.address] : null }), target: '_blank', rel: 'noopener' }, svg(ICO.pin), 'Vis rute')));
+      el('a', { class: 'btn2', href: gdirP(p), target: '_blank', rel: 'noopener' }, svg(ICO.pin), 'Vis rute')));
     const parts = [['Kjøtt', p.cat.meat], ['Saus', p.cat.sauce], ['Fyll / grønt', p.cat.fill], ['Porsjon', p.cat.portion], ['Pris / verdi', p.cat.value], ['Brød', p.bread]];
     box.append(el('section', { class: 'card sec' },
       el('div', { class: 'sech', style: 'margin:0' }, el('h2', { text: 'SCOREKORT' }), el('span', { class: 'ksub', text: 'snitt av ' + nv(p.ratings, 'vurdering', 'vurderinger') })),

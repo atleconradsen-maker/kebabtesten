@@ -112,10 +112,15 @@
     bread: ['brod', 'brød', 'brod score'],
     notes: ['kommentar', 'notat'],
     imgKebab: ['bilde kebab', 'bilde av kebab', 'bilde'],
-    imgShop: ['bilde sjappa', 'bilde av sjappa', 'bilde sted']
+    imgShop: ['bilde sjappa', 'bilde av sjappa', 'bilde sted'],
+    city: ['by', 'kommune'],
+    country: ['land'],
+    lat: ['lat', 'breddegrad'],
+    lon: ['lon', 'lengdegrad'],
+    currency: ['valuta']
   };
   const CATS = ['meat', 'sauce', 'fill', 'portion', 'value'];
-  const SHARED = ['date', 'place', 'address', 'what', 'served', 'price', 'heat', 'breadType'];
+  const SHARED = ['date', 'place', 'address', 'what', 'served', 'price', 'heat', 'breadType', 'city', 'country', 'lat', 'lon', 'currency'];
 
   function parseRows(rows) {
     if (!rows.length) return { tests: [] };
@@ -146,10 +151,14 @@
       const date = parseDate(base.date);
       const rawPlace = String(base.place).trim().slice(0, 80);
       const pk = placeKey(rawPlace);
-      if (!places.has(pk)) places.set(pk, { name: rawPlace, address: '' });
+      if (!places.has(pk)) places.set(pk, { name: rawPlace, address: '', city: '', country: '', lat: null, lon: null });
       const pinfo = places.get(pk);
       const addr = String(base.address || '').trim();
       if (addr && !pinfo.address) pinfo.address = addr.slice(0, 120);
+      if (!pinfo.city && String(base.city || '').trim()) pinfo.city = String(base.city).trim().slice(0, 60);
+      if (!pinfo.country && String(base.country || '').trim()) pinfo.country = String(base.country).trim().slice(0, 60);
+      const la = toNum(base.lat), lo = toNum(base.lon);
+      if (pinfo.lat == null && la != null && lo != null && Math.abs(la) <= 90 && Math.abs(lo) <= 180) { pinfo.lat = la; pinfo.lon = lo; }
       const place = pinfo.name;
       // Mangler datoen (f.eks. tolket som tall i arket), hør til siste test på samme sted
       let key = (date || 'u' + n) + '|' + pk;
@@ -162,6 +171,7 @@
           price: toNum(base.price),
           heat: (() => { const h = toNum(base.heat); return h == null ? null : Math.min(5, Math.max(0, Math.round(h))); })(),
           breadType: String(base.breadType || '').trim().slice(0, 40),
+          currency: /^eur|€/i.test(String(base.currency || '').trim()) ? 'EUR' : 'NOK',
           notes: [], imgKebab: null, imgShop: null, scores: []
         });
       }
@@ -191,7 +201,8 @@
       CATS.forEach(c => cat[c] = avg(t.scores.map(s => s[c])));
       const kebab = avg(t.scores.map(s => s.kebab));
       const bread = avg(t.scores.map(s => s.bread));
-      return { ...t, address: (places.get(t.placeKey) || {}).address || '', cat, kebab, bread, total: combine(kebab, bread) };
+      const pi = places.get(t.placeKey) || {};
+      return { ...t, address: pi.address || '', city: pi.city || '', country: pi.country || '', lat: pi.lat ?? null, lon: pi.lon ?? null, abroad: isAbroad(pi.country), cat, kebab, bread, total: combine(kebab, bread) };
     });
     // Ett sted = alle tester der samlet, uansett dato. Snittet tas over alle vurderinger (alle personer, alle besøk).
     const placeList = [...places.entries()].map(([pk, p]) => {
@@ -202,7 +213,8 @@
       const kebab = avg(all.map(s => s.kebab)), bread = avg(all.map(s => s.bread));
       const latest = ts[0] || {};
       return {
-        key: pk, name: p.name, address: p.address, tests: ts, visits: ts.length, ratings: all.length,
+        key: pk, name: p.name, address: p.address, city: p.city, country: p.country, lat: p.lat, lon: p.lon, abroad: isAbroad(p.country),
+        currency: latest.currency || 'NOK', tests: ts, visits: ts.length, ratings: all.length,
         cat, kebab, bread, total: combine(kebab, bread),
         what: latest.what || '', served: latest.served || '', price: latest.price ?? null, date: latest.date || '',
         breadType: (ts.map(t => t.breadType).filter(Boolean)[0]) || '',
@@ -211,11 +223,12 @@
     });
     return { tests: out, places: placeList };
   }
+  function isAbroad(c) { const v = String(c || '').trim().toLowerCase(); return !!v && !['norge', 'norway', 'no', 'nor'].includes(v); }
   function combine(k, b) {
     if (k != null && b != null) return k * W_KEBAB + b * W_BREAD;
     return k != null ? k : b;
   }
 
-  const api = { placeKey, similarPlace, parseCSV, parseRows, parseSheet: t => parseRows(parseCSV(t)), gvizToRows, parseDate, imageUrl, W_KEBAB, W_BREAD };
+  const api = { placeKey, similarPlace, parseCSV, parseRows, parseSheet: t => parseRows(parseCSV(t)), gvizToRows, parseDate, imageUrl, isAbroad, W_KEBAB, W_BREAD };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.KTParse = api;
 })(typeof self !== 'undefined' ? self : this);
