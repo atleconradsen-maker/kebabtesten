@@ -363,8 +363,8 @@
 </div></nav>
 <div class="lightbox hidden" id="lb"><img alt=""><div></div></div>
 
-<script src="config.js?v=202611260914"></script>
-<script src="parse.js?v=202611260914"></script>
+<script src="config.js?v=202611261000"></script>
+<script src="parse.js?v=202611261000"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -1493,7 +1493,18 @@
 
   load();
   setInterval(() => { if (!document.hidden) load(); }, 60000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
+  // Hjemskjerm-appen på iPhone fortsetter der den var. Last siden på nytt når det finnes en ny versjon.
+  const verOf = html => (/parse\.js\?v=([^"'&]+)/.exec(html) || [])[1] || '';
+  async function checkVersion() {
+    try {
+      const mine = verOf(document.documentElement.innerHTML);
+      const live = verOf(await (await fetch('index.html?_=' + Date.now(), { cache: 'no-store' })).text());
+      if (mine && live && live !== mine && sessionStorage.getItem('kt-reloaded') !== live) { sessionStorage.setItem('kt-reloaded', live); location.reload(); }
+    } catch {}
+  }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { load(); checkVersion(); } });
+  window.addEventListener('pageshow', e => { if (e.persisted) { load(); checkVersion(); } });
+  checkVersion();
 })();
 </script>
 </body>
