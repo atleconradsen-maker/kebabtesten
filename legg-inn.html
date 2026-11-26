@@ -7,13 +7,13 @@
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#17110e;--panel:#241a15;--panel2:#1d1511;--line:#3d2c22;--line2:#2f221b;--text:#fff4e0;--muted:#c4ad94;--dim:#957d66;--sauce:#e8402a;--sauce2:#ff5a3c;--gold:#ffc629}
+  :root{--bg:#171717;--panel:#222;--panel2:#1d1d1d;--line:#333;--line2:#2a2a2a;--text:#F5F0E7;--muted:#b3ac9f;--dim:#8a8378;--sauce:#D94B35;--sauce2:#F5B632;--gold:#F5B632;--green:#647C55}
   *{box-sizing:border-box}
   html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
   button,input,textarea{font:inherit;color:inherit}
-  .disp{font-family:'Archivo Black',Impact,sans-serif;font-weight:400}
+  .disp{font-family:Anton,Impact,sans-serif;font-weight:400;letter-spacing:.3px}
   .wrap{max-width:560px;margin:0 auto;padding:20px 16px 120px;display:flex;flex-direction:column;gap:20px}
   header{display:flex;align-items:center;gap:12px}
   .back{width:44px;height:44px;border-radius:50%;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;color:var(--text);text-decoration:none;flex:0 0 auto}
@@ -43,7 +43,7 @@
   .tester{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px 14px}
   .th{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
   .th b{font-size:17px}
-  .th .tot{font-family:'Archivo Black';font-size:26px;color:var(--sauce2)}
+  .th .tot{font-family:Anton;font-size:26px;color:var(--sauce2)}
   .rm{background:none;border:0;color:var(--dim);font-size:13px;cursor:pointer;padding:8px}
   .sub{font-size:11px;font-weight:800;letter-spacing:1.1px;color:var(--muted);margin:10px 0 0}
   .step{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line2)}
@@ -51,7 +51,7 @@
   .step span{font-weight:600}
   .step .ctl{display:flex;align-items:center;gap:6px}
   .step button{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--bg);font-size:20px;font-weight:700;cursor:pointer}
-  .step output{width:34px;text-align:center;font-family:'Archivo Black';font-size:21px;color:var(--gold)}
+  .step output{width:34px;text-align:center;font-family:Anton;font-size:21px;color:var(--gold)}
   .step output.empty{color:var(--dim)}
   .sum{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:8px}
   .sum b{color:var(--text)}
@@ -82,7 +82,7 @@
   .km{display:inline-flex;align-items:flex-end;gap:2px;line-height:1;max-width:100%}
   .km .kk{position:relative;width:16px;height:24px;flex:0 0 auto}
   .km .kk svg{position:absolute;inset:0;width:100%;height:100%}
-  .km .num{margin-left:8px;color:var(--gold);font-family:'Archivo Black';font-size:16px;align-self:center}
+  .km .num{margin-left:8px;color:var(--gold);font-family:Anton;font-size:16px;align-self:center}
   .ac{position:relative}
   .sugg{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:20;background:#2a1e18;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 14px 30px rgba(0,0,0,.5)}
   .sugg button{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line2);padding:12px 14px;cursor:pointer;color:var(--text)}
@@ -107,20 +107,37 @@
   .at .chips button small{font-size:11px;color:var(--muted)}
   .sugg .head{padding:8px 14px 6px;font-size:11px;font-weight:800;letter-spacing:1px;color:var(--gold);border-top:1px solid var(--line2);background:#21170f}
   .sugg .head:first-child{border-top:0}
-  body{background:radial-gradient(700px 320px at 0 -100px,rgba(232,64,42,.25),transparent 70%),var(--bg)}
-  header h1{color:var(--gold)}
-  .lbl{color:var(--gold)}
+  header h1{color:var(--text);font-size:26px}
+  .lbl{color:var(--muted);letter-spacing:1.5px}
+  form{counter-reset:stp}
+  .lbl.n::before{counter-increment:stp;content:counter(stp) " · ";color:var(--gold)}
   .card h3,.sub{color:var(--gold)}
-  .save{box-shadow:0 5px 0 #a82a18}
-  .save:active{transform:translateY(3px);box-shadow:0 2px 0 #a82a18}
+  .timepill{flex:0 0 auto;font-size:11px;font-weight:800;letter-spacing:1px;background:var(--green);color:var(--text);border-radius:10px;padding:7px 10px}
+  input:focus,textarea:focus{outline:2px solid var(--gold)!important}
+  .pill.on{border-color:var(--text)!important;background:var(--text)!important;color:#171717!important}
+  .tester{border:0}
+  .th .tot{color:var(--gold)!important}
+  .step button{border-radius:12px!important;width:44px!important;height:44px!important}
+  .step button:last-child{background:var(--gold)!important;color:#171717!important;border-color:var(--gold)!important}
+  .selchip{background:var(--gold)}
+  .bar{background:#111!important;border-top:1px solid #2c2c2c;padding:12px 16px calc(14px + env(safe-area-inset-bottom))!important}
+  .bar .in{display:flex;align-items:center;gap:12px}
+  .live{width:62px;height:62px;border-radius:50%;background:var(--gold);color:#171717;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:0 0 auto}
+  .live b{font-family:Anton,sans-serif;font-weight:400;font-size:24px;line-height:1}
+  .live small{font-size:8px;font-weight:800;letter-spacing:.8px}
+  .live.off{background:var(--panel);color:var(--muted)}
+  .liveTxt{flex:1;font-size:11px;color:var(--muted);line-height:1.4;min-width:0}
+  .save{width:auto!important;flex:0 0 auto;padding:0 24px!important;height:56px;border-radius:16px!important;background:var(--sauce)!important;color:var(--text)!important;font-family:Anton,sans-serif!important;font-weight:400!important;font-size:20px!important;letter-spacing:.5px;box-shadow:0 4px 0 #8f2a1c}
+  .save:active{transform:translateY(2px);box-shadow:0 2px 0 #8f2a1c}
+  .wrap{padding-bottom:140px!important}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <a class="back" href="./" aria-label="Tilbake til Kebabtesten"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></a>
+    <a class="back" href="./" onclick="if (history.length > 1 && document.referrer.indexOf(location.host) > -1) { history.back(); return false; }" aria-label="Tilbake til Kebabtesten"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></a>
     <h1 class="disp">NY TEST</h1>
-    <a href="./" aria-label="Til forsiden" style="flex:0 0 auto;display:block"><img src="logo.svg" alt="Kebabtesten" width="52" height="52" style="display:block"></a>
+    <span class="timepill">≈ 45 SEK</span>
   </header>
 
   <div class="msg info hidden" id="setup">Innleggingen er ikke koblet til regnearket ennå. Når mottakeren i regnearket er publisert, virker denne siden.</div>
@@ -128,12 +145,12 @@
   <form id="f" autocomplete="off" novalidate>
     <div style="display:flex;flex-direction:column;gap:20px">
       <div>
-        <label class="lbl" for="nyNavn">Hvem tester?</label>
+        <label class="lbl n" for="nyNavn">Hvem tester?</label>
         <div class="sel" id="sel"></div>
         <div class="ac"><input type="text" id="nyNavn" placeholder="Kallenavn på tester" maxlength="40" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="nameSugg" aria-expanded="false"><div class="sugg hidden" id="nameSugg" role="listbox"></div></div>
       </div>
       <div class="placebox">
-        <label class="lbl" for="sted">Sted</label>
+        <label class="lbl n" for="sted">Hvor spiste dere?</label>
         <div class="ac"><input type="text" id="sted" placeholder="Navnet på sjappa, eller start med adressen under" maxlength="80" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="sugg" aria-expanded="false"><div class="sugg hidden" id="sugg" role="listbox"></div></div>
         <div id="placeInfo" aria-live="polite"></div>
         <div id="addrWrap" style="margin-top:12px">
@@ -148,13 +165,13 @@
         <label><span class="lbl">Pris (kr)</span><input type="number" id="pris" inputmode="numeric" min="0" placeholder="149"></label>
       </div>
 
-      <div><span class="lbl">Hva spiste dere?</span><div class="pills" data-group="hva"></div></div>
+      <div><span class="lbl n">Hva spiste dere?</span><div class="pills" data-group="hva"></div></div>
       <div><span class="lbl">Servert som</span><div class="pills" data-group="servert"></div></div>
       <div><span class="lbl">Brødtype</span><div class="pills even" data-group="brodtype"></div></div>
       <div><span class="lbl">Sterkhet</span><div class="chili" id="chili"></div></div>
 
       <div>
-        <span class="lbl">Bilder</span>
+        <span class="lbl n">Bilder</span>
         <div class="photos">
           <label class="photo" id="p-kebab"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Kebaben<input type="file" accept="image/*" data-key="kebab"></label>
           <label class="photo" id="p-sjappa"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9l1.5-5h13L20 9"/><path d="M4 9h16v2a2.7 2.7 0 01-5.3 0 2.7 2.7 0 01-5.4 0A2.7 2.7 0 014 11z"/><path d="M5 13v7h14v-7"/><path d="M10 20v-4h4v4"/></svg>Kebabsjappa<input type="file" accept="image/*" data-key="sjappa"></label>
@@ -162,7 +179,7 @@
       </div>
 
       <div>
-        <span class="lbl">Score</span>
+        <span class="lbl n">Score</span>
         <div id="testers" style="display:flex;flex-direction:column;gap:12px"></div>
       </div>
 
@@ -170,10 +187,10 @@
     </div>
   </form>
 </div>
-<div class="bar"><div class="in"><button class="save" id="save" form="f" type="submit">Lagre test</button></div></div>
+<div class="bar"><div class="in"><div class="live off" id="live" aria-live="polite"><b>–</b><small>TOTAL</small></div><div class="liveTxt" id="liveTxt">Kebab × 80 %<br>Brød × 20 %</div><button class="save" id="save" form="f" type="submit">SEND INN</button></div></div>
 
-<script src="config.js?v=202611251609"></script>
-<script src="parse.js?v=202611251609"></script>
+<script src="config.js?v=202611260731"></script>
+<script src="parse.js?v=202611260731"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -235,7 +252,7 @@
   }
 
   // ----- kebabmåler (samme som på forsiden) -----
-  const KB_EMPTY = '<svg class="e" viewBox="0 0 16 24" aria-hidden="true"><rect x="7.2" y="0.5" width="1.6" height="23" rx=".8" fill="#3d2c22"/><path d="M2.6 4.6h10.8l-2.5 14.2H5.1z" fill="#3d2c22"/><rect x="2" y="3" width="12" height="2.4" rx="1.2" fill="#4a362b"/></svg>';
+  const KB_EMPTY = '<svg class="e" viewBox="0 0 16 24" aria-hidden="true"><rect x="7.2" y="0.5" width="1.6" height="23" rx=".8" fill="#3a3a3a"/><path d="M2.6 4.6h10.8l-2.5 14.2H5.1z" fill="#3a3a3a"/><rect x="2" y="3" width="12" height="2.4" rx="1.2" fill="#444"/></svg>';
   const KB_FULL = '<svg class="f" viewBox="0 0 16 24" aria-hidden="true"><rect x="7.2" y="0.5" width="1.6" height="23" rx=".8" fill="#fff4e0"/><path d="M2.6 4.6h10.8l-2.5 14.2H5.1z" fill="#c0612b"/><path d="M3.2 8.2h9.6M3.7 11.6h8.6M4.3 15h7.4" stroke="#7a2e12" stroke-width="1.2" stroke-linecap="round"/><path d="M11.6 5.2l-1.8 12.6" stroke="#ffb36b" stroke-width="1" stroke-linecap="round" opacity=".7"/><rect x="2" y="3" width="12" height="2.4" rx="1.2" fill="#ffc629"/></svg>';
   function kebabMeter(v, size = 'sm', showNum = true) {
     const wrap = el('span', {class: 'km ' + size, role: 'img', 'aria-label': v == null ? 'Ingen score' : `${fmt(v)} av 10 kebaber`});
@@ -261,7 +278,15 @@
     drawTesters(); drawQuick();
   }
   const avg = a => { const x = a.filter(v => v != null); return x.length ? x.reduce((s, v) => s + v, 0) / x.length : null; };
+  function updateLive() {
+    const ks = state.testere.map(t => avg(CATS.map(([k]) => t[k]))), bs = state.testere.map(t => t.brod);
+    const k = avg(ks), b = avg(bs);
+    const tot = k != null && b != null ? k * 0.8 + b * 0.2 : (k ?? b);
+    const live = $('#live'); live.classList.toggle('off', tot == null); live.querySelector('b').textContent = fmt(tot);
+    $('#liveTxt').innerHTML = `Kebab ${fmt(k)} × 80 %<br>Brød ${fmt(b)} × 20 %` + (state.testere.length > 1 ? '<br>snitt av ' + state.testere.length + ' testere' : '');
+  }
   function drawTesters() {
+    updateLive();
     if (!state.testere.length) {
       $('#testers').replaceChildren(el('div', { class: 'tester empty-t' }, el('b', { text: 'Velg hvem som tester' }), el('div', { text: 'Skriv kallenavnet ditt og de andre øverst under «Hvem tester?», så kommer scorene for kjøtt, saus, fyll, porsjon, pris og brød her.' })));
       return;
@@ -334,6 +359,8 @@
       const parsed = KTParse.parseRows(KTParse.gvizToRows(table));
       const tests = parsed.tests;
       knownPlaces = parsed.places || [];
+      const qs = new URLSearchParams(location.search).get('sted');
+      if (qs && !stedIn.value) { const k = knownPlaces.find(p => KTParse.placeKey(p.name) === KTParse.placeKey(qs)); stedIn.value = k ? k.name : qs; }
       refreshPlace();
       const names = new Map(); tests.forEach(t => t.scores.forEach(s => { if (s.name && s.name !== 'Anonym') names.set(s.name, (names.get(s.name) || 0) + 1); }));
       nameCount = names;
@@ -542,7 +569,7 @@
       setTimeout(() => { location.href = './'; }, 2500);
     } catch (err) {
       show('err', 'Kunne ikke lagre: ' + String(err.message || err).replace(/[<>&]/g, ''));
-      btn.disabled = false; btn.textContent = 'Lagre test';
+      btn.disabled = false; btn.textContent = 'SEND INN';
     }
   });
 })();

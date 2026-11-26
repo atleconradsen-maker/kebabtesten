@@ -2,371 +2,366 @@
 <html lang="no">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kebabtesten</title>
-<meta name="description" content="Kebabtesten – vi tester kebab og brød, 1 til 10.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#171717">
+<title>Kebabtesten – Norges mest uoffisielle kebabliga</title>
+<meta name="description" content="Norges mest uoffisielle kebabliga. Vi tester kebab, gir poeng og kårer den beste baben.">
+<meta property="og:title" content="Kebabtesten – Norges mest uoffisielle kebabliga">
+<meta property="og:description" content="Vi tester. Dere stemmer. Den beste baben vinner.">
+<meta property="og:image" content="logo.svg">
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#17110e;--panel:#241a15;--panel2:#1d1511;--line:#3d2c22;--line2:#2f221b;--text:#fff4e0;--muted:#c4ad94;--dim:#957d66;--sauce:#e8402a;--sauce2:#ff5a3c;--gold:#ffc629;--r:18px}
+  :root{--bg:#171717;--panel:#222;--panel2:#1d1d1d;--line:#333;--line2:#2a2a2a;--text:#F5F0E7;--muted:#b3ac9f;--dim:#8a8378;--gold:#F5B632;--chili:#D94B35;--green:#647C55;--green2:#8fb07a;--bread:#e2b77a;--r:18px;--nav:76px}
   *{box-sizing:border-box}
-  html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-  a{color:var(--sauce2)} button{font:inherit;color:inherit}
-  .disp{font-family:'Archivo Black',Impact,sans-serif;font-weight:400;letter-spacing:-.3px}
-  .wrap{max-width:1200px;margin:0 auto;padding:28px 20px 80px;display:flex;flex-direction:column;gap:40px}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:clip}
+  a{color:var(--gold);text-decoration:none} button,input,select{font:inherit;color:inherit}
+  .disp{font-family:Anton,Impact,'Arial Narrow',sans-serif;font-weight:400;letter-spacing:.2px}
   .hidden{display:none!important}
+  .wrap{max-width:720px;margin:0 auto;padding:0 16px calc(var(--nav) + 40px + env(safe-area-inset-bottom))}
+  :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 
-  header{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding-bottom:22px;border-bottom:1px solid var(--line)}
-  .brand{display:flex;align-items:center;gap:14px;color:inherit;text-decoration:none}
-  .mark{width:60px;height:60px;border-radius:50%;background:var(--sauce);display:grid;place-items:center;color:var(--bg);flex:0 0 auto}
-  .brand h1{margin:0;font-size:clamp(26px,5vw,34px);line-height:1}
-  .brand h1 span{color:var(--sauce)}
-  .brand p{margin:5px 0 0;color:var(--muted);font-size:14px}
-  .addbtn{order:3;padding:12px 20px;border-radius:999px;background:var(--sauce);color:var(--bg);font-weight:800;text-decoration:none;font-size:14px}
-  @media (max-width:560px){.addbtn{order:0;width:100%;text-align:center}}
-  nav.tabs{display:flex;gap:4px;background:var(--panel);padding:5px;border-radius:999px;border:1px solid var(--line);flex-wrap:wrap}
-  nav.tabs button{background:none;border:0;padding:10px 18px;border-radius:999px;font-weight:700;color:var(--muted);cursor:pointer;font-size:14px}
-  nav.tabs button.on{background:var(--text);color:var(--bg)}
-  @media (max-width:560px){nav.tabs{width:100%}nav.tabs button{flex:1;padding:11px 0}}
+  /* topp og bunnmeny */
+  .top{position:sticky;top:0;z-index:30;background:rgba(23,23,23,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .top .in{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:10px 16px}
+  .brand{display:flex;align-items:center;gap:10px;color:var(--text);flex:1;min-width:0}
+  .brand img{width:40px;height:40px;flex:0 0 auto}
+  .brand span{font-family:Anton,Impact,sans-serif;font-size:22px;letter-spacing:.5px}
+  .brand span b{font-weight:400;color:var(--gold)}
+  .toplink{color:var(--text);font-size:13px;font-weight:700;padding:12px 8px}
+  .meBtn{width:42px;height:42px;border-radius:50%;border:0;background:var(--gold);color:#171717;font-family:Anton,sans-serif;font-size:17px;cursor:pointer;flex:0 0 auto}
+  .meBtn.anon{background:var(--panel);color:var(--text);border:1px solid var(--line)}
+  nav.bnav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:#111;border-top:1px solid #2c2c2c;padding-bottom:env(safe-area-inset-bottom)}
+  nav.bnav .in{max-width:720px;margin:0 auto;height:var(--nav);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:start;padding-top:8px}
+  nav.bnav a{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--muted);padding:4px 0;min-height:48px}
+  nav.bnav a.on{color:var(--gold)}
+  nav.bnav a.plus{justify-self:center;margin-top:-26px;width:62px;height:62px;border-radius:50%;background:var(--gold);color:#171717;display:grid;place-items:center;box-shadow:0 0 0 5px var(--bg);padding:0}
+  nav.bnav a.plus:active{transform:scale(.95)}
 
-  .status{padding:14px 16px;border-radius:14px;background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:14px}
-  h2.sec{font-size:26px;margin:0 0 16px}
-  .kick{font-size:12px;font-weight:800;letter-spacing:1.5px;color:var(--sauce2);text-transform:uppercase}
+  .status{margin:14px 0 0;padding:14px 16px;border-radius:14px;background:var(--panel);color:var(--muted);font-size:14px}
+  .kick{font-size:11px;font-weight:800;letter-spacing:2px;color:var(--gold);text-transform:uppercase}
+  .lbl{font-size:11px;font-weight:800;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
+  .ksub{font-size:12px;color:var(--muted);margin-top:2px}
+  .h1{margin:8px 0 0;font-family:Anton,Impact,sans-serif;font-weight:400;font-size:clamp(44px,12vw,64px);line-height:.95;text-transform:uppercase}
+  .h1 em{font-style:normal;color:var(--gold)}
+  .lead{margin:12px 0 0;font-size:15px;line-height:1.45;color:#cfc8bb}
+  .sec{margin:30px 0 0}
+  .sech{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .sech h2{margin:0;font-family:Anton,sans-serif;font-weight:400;font-size:28px;line-height:1}
+  .sech a,.sech button.linkbtn{font-size:13px;font-weight:700;padding:10px 0}
+  .empty{text-align:center;color:var(--muted);padding:36px 18px;border:1px dashed var(--line);border-radius:var(--r);line-height:1.5}
+  .empty strong{display:block;color:var(--text);font-size:18px;margin-bottom:6px}
 
-  /* hero */
-  .hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:28px}
-  .photo{position:relative;border-radius:24px;min-height:400px;overflow:hidden;background:repeating-linear-gradient(135deg,#2a211c 0 14px,#251d19 14px 28px);display:flex;align-items:center;justify-content:center;color:var(--dim)}
-  .photo>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;cursor:zoom-in}
-  .photo .ph{display:flex;flex-direction:column;align-items:center;gap:8px;font-weight:600}
-  .photo .badge{position:absolute;left:18px;top:18px;background:var(--sauce);color:var(--bg);font-weight:800;font-size:12px;letter-spacing:1.2px;padding:7px 12px;border-radius:999px;z-index:2}
-  .inset{position:absolute;right:16px;bottom:16px;width:190px;height:130px;border-radius:14px;border:3px solid var(--bg);overflow:hidden;background:repeating-linear-gradient(45deg,#3a2e27 0 10px,#33281f 10px 20px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--muted);font-size:12px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.45);z-index:2}
-  .inset img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;cursor:zoom-in}
-  @media (max-width:560px){.photo{min-height:240px}.inset{width:120px;height:84px;right:12px;bottom:12px}}
-  .info{display:flex;flex-direction:column;gap:20px;justify-content:center}
-  .info h3{font-size:clamp(34px,6vw,52px);line-height:1;margin:6px 0 8px}
-  .meta{color:var(--muted);font-size:15px}
-  .scoreRow{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap}
-  .big{font-size:clamp(64px,12vw,96px);line-height:.85;color:var(--gold)}
-  .lbl{font-size:12px;font-weight:800;letter-spacing:1.4px;color:var(--muted)}
-  .split{font-size:14px;color:#d9cbb6;margin-top:6px}
-  .split b{color:var(--text)}
-  .chili{display:flex;gap:3px;margin-top:8px}
-  .cats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px}
-  @media (max-width:420px){.cats{grid-template-columns:1fr}}
-  .cat .top{display:flex;justify-content:space-between;font-size:14px}
-  .cat .top span{color:var(--muted);font-weight:600}
-  .bar{height:8px;border-radius:99px;background:var(--line2);overflow:hidden;margin-top:6px}
-  .bar i{display:block;height:100%;border-radius:99px;background:var(--sauce);transform-origin:left}
-  .bread{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px}
-  .tag{font-size:11px;font-weight:800;letter-spacing:.8px;padding:3px 8px;border-radius:99px;background:var(--line);color:#d9cbb6;text-transform:uppercase}
-  .tag.home{background:rgba(255,181,71,.16);color:var(--gold)}
-  .quote{margin:0;font-style:italic;color:#d9cbb6;font-size:15px}
-  .quote small{font-style:normal;color:var(--dim)}
-  .chips{display:flex;gap:6px;flex-wrap:wrap}
-  .chip{font-size:12px;padding:5px 10px;border-radius:99px;background:var(--line2);color:var(--muted)}
-  .chip b{color:var(--text)}
+  .cta{display:flex;align-items:center;justify-content:center;gap:10px;height:58px;border-radius:16px;background:var(--gold);color:#171717;font-family:Anton,sans-serif;font-size:22px;letter-spacing:.5px;box-shadow:0 4px 0 #b9831c}
+  .cta:active{transform:translateY(2px);box-shadow:0 2px 0 #b9831c}
+  .btn2{display:flex;align-items:center;justify-content:center;gap:8px;height:48px;border-radius:14px;border:1px solid #3a3a3a;background:transparent;color:var(--text);font-weight:700;font-size:14px;cursor:pointer}
+  .btnL{display:flex;align-items:center;justify-content:center;gap:8px;height:48px;border-radius:14px;border:0;background:var(--text);color:#171717;font-weight:800;font-size:14px;cursor:pointer}
+  .seg{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);background:var(--panel);border-radius:14px;padding:4px}
+  .seg button{height:40px;border:0;border-radius:10px;background:transparent;color:#cfc8bb;font-weight:600;font-size:13px;cursor:pointer}
+  .seg button.on{background:var(--text);color:#171717;font-weight:700}
+  .chipsRow{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
+  .chipsRow::-webkit-scrollbar{display:none}
+  .pill{flex:0 0 auto;height:40px;padding:0 16px;border-radius:20px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap}
+  .pill.on{background:var(--gold);border-color:var(--gold);color:#171717;font-weight:700}
+  .search{display:flex;align-items:center;gap:10px;height:50px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:0 14px;flex:1;min-width:0}
+  .search input{flex:1;min-width:0;background:transparent;border:0;outline:0;font-size:16px;font-weight:500}
+  .search input::placeholder{color:var(--dim)}
+  .linkbtn{background:none;border:0;padding:0;color:var(--gold);font:inherit;font-weight:700;cursor:pointer;text-decoration:underline}
 
-  /* awards */
-  .awards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px}
-  .award{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden}
+  /* forside */
+  .hero{position:relative;display:block;margin-top:18px;height:min(86vw,420px);border-radius:24px;background:var(--chili);overflow:hidden;color:var(--text)}
+  .hero .stripes{position:absolute;inset:0;background:repeating-linear-gradient(-35deg,rgba(0,0,0,.07) 0 18px,transparent 18px 36px)}
+  .hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .hero .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.25),transparent 35%,transparent 50%,rgba(0,0,0,.7))}
+  .hero .illu{position:absolute;inset:0;width:100%;height:100%}
+  .tagS{position:absolute;left:14px;top:14px;background:#171717;color:var(--gold);font-size:11px;font-weight:800;letter-spacing:1.5px;padding:8px 10px;border-radius:10px}
+  .stamp{width:88px;height:88px;border-radius:50%;background:var(--gold);color:#171717;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(8deg);flex:0 0 auto}
+  .stamp b{font-family:Anton,sans-serif;font-weight:400;font-size:36px;line-height:1}
+  .stamp small{font-size:9px;font-weight:800;letter-spacing:.8px;text-align:center;line-height:1.2}
+  .hero .stamp{position:absolute;right:14px;bottom:14px}
+  .hero .hname{position:absolute;left:16px;bottom:16px;right:116px}
+  .hero .hname b{display:block;font-family:Anton,sans-serif;font-weight:400;font-size:30px;line-height:1;text-shadow:0 2px 0 rgba(0,0,0,.3);text-transform:uppercase}
+  .hero .hname span{display:block;font-size:12px;font-weight:600;margin-top:5px}
+  .stats3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+  .stat{background:var(--panel);border-radius:14px;padding:12px 8px;text-align:center}
+  .stat b{display:block;font-family:Anton,sans-serif;font-weight:400;font-size:28px;color:var(--gold);line-height:1.1}
+  .stat span{font-size:11px;color:var(--muted);font-weight:600}
+  .hscroll{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px 6px;scroll-snap-type:x mandatory}
+  .hscroll::-webkit-scrollbar{display:none}
+  .tcard{flex:0 0 240px;scroll-snap-align:start;background:var(--panel);border-radius:18px;overflow:hidden;color:var(--text);display:flex;flex-direction:column}
+  .pic{position:relative;height:140px;background:#3a2418;overflow:hidden}
+  .pic.ph{background:repeating-linear-gradient(-35deg,#2a2a2a 0 14px,#262626 14px 28px)}
+  .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .pic .sc{position:absolute;right:10px;top:10px;background:var(--gold);color:#171717;border-radius:12px;padding:6px 9px;font-family:Anton,sans-serif;font-size:20px;line-height:1}
+  .pic .ty{position:absolute;left:10px;top:10px;background:rgba(23,23,23,.85);border-radius:8px;padding:4px 7px;font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase}
+  .pic .dt{position:absolute;left:10px;bottom:8px;font-size:10px;font-weight:700;color:rgba(245,240,231,.9);text-shadow:0 1px 3px rgba(0,0,0,.8)}
+  .pic.ph .ico{position:absolute;inset:0;display:grid;place-items:center;color:#4a4a4a}
+  .tbody{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px}
+  .tbody b{font-family:Anton,sans-serif;font-weight:400;font-size:19px;line-height:1.1}
+  .meter{display:flex;gap:3px;margin-top:8px}
+  .meter i{display:block;flex:1 1 0;max-width:14px;min-width:0;height:6px;border-radius:3px;background:#3a3a3a;overflow:hidden}
+  .meter i u{display:block;height:100%;background:var(--gold)}
+  .tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .tile{border-radius:18px;padding:16px;min-height:118px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;color:var(--text);text-align:left;border:0;cursor:pointer}
+  .tile .t1{font-size:11px;font-weight:800;letter-spacing:1.5px}
+  .tile .t2{font-family:Anton,sans-serif;font-size:20px;line-height:1.05;text-transform:uppercase}
+  .tile .t3{font-size:12px;margin-top:4px;opacity:.92}
+  .tile.c0{background:var(--gold);color:#171717}.tile.c1{background:var(--green)}.tile.c2{background:var(--chili)}.tile.c3{background:var(--panel)}
+  .tile.none{opacity:.55}
+
+  /* kåringer (gjenbrukt) */
+  .awards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px}
+  .award{background:var(--panel);border:1px solid var(--line2);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:2px;position:relative}
   .award .h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-  .award .n{font-size:32px;line-height:1;color:var(--gold)}
-  .award .who{font-size:19px;font-weight:800}
-  .award .sub{font-size:13px;color:var(--muted)}
-  .award.none .who{color:var(--muted);font-weight:600;font-size:15px}
-
-  /* board */
-  .two{display:flex;flex-wrap:wrap;gap:28px}
-  .two>.main{flex:999 1 560px;min-width:0}
-  .two>.side{flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:14px}
-  .bhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:16px}
-  .bhead h2{margin:0}
-  .pills{display:flex;gap:6px;flex-wrap:wrap}
-  .pill{font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
-  .pill.on{border-color:var(--sauce);color:var(--sauce2)}
-  .table{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);overflow-x:auto}
-  .row{display:grid;grid-template-columns:44px minmax(0,1fr) 62px 62px 62px 74px;gap:8px;padding:14px 18px;align-items:center;border-top:1px solid var(--line2);min-width:540px}
-  .row.head{font-size:11px;font-weight:800;letter-spacing:1.2px;color:var(--muted);background:#241c18;border-top:0;padding:12px 18px}
-  .row .rk{font-size:22px}
-  .row .nm b{display:block}
-  .row .nm small{font-size:12px;color:var(--muted)}
-  .row .c{text-align:center;font-weight:700}
-  .row .c small{display:block;font-size:10px;color:var(--muted);font-weight:700}
-  .row .c.sel{color:var(--sauce2)}
-  .row .t{text-align:center;font-size:20px;color:var(--gold)}
-  @media (max-width:560px){.table{overflow:visible}.row{min-width:0;grid-template-columns:30px minmax(0,1fr) 54px;padding:13px 14px}.row .c{display:none}.row.head .c{display:none}}
-
-  .jurygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:14px}
-  .judge{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center}
-  .av{width:48px;height:48px;border-radius:50%;background:var(--text);color:var(--bg);display:grid;place-items:center;font-size:17px;flex:0 0 auto}
-  .judge .jn{font-weight:800}
-  .judge .st{font-size:13px;color:var(--muted)}
-  .judge .st b{color:var(--text)}
-  .jtag{font-size:11px;font-weight:800;letter-spacing:.8px;padding:4px 9px;border-radius:99px}
-  .jtag.kind{background:#1f3322;color:#8fe08a}.jtag.hard{background:#3d1f1c;color:#ff8a7a}
-
-  /* all tests */
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:16px;align-items:start}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
-  .card .pic{height:190px;position:relative;background:repeating-linear-gradient(135deg,#2a211c 0 12px,#251d19 12px 24px);display:flex;align-items:center;justify-content:center;color:var(--dim)}
-  .card .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;cursor:zoom-in}
-  .card .pic .mini{position:absolute;right:10px;bottom:10px;width:84px;height:60px;border-radius:10px;border:2px solid var(--bg);overflow:hidden}
-  .card .pic .mini img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  .card .body{padding:16px;display:flex;flex-direction:column;gap:12px}
-  .card .ch{display:flex;justify-content:space-between;gap:10px}
-  .card h4{margin:0;font-size:18px;font-weight:800}
-  .card .sm{font-size:13px;color:var(--muted);margin-top:3px}
-  .card .tot{font-size:36px;line-height:.9;color:var(--gold);text-align:right}
-  .card .tot small{display:block;font-family:Inter;font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted);margin-top:4px}
-  .kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-  .kv div{background:var(--panel2);border-radius:10px;padding:8px 10px;font-size:12px;color:var(--muted)}
-  .kv b{display:block;font-size:18px;color:var(--text)}
-
-  .empty{text-align:center;color:var(--muted);padding:44px 18px;border:1px dashed var(--line);border-radius:var(--r);line-height:1.5}
-  .empty strong{display:block;color:var(--text);font-size:19px;margin-bottom:6px}
-  footer{font-size:12px;color:var(--dim);border-top:1px solid var(--line);padding-top:18px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-
-  .lightbox{position:fixed;inset:0;z-index:60;background:rgba(10,7,5,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
-  .lightbox img{max-width:100%;max-height:82vh;border-radius:14px}
-  .lightbox div{margin-top:12px;font-weight:800}
-
-  body.anim .award,body.anim .card,body.anim .judge,body.anim .row:not(.head){animation:rise .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*60ms)}
-  body.anim .bar i{animation:grow .9s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*60ms + 150ms)}
-  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-  @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-
-  /* ---- kebab-skilt-stil ---- */
-  html,body{overflow-x:clip}
-  body{background:radial-gradient(900px 420px at 15% -120px,rgba(232,64,42,.28),transparent 70%),radial-gradient(700px 380px at 100% 0,rgba(255,198,41,.10),transparent 70%),var(--bg)}
-  .logo{width:104px;height:104px;flex:0 0 auto;filter:drop-shadow(0 8px 22px rgba(232,64,42,.45));transition:transform .6s cubic-bezier(.2,1.4,.4,1)}
-  .brand:hover .logo{transform:rotate(-8deg) scale(1.04)}
-  .brand h1{font-size:clamp(34px,7vw,56px);line-height:.9;letter-spacing:-1px}
-  .brand h1 .w1{color:var(--gold)}
-  .brand h1 .w2{color:var(--text);margin-left:.08em}
-  .brand p{max-width:420px;line-height:1.45;margin-top:8px}
-  @media (max-width:560px){.logo{width:76px;height:76px}}
-  .addbtn{background:var(--gold)!important;color:#17110e!important;box-shadow:0 4px 0 #b8860b;transform:translateY(-2px)}
-  .addbtn:active{transform:none;box-shadow:none}
-  nav.tabs button.on{background:var(--sauce)!important;color:#fff!important}
-  .ticker{overflow:hidden;background:var(--sauce);color:#fff4e0;border-radius:10px;transform:rotate(-1deg);margin:-12px -6px 0;box-shadow:0 6px 20px rgba(232,64,42,.25)}
-  .ticker .track{display:flex;width:max-content;animation:tick 38s linear infinite}
-  .ticker span{font-family:'Archivo Black',Impact,sans-serif;font-size:15px;letter-spacing:1.5px;padding:10px 0;white-space:nowrap}
-  @keyframes tick{to{transform:translateX(-50%)}}
-  h2.sec{display:inline-block;background:var(--gold);color:#17110e;padding:8px 16px 6px;border-radius:6px;transform:rotate(-1.5deg);box-shadow:4px 4px 0 var(--sauce);font-size:22px}
-  .kick{color:var(--gold)}
-  .photo .badge{background:var(--gold)!important;color:#17110e!important}
-  .big{color:var(--gold)!important;text-shadow:0 0 30px rgba(255,198,41,.25)}
-  .bar i{background:linear-gradient(90deg,var(--sauce),#ff8a1f)!important}
-  .award{background:linear-gradient(160deg,#2c1f18,#1d1511)}
-  .award .n{position:relative;z-index:0;color:#17110e!important;font-size:24px!important;width:70px;height:70px;display:grid;place-items:center;flex:0 0 auto;margin:-6px -6px 0 0}
-  .award .n::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--gold);clip-path:polygon(50% 0,61% 12%,75% 6%,79% 21%,94% 25%,88% 39%,100% 50%,88% 61%,94% 75%,79% 79%,75% 94%,61% 88%,50% 100%,39% 88%,25% 94%,21% 79%,6% 75%,12% 61%,0 50%,12% 39%,6% 25%,21% 21%,25% 6%,39% 12%);transform:rotate(-8deg)}
-  .award:first-child .n::before{background:var(--sauce)}
-  .award:first-child .n{color:#fff4e0!important}
-  .row .rk{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:17px!important;background:var(--line2);color:var(--muted)!important}
-  .row:nth-child(2) .rk{background:var(--gold);color:#17110e!important}
-  .row:nth-child(3) .rk{background:#e9dccb;color:#17110e!important}
-  .row:nth-child(4) .rk{background:#c98652;color:#17110e!important}
-  .row .t{color:var(--gold)!important}
-  .card .tot,.award .who{color:var(--text)}
-  .card .tot{color:var(--gold)!important}
-  .av{background:var(--gold)!important;color:#17110e!important}
-  .tag.home{background:rgba(255,198,41,.16)!important;color:var(--gold)!important}
-  footer{border-top:2px dashed var(--line)}
-  button.judge{font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%}
-  button.judge:hover,button.award.folk:hover{border-color:var(--gold)}
-  .award.folk{padding:14px 16px;gap:2px}
-  .award.folk .who{font-size:17px;margin:2px 0 0}
-  .award.folk .avs{display:flex;margin:-4px -4px 0 0}
-  .award.folk .av{width:40px;height:40px;font-size:14px;border:2px solid #241a15;cursor:pointer;margin-left:-10px}
+  .award .who{font-size:17px;font-weight:800;margin-top:2px}
+  .award .sub{font-size:12px;color:var(--muted)}
+  .award.folk .avs{display:flex;margin:-2px -2px 0 0}
+  .award.folk .av{width:40px;height:40px;font-size:15px;border:2px solid var(--panel);cursor:pointer;margin-left:-10px}
   .award.folk .av:first-child{margin-left:0}
-  .cm-name.big{font-size:19px}
-  .cm-name.big:hover{color:var(--gold)}
-  .cmts{display:flex;flex-direction:column;gap:10px}
-  .cmt{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
-  .cmt .av{width:40px;height:40px;font-size:14px;border:0;cursor:pointer;flex:0 0 auto}
-  .cm-h{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+  .award.champ{border:2px solid var(--gold);background:linear-gradient(135deg,rgba(245,182,50,.16),rgba(217,75,53,.06))}
+  .award.champ.year{border-color:var(--chili)}
   .cm-name{background:none;border:0;padding:0;font:inherit;font-weight:800;color:var(--text);cursor:pointer}
   .cm-name:hover{color:var(--gold)}
-  .cm-t{margin:4px 0 0;color:#e9dccb;font-size:15px;line-height:1.45;overflow-wrap:anywhere}
-  .like{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:52px;min-height:52px;justify-content:center;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--muted);cursor:pointer;font-size:18px}
-  .like b{font-size:13px;color:var(--text)}
-  .like.on{border-color:var(--gold);background:rgba(255,198,41,.14)}
-  .like.on b{color:var(--gold)}
-  .like:active{transform:scale(.94)}
-  .infobtn{margin-top:14px;width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:14px 16px;border-radius:16px;border:1px dashed var(--gold);background:rgba(255,198,41,.06);color:var(--text);font:inherit;cursor:pointer;min-height:56px}
+  .cm-name.big{font-family:Anton,sans-serif;font-weight:400;font-size:24px;line-height:1.1}
+  .av{width:44px;height:44px;border-radius:50%;background:var(--gold);color:#171717;display:grid;place-items:center;font-family:Anton,sans-serif;font-size:17px;flex:0 0 auto;border:0;cursor:pointer}
+  .infobtn{margin-top:10px;width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:14px 16px;border-radius:16px;border:1px dashed var(--gold);background:rgba(245,182,50,.06);color:var(--text);font:inherit;cursor:pointer;min-height:56px}
   .infobtn>span:first-child{font-size:24px}
   .infobtn b{display:block}.infobtn small{color:var(--muted);font-size:12px}
   .infobtn .arr{margin-left:auto;font-size:26px;color:var(--gold)}
+
+  /* kommentarer og anmeldelser */
+  .cmts,.revs{display:flex;flex-direction:column;gap:8px}
+  .cmt,.rev{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border-radius:16px;padding:12px 14px}
+  .rev{align-items:center}
+  .cmt .av,.rev .av{width:40px;height:40px;font-size:16px}
+  .cm-h{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+  .cm-t{margin:4px 0 0;color:#e7dfd1;font-size:14px;line-height:1.45;overflow-wrap:anywhere}
+  .rnote{margin-top:4px;font-style:italic;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+  .like{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:50px;min-height:50px;justify-content:center;border-radius:14px;border:1px solid #3a3a3a;background:var(--bg);color:var(--muted);cursor:pointer;font-size:18px}
+  .like b{font-size:13px;color:var(--text)}
+  .like.on{border-color:var(--gold);background:rgba(245,182,50,.14)}
+  .like.on b{color:var(--gold)}
+  .like:active{transform:scale(.94)}
+  .chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:5px 10px;border-radius:99px;background:var(--line2);color:var(--muted)}
+  .chip b{color:var(--text)}
+  .rchip{cursor:pointer;font:inherit;font-size:12px;min-height:34px;border:1px solid transparent}
+  .rchip.on{border-color:var(--gold);background:rgba(245,182,50,.14)}
+  .rchip.on .rl{color:var(--gold)}
+
+  /* liga */
+  .podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:end;margin-top:18px}
+  .pod{background:var(--panel);border-radius:16px 16px 8px 8px;padding:14px 8px;text-align:center;display:flex;flex-direction:column;justify-content:flex-end;color:var(--text);position:relative;min-width:0}
+  .pod .pn{font-family:Anton,sans-serif;font-size:30px;line-height:1;color:#cfc8bb}
+  .pod .pname{font-family:Anton,sans-serif;font-size:15px;line-height:1.1;margin-top:8px;text-transform:uppercase;overflow-wrap:anywhere}
+  .pod .pm{font-size:11px;color:var(--muted);margin-top:4px}
+  .pod.p1{background:var(--gold);color:#171717;height:196px}
+  .pod.p1 .pn{color:#171717;font-size:42px}.pod.p1 .pm{color:#171717;font-weight:700}
+  .pod.p2{height:156px}.pod.p3{height:130px}.pod.p3 .pn{color:#c58a5a}
+  .crown{position:absolute;top:14px;left:50%;transform:translateX(-50%)}
+  .ltable{margin-top:16px;background:var(--panel);border-radius:18px;overflow:hidden}
+  .lrow{display:grid;grid-template-columns:38px minmax(0,1fr) 56px 60px;gap:8px;align-items:center;padding:12px 14px;border-top:1px solid var(--line2);color:var(--text);min-height:58px}
+  .lrow.head{border-top:0;font-size:10px;font-weight:800;letter-spacing:1.2px;color:var(--muted);min-height:0;padding:10px 14px}
+  .lpos{display:flex;flex-direction:column;line-height:1}
+  .lpos b{font-family:Anton,sans-serif;font-weight:400;font-size:20px}
+  .lpos small{font-size:10px;font-weight:800;margin-top:3px}
+  .mv-up{color:var(--green2)}.mv-down{color:#e8735f}.mv-same{color:var(--dim)}.mv-new{color:var(--gold)}
+  .lname{min-width:0}
+  .lname b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lname small{font-size:11px;color:var(--muted)}
+  .lnum{text-align:center;font-size:13px;font-weight:700;color:#cfc8bb}
+  .lsc{justify-self:end;background:var(--bg);border:1px solid #3a3a3a;border-radius:10px;padding:5px 8px;font-family:Anton,sans-serif;font-size:18px;color:var(--gold)}
+  .divider{display:flex;align-items:center;gap:10px;margin:22px 0 10px;font-size:11px;font-weight:800;letter-spacing:1.5px;color:var(--muted)}
+  .divider:before,.divider:after{content:"";height:1px;flex:1;background:var(--line)}
+  .uq{display:flex;align-items:center;gap:12px;background:var(--panel2);border:1px dashed #3a3a3a;border-radius:14px;padding:12px 14px;color:var(--text);margin-bottom:8px}
+  .uq b{font-size:14px}.uq .s{font-family:Anton,sans-serif;font-size:18px;color:var(--muted);margin-left:auto}
+  .note{margin-top:16px;background:#2a2418;border:1px solid #4a3d1d;border-radius:16px;padding:14px 16px;display:flex;gap:12px;font-size:13px;line-height:1.45;color:#e7dcc6}
+
+  /* kart */
+  body.v-kart .wrap{padding-bottom:calc(var(--nav) + env(safe-area-inset-bottom))}
+  .kartwrap{position:relative;margin:0 -16px;height:calc(100vh - 62px - var(--nav) - env(safe-area-inset-bottom));height:calc(100dvh - 62px - var(--nav) - env(safe-area-inset-bottom));min-height:420px;overflow:hidden}
+  #kmap{position:absolute;inset:0;background:#1e2120}
+  .kover{position:absolute;left:12px;right:12px;top:12px;z-index:500;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+  .kover>*{pointer-events:auto}
+  .kover .search{background:var(--bg);box-shadow:0 6px 20px rgba(0,0,0,.4)}
+  .kover .pill{background:var(--bg);box-shadow:0 4px 12px rgba(0,0,0,.35)}
+  .kover .pill.on{background:var(--text);border-color:var(--text);color:#171717}
+  .kover .chipsRow{margin:0 -12px;padding:0 12px}
+  .nearBtn{width:50px;height:50px;border-radius:14px;border:0;background:var(--gold);color:#171717;display:grid;place-items:center;box-shadow:0 6px 20px rgba(0,0,0,.4);cursor:pointer;flex:0 0 auto}
+  .ksheet{position:absolute;left:10px;right:10px;bottom:12px;z-index:500;background:var(--panel);border-radius:22px;padding:8px 16px 16px;box-shadow:0 -10px 30px rgba(0,0,0,.5)}
+  .ksheet .grab{width:40px;height:5px;border-radius:3px;background:#444;margin:0 auto 12px}
+  .ksheet .krow{display:flex;gap:14px;align-items:center}
+  .ksheet .kimg{width:72px;height:72px;border-radius:16px;background:#3a2418;flex:0 0 auto;overflow:hidden;position:relative}
+  .ksheet .kimg img{width:100%;height:100%;object-fit:cover}
+  .ksheet .kname{font-family:Anton,sans-serif;font-size:24px;line-height:1.05;margin-top:3px;text-transform:uppercase}
+  .ksheet .stamp{width:60px;height:60px;transform:none}.ksheet .stamp b{font-size:24px}
+  .kbtns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:14px}
+  .kpin{display:inline-block;border:2px solid #171717;border-radius:12px;padding:4px 8px;font:400 16px/1 Anton,Impact,sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.5);white-space:nowrap;transform:translate(-50%,-100%);position:relative;cursor:pointer}
+  .kpin:after{content:"";position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);border-left:7px solid transparent;border-right:7px solid transparent;border-top:8px solid #171717}
+  .kpin.top{font-size:22px;background:var(--gold);color:#171717}
+  .kpin.sel{outline:3px solid var(--text)}
+  .leaflet-container{font-family:Inter,system-ui,sans-serif;background:#1e2120}
+  .kt-tiles{filter:invert(1) hue-rotate(180deg) brightness(.75) contrast(.9) saturate(.4)}
+
+  /* alle tester */
+  .tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(46%,240px),1fr));gap:10px;margin-top:16px}
+  .tgrid .tcard{flex:none}
+  .tgrid .pic{height:150px}
+  .tgrid .tbody b{font-size:17px}
+  .likesm{display:flex;align-items:center;gap:5px;margin-top:4px;font-size:11px;font-weight:700;color:#cfc8bb}
+
+  /* restaurantside */
+  .shero{position:relative;margin:0 -16px;height:min(80vw,380px);background:#3a2418;overflow:hidden}
+  .shero.ph{background:var(--chili)}
+  .shero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;cursor:zoom-in}
+  .shero .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35),transparent 30%,transparent 55%,var(--bg));pointer-events:none}
+  .shero .bar{position:absolute;left:12px;right:12px;top:12px;display:flex;justify-content:space-between}
+  .rbtn{width:46px;height:46px;border-radius:50%;border:0;background:rgba(23,23,23,.82);color:var(--text);display:grid;place-items:center;cursor:pointer}
+  .sharebtn{height:46px;padding:0 16px;border-radius:23px;border:0;background:var(--gold);color:#171717;display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;cursor:pointer}
+  .ligatag{position:absolute;left:16px;bottom:10px;background:var(--gold);color:#171717;border-radius:10px;padding:6px 10px;font-size:11px;font-weight:800;letter-spacing:1.2px}
+  .ligatag.uq{background:var(--panel);color:var(--text);border:1px dashed #555}
+  .stitle{display:flex;gap:14px;align-items:flex-start;margin-top:12px}
+  .stitle h1{margin:0;font-family:Anton,sans-serif;font-weight:400;font-size:clamp(36px,10vw,52px);line-height:.95;text-transform:uppercase;overflow-wrap:anywhere}
+  .card{background:var(--panel);border-radius:20px;padding:16px}
+  .card h2{margin:0;font-family:Anton,sans-serif;font-weight:400;font-size:22px}
+  .bars{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+  .brow{display:grid;grid-template-columns:96px 1fr 36px;gap:10px;align-items:center}
+  .brow span{font-size:13px;font-weight:600;color:#cfc8bb}
+  .brow .tr{height:10px;border-radius:5px;background:#333;overflow:hidden}
+  .brow .tr i{display:block;height:100%;border-radius:5px;background:var(--gold);transform-origin:left;animation:grow .9s cubic-bezier(.2,.8,.2,1) both}
+  .brow b{font-family:Anton,sans-serif;font-weight:400;font-size:17px;text-align:right}
+  @keyframes grow{from{transform:scaleX(0)}}
+  .form{display:flex;align-items:flex-end;gap:10px;height:120px;margin-top:14px}
+  .form div{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+  .form i{display:block;width:100%;max-width:56px;border-radius:6px 6px 3px 3px;background:#4a4a4a}
+  .form div:last-child i{background:var(--gold)}
+  .form span{font-size:11px;font-weight:700;color:#cfc8bb}
+  .form small{font-size:10px;color:var(--muted);white-space:nowrap}
+  .gal{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:10px 16px 0}
+  .gal::-webkit-scrollbar{display:none}
+  .gal img{flex:0 0 130px;width:130px;height:130px;border-radius:14px;object-fit:cover;cursor:zoom-in;background:#333}
+  .visit{margin-top:14px}
+  .visit .vh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+  .storycard{margin-top:20px;background:var(--chili);border-radius:20px;padding:16px;display:flex;gap:14px;align-items:center}
+  .storycard .mini{width:78px;height:128px;border-radius:12px;background:#171717;flex:0 0 auto;padding:8px;display:flex;flex-direction:column;justify-content:space-between}
+  .heat{display:flex;gap:3px}
+
+  /* om */
+  .steps{display:flex;flex-direction:column;gap:8px}
+  .stp{display:flex;gap:14px;align-items:center;background:var(--panel);border-radius:16px;padding:14px}
+  .stp .n{width:44px;height:44px;border-radius:12px;background:var(--gold);color:#171717;display:grid;place-items:center;font-family:Anton,sans-serif;font-size:22px;flex:0 0 auto}
+  .stp b{font-size:15px}.stp div div{font-size:13px;color:var(--muted);margin-top:2px}
+  .split8020{display:flex;height:56px;border-radius:12px;overflow:hidden;margin-top:14px}
+  .split8020 div{display:flex;flex-direction:column;justify-content:center;color:#171717;padding:0 14px}
+  .split8020 b{font-family:Anton,sans-serif;font-weight:400;font-size:22px;line-height:1}
+  .split8020 small{font-size:11px;font-weight:800}
+  .checks{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.45}
+  .checks li{display:flex;gap:10px}.checks li:before{content:"✓";color:var(--green2);font-weight:800}
+  .jurygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:8px}
+  .judge{background:var(--panel);border:0;border-radius:16px;padding:12px 14px;display:flex;gap:12px;align-items:center;text-align:left;cursor:pointer;width:100%;color:var(--text)}
+  .judge .jn{font-weight:800}.judge .st{font-size:12px;color:var(--muted)}
+  footer{margin-top:30px;font-size:12px;color:var(--dim);text-align:center}
+
+  /* ark, profil, badges (gjenbrukt) */
+  .lightbox{position:fixed;inset:0;z-index:90;background:rgba(10,10,10,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
+  .lightbox img{max-width:100%;max-height:82vh;border-radius:14px}
+  .lightbox div{margin-top:12px;font-weight:800}
+  .overlay{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.75);display:flex;align-items:flex-end;justify-content:center}
+  @media (min-width:640px){.overlay{align-items:center;padding:20px}}
+  .sheet{position:relative;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;background:#1c1c1c;border:1px solid var(--line);border-radius:24px 24px 0 0;padding:22px 18px calc(28px + env(safe-area-inset-bottom));animation:rise .3s ease both}
+  @media (min-width:640px){.sheet{border-radius:24px}}
+  .sheet h3{margin:0 0 6px;font-family:Anton,sans-serif;font-weight:400;font-size:28px;color:var(--gold);line-height:1.05}
+  .sheet .x{position:absolute;top:12px;right:12px;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:22px;cursor:pointer}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .whoform{display:flex;gap:8px;margin-top:14px}
+  .whoform input{flex:1;min-width:0;height:50px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:0 14px;font-size:16px}
+  .okbtn{padding:0 18px;border-radius:12px;border:0;background:var(--gold);color:#171717;font-weight:800;cursor:pointer}
+  .sheet .pills{display:flex;gap:8px;flex-wrap:wrap}
+  .ph-top{display:flex;gap:14px;align-items:center;padding-right:44px}
+  .big-av{width:64px;height:64px;font-size:24px}
+  .badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+  .badge-t{font-size:12px;font-weight:800;padding:6px 10px;border-radius:999px;background:rgba(245,182,50,.14);color:var(--gold)}
+  .pstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:16px}
+  .pstat{background:var(--panel);border-radius:12px;padding:10px 6px;text-align:center;display:flex;flex-direction:column;gap:2px}
+  .pstat b{font-size:24px;color:var(--gold)}
+  .pstat span{font-size:11px;color:var(--muted)}
+  .plist{display:flex;flex-direction:column;gap:8px}
+  .prow{display:flex;gap:10px;align-items:center;background:var(--panel);border-radius:12px;padding:10px 12px}
   .blist{display:flex;flex-direction:column;gap:6px}
   .bdg{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.02);opacity:.45;filter:grayscale(1)}
   .bdg.on{opacity:1;filter:none}
   .bdg .bi{font-size:24px;width:32px;text-align:center;flex:0 0 auto}
   .bdg b{display:block;font-size:14px}.bdg small{color:var(--muted);font-size:12px}
-  .unlock{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:80;width:min(92vw,380px);text-align:center;padding:18px 16px;border-radius:20px;background:#1f1612;border:2px solid var(--gold);box-shadow:0 10px 40px rgba(0,0,0,.6);animation:pop .5s cubic-bezier(.2,1.4,.4,1) both;display:flex;flex-direction:column;gap:4px;align-items:center}
+  .unlock{position:fixed;left:50%;bottom:calc(var(--nav) + 18px);transform:translateX(-50%);z-index:80;width:min(92vw,380px);text-align:center;padding:18px 16px;border-radius:20px;background:#1c1c1c;border:2px solid var(--gold);box-shadow:0 10px 40px rgba(0,0,0,.6);animation:pop .5s cubic-bezier(.2,1.4,.4,1) both;display:flex;flex-direction:column;gap:4px;align-items:center}
   .unlock .u-big{font-size:40px}
+  .unlock b{font-size:26px;color:var(--gold)}
+  @keyframes pop{from{transform:translate(-50%,40px) scale(.8);opacity:0}to{transform:translate(-50%,0) scale(1);opacity:1}}
   .has-ym{position:relative;overflow:visible}
-  .ymark{position:absolute;right:-6px;bottom:-4px;min-width:24px;height:18px;padding:0 4px;border-radius:9px;background:linear-gradient(180deg,#ffe27a,#e0a100);color:#17110e;border:2px solid #17110e;font:900 10px/14px Inter,system-ui,sans-serif;letter-spacing:0;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+  .ymark{position:absolute;right:-6px;bottom:-4px;min-width:24px;height:18px;padding:0 4px;border-radius:9px;background:linear-gradient(180deg,#ffe08a,#e0a100);color:#171717;border:2px solid #171717;font:900 10px/14px Inter,system-ui,sans-serif;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.5)}
   .big-av .ymark{min-width:40px;height:26px;font-size:14px;line-height:22px;border-radius:13px;right:-8px;bottom:-2px}
   .trophies{display:flex;flex-direction:column;gap:6px;margin:0 50px 14px 0}
-  .trophy{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;border:2px solid var(--gold);background:linear-gradient(135deg,rgba(255,198,41,.2),rgba(255,106,43,.08))}
+  .trophy{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;border:2px solid var(--gold);background:linear-gradient(135deg,rgba(245,182,50,.2),rgba(217,75,53,.08))}
   .trophy b{display:block;font-size:14px}.trophy small{color:var(--muted);font-size:12px}
-  .tro-y{flex:0 0 auto;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#fff1a8,#ffc629 45%,#b8860b);color:#17110e;font-size:18px;border:2px solid #7a5a00}
+  .tro-y{flex:0 0 auto;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#fff1a8,var(--gold) 45%,#b8860b);color:#171717;font-size:18px;border:2px solid #7a5a00}
   .intro{text-align:left}
   .intro-hero{font-size:44px;text-align:center;letter-spacing:6px;margin:4px 0 6px}
-  .intro h3{text-align:center;font-size:28px;line-height:1.05}
+  .intro h3{text-align:center;font-size:30px}
   .intro>.ksub{text-align:center}
   .intro-btns{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:18px}
-  .btn-primary{width:100%;min-height:52px;border:0;border-radius:16px;background:var(--gold);color:#17110e;font:800 17px Inter,system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 0 #b8860b}
-  .btn-primary:active{transform:translateY(2px);box-shadow:0 2px 0 #b8860b}
+  .btn-primary{width:100%;min-height:54px;border:0;border-radius:16px;background:var(--gold);color:#171717;font:400 20px Anton,sans-serif;letter-spacing:.5px;cursor:pointer;box-shadow:0 4px 0 #b9831c}
+  .btn-primary:active{transform:translateY(2px);box-shadow:0 2px 0 #b9831c}
   .ann{text-align:center}
-  .ann h3{font-size:30px}
-  .ann-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 10px;margin-top:12px;border:2px solid var(--gold);border-radius:18px;background:linear-gradient(135deg,rgba(255,198,41,.16),rgba(255,106,43,.08))}
+  .ann-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 10px;margin-top:12px;border:2px solid var(--gold);border-radius:18px;background:linear-gradient(135deg,rgba(245,182,50,.16),rgba(217,75,53,.08))}
   .ann-item .u-big{font-size:48px;line-height:1}
-  .ann-name{font-size:32px;color:var(--text)}
-  .award.champ.year{border-color:#ff6a2b}
-  .award.champ{border-color:var(--gold);background:linear-gradient(135deg,rgba(255,198,41,.16),rgba(255,106,43,.08))}
-  .confetti{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:90}
-  .unlock b{font-size:24px;color:var(--gold)}
-  @keyframes pop{from{transform:translate(-50%,40px) scale(.8);opacity:0}to{transform:translate(-50%,0) scale(1);opacity:1}}
-  .revs{display:flex;flex-direction:column;gap:8px}
-  .rev{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.02)}
-  .rev .like{min-width:48px;min-height:48px}
-  .rnote{margin-top:4px;font-style:italic;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-  .rchip{cursor:pointer;font:inherit;font-size:12px;min-height:34px;border:1px solid transparent}
-  .rchip .rl{color:var(--muted)}
-  .rchip.on{border-color:var(--gold);background:rgba(255,198,41,.14)}
-  .rchip.on .rl{color:var(--gold)}
-  .linkbtn{background:none;border:0;padding:0;color:var(--gold);font:inherit;font-weight:700;cursor:pointer;text-decoration:underline}
-  .overlay{position:fixed;inset:0;z-index:70;background:rgba(10,7,5,.8);display:flex;align-items:flex-end;justify-content:center;padding:0}
-  @media (min-width:640px){.overlay{align-items:center;padding:20px}}
-  .sheet{position:relative;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;background:#1f1612;border:1px solid var(--line);border-radius:22px 22px 0 0;padding:22px 18px 28px;animation:rise .3s ease both}
-  @media (min-width:640px){.sheet{border-radius:22px}}
-  .sheet h3{margin:0 0 6px;font-size:26px;color:var(--gold)}
-  .sheet .x{position:absolute;top:12px;right:12px;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:22px;cursor:pointer}
-  .whoform{display:flex;gap:8px;margin-top:14px}
-  .whoform input{flex:1;min-width:0;height:48px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:0 14px;font:inherit;font-size:16px;color:var(--text)}
-  .okbtn{padding:0 16px;border-radius:12px;border:0;background:var(--gold);color:#17110e;font-weight:800;cursor:pointer}
-  .ph-top{display:flex;gap:14px;align-items:center;padding-right:44px}
-  .big-av{width:64px;height:64px;font-size:22px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto}
-  .badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
-  .badge-t{font-size:12px;font-weight:800;padding:6px 10px;border-radius:999px;background:rgba(255,198,41,.14);color:var(--gold)}
-  .pstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:16px}
-  .pstat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center;display:flex;flex-direction:column;gap:2px}
-  .pstat b{font-size:22px;color:var(--gold)}
-  .pstat span{font-size:11px;color:var(--muted)}
-  .plist{display:flex;flex-direction:column;gap:8px}
-  .prow{display:flex;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+  .ann-name{font-size:34px;color:var(--text)}
+  .confetti{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:95}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav) + 18px);z-index:85;background:var(--text);color:#171717;font-weight:700;font-size:14px;padding:12px 16px;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:90vw}
+
+  /* kebabmåler */
   .km{display:inline-flex;align-items:flex-end;gap:2px;line-height:1;max-width:100%}
   .km .kk{position:relative;width:14px;height:21px;flex:0 0 auto}
   .km .kk svg{position:absolute;inset:0;width:100%;height:100%}
   .km .num{margin-left:8px;color:var(--gold);font-size:16px;align-self:center;white-space:nowrap}
-  .km.lg{gap:3px}
-  .km.lg .kk{width:24px;height:36px}
-  .km.lg .num{font-size:34px;margin-left:12px;text-shadow:0 0 24px rgba(255,198,41,.25)}
   .km.xs .kk{width:11px;height:16px}
-  .award .km{margin-top:4px}
-  @media (max-width:420px){.km.lg{gap:2px}.km.lg .kk{width:21px;height:31px}.km.lg .num{font-size:28px;margin-left:8px}}
-  @media (max-width:360px){.km.lg .kk{width:18px;height:27px}}
-  .scoreCol{display:flex;flex-direction:column;gap:8px}
-  body.anim .km .kk .f{animation:kfill .55s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--k) * 70ms + 150ms)}
-  @keyframes kfill{from{clip-path:inset(100% 0 0 0)}}
-  .kwrap{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
-  .kmap{flex:999 1 520px;min-width:0;height:min(70vh,560px);border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:#1d1511;display:grid;place-items:center}
-  .kmap-ph{color:var(--muted);font-size:14px;padding:20px;text-align:center}
-  .klist{flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:10px}
-  .krow{display:flex;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
-  .krk{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;background:var(--line2);color:var(--muted);font-size:16px}
-  .krow b{display:block}
-  .ksub{font-size:12px;color:var(--muted);margin-top:2px}
-  .klinks{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
-  .klinks a{font-size:12px;font-weight:700;color:var(--gold);text-decoration:none}
-  .klinks a:hover{text-decoration:underline}
-  .kpin{width:44px;height:44px;border-radius:50%;background:var(--sauce);border:3px solid #fff4e0;box-shadow:0 4px 12px rgba(0,0,0,.5);display:grid;place-items:center;color:#fff4e0;font:400 13px 'Archivo Black',Impact,sans-serif}
-  .kpin.top{background:var(--gold);color:#17110e}
-  .leaflet-container{font-family:Inter,system-ui,sans-serif;background:#1d1511}
-  .kt-tiles{filter:invert(1) hue-rotate(180deg) brightness(.8) contrast(.9) saturate(.6)}
-  .leaflet-popup-content{font-size:13px;line-height:1.5}
-  .leaflet-popup-content b{font-size:15px}
-  .leaflet-popup-content a{color:#c2410c;font-weight:800}
-  @media (max-width:560px){nav.tabs button{padding:11px 0;font-size:13px}}
-  .addr{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:13px;font-weight:600;color:var(--gold);text-decoration:none}
-  .addr:hover{text-decoration:underline}
-  @media (prefers-reduced-motion:reduce){.ticker .track{animation:none}}
+  .km.lg .kk{width:22px;height:33px}.km.lg .num{font-size:28px}
+
+  body.anim .tcard,body.anim .lrow:not(.head),body.anim .award,body.anim .tile,body.anim .pod{animation:rise .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*50ms)}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<header class="top">
+  <div class="in">
+    <a class="brand" href="#hjem" aria-label="Kebabtesten – til forsiden"><img src="logo.svg" alt=""><span>KEBAB<b>TESTEN</b></span></a>
+    <a class="toplink" href="#om">Om</a>
+    <button type="button" class="meBtn anon" id="meBtn" aria-label="Din profil">?</button>
+  </div>
+</header>
 <div class="wrap">
-  <header>
-    <a class="brand" href="./#siste" id="home" aria-label="Kebabtesten – til forsiden">
-      <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Kebabtesten-logo">
-  <defs>
-    <linearGradient id="kt-meat" x1="0" x2="1">
-      <stop offset="0" stop-color="#7a2e12"/><stop offset=".45" stop-color="#c0612b"/><stop offset=".7" stop-color="#a94a1f"/><stop offset="1" stop-color="#6b250e"/>
-    </linearGradient>
-    <linearGradient id="kt-flame" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0" stop-color="#e8402a"/><stop offset=".55" stop-color="#ff8a1f"/><stop offset="1" stop-color="#ffc629"/>
-    </linearGradient>
-    <path id="kt-top" d="M 38 120 A 82 82 0 0 1 202 120"/>
-    <path id="kt-bot" d="M 22 120 A 98 98 0 0 0 218 120"/>
-  </defs>
-  <!-- badge -->
-  <circle cx="120" cy="120" r="116" fill="#e8402a"/>
-  <circle cx="120" cy="120" r="108" fill="none" stroke="#fff4e0" stroke-width="3"/>
-  <circle cx="120" cy="120" r="70" fill="#17110e"/>
-  <circle cx="120" cy="120" r="70" fill="none" stroke="#ffc629" stroke-width="4"/>
-  <!-- arc text -->
-  <text font-family="'Archivo Black', Impact, 'Arial Black', sans-serif" font-size="28" font-weight="900" fill="#fff4e0" letter-spacing="2.5" text-anchor="middle"><textPath href="#kt-top" startOffset="50%">KEBABTESTEN</textPath></text>
-  <text font-family="'Archivo Black', Impact, 'Arial Black', sans-serif" font-size="14" font-weight="900" fill="#ffc629" letter-spacing="3" text-anchor="middle"><textPath href="#kt-bot" startOffset="50%">★ KJØTT · SAUS · BRØD ★</textPath></text>
-  <!-- flames -->
-  <path d="M90 178 C 82 166, 88 154, 97 148 C 96 157, 101 160, 104 156 C 101 145, 108 135, 116 128 C 116 140, 124 144, 126 152 C 129 149, 130 144, 129 139 C 140 148, 146 164, 140 178 Z" fill="url(#kt-flame)"/>
-  <path d="M108 180 C 101 172, 106 162, 113 158 C 113 164, 117 166, 119 163 C 118 155, 123 150, 128 146 C 128 154, 134 158, 135 164 C 138 162, 138 159, 137 156 C 145 164, 146 174, 141 180 Z" fill="url(#kt-flame)" opacity=".85" transform="translate(4 0)"/>
-  <!-- spit -->
-  <rect x="118" y="56" width="4" height="122" rx="2" fill="#fff4e0"/>
-  <circle cx="120" cy="56" r="5" fill="#ffc629"/>
-  <!-- doner cone -->
-  <path d="M95 70 h50 l-9 84 h-32z" fill="url(#kt-meat)"/>
-  <g stroke="#4a1a08" stroke-width="2.2" stroke-linecap="round" opacity=".55">
-    <path d="M97 82 h46"/><path d="M98 96 h44"/><path d="M100 110 h40"/><path d="M101 124 h38"/><path d="M103 138 h34"/>
-  </g>
-  <path d="M137 72 l-8 80" stroke="#ffb36b" stroke-width="3" stroke-linecap="round" opacity=".55"/>
-  <rect x="93" y="66" width="54" height="7" rx="3" fill="#fff4e0"/>
-  <rect x="102" y="152" width="36" height="6" rx="3" fill="#fff4e0"/>
-  <!-- tiny stars -->
-  <circle cx="26" cy="120" r="3.5" fill="#ffc629"/><circle cx="214" cy="120" r="3.5" fill="#ffc629"/>
-</svg>
-      <div>
-        <h1 class="disp"><span class="w1">KEBAB</span><span class="w2">TESTEN</span></h1>
-        <p>Vi tester byens kebab. Kebab og brød scores fra 1 til 10, og totalen er 80 % kebab og 20 % brød.</p>
-      </div>
-    </a>
-    <a href="legg-inn.html" class="addbtn">+ Legg inn test</a>
-    <nav class="tabs" id="tabs">
-      <button data-v="siste" class="on">Siste test</button>
-      <button data-v="toppliste">Toppliste</button>
-      <button data-v="steder">Alle tester</button>
-      <button data-v="kart">Kart</button>
-    </nav>
-  </header>
-
-  <div class="ticker" aria-hidden="true"><div class="track"><span>HVITLØKSSAUS ✦ STERK SAUS ✦ BEGGE DELER ✦ EKSTRA KJØTT ✦ UTEN LØK ✦ MED ALT ✦ I PITA ✦ I RULL ✦ PÅ TALLERKEN ✦ KYLLING ELLER KJØTT? ✦ </span><span>HVITLØKSSAUS ✦ STERK SAUS ✦ BEGGE DELER ✦ EKSTRA KJØTT ✦ UTEN LØK ✦ MED ALT ✦ I PITA ✦ I RULL ✦ PÅ TALLERKEN ✦ KYLLING ELLER KJØTT? ✦ </span></div></div>
   <div class="status" id="status">Henter tester …</div>
-  <main id="view-siste"></main>
-  <main id="view-toppliste" class="hidden"></main>
-  <main id="view-steder" class="hidden"></main>
+  <main id="view-hjem"></main>
+  <main id="view-liga" class="hidden"></main>
   <main id="view-kart" class="hidden"></main>
-
-  <footer><span>Kebabscore = snitt av kjøtt, saus, fyll, porsjon og pris/verdi. Brødet scores for seg.</span><span><span id="updated"></span> · <a href="om.html" style="color:var(--gold);font-weight:700">Om siden</a></span></footer>
+  <main id="view-tester" class="hidden"></main>
+  <main id="view-sted" class="hidden"></main>
+  <main id="view-om" class="hidden"></main>
 </div>
+<nav class="bnav" aria-label="Hovedmeny"><div class="in">
+  <a href="#hjem" data-v="hjem"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Hjem</a>
+  <a href="#liga" data-v="liga"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg>Liga</a>
+  <a href="legg-inn.html" class="plus" aria-label="Registrer test"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></a>
+  <a href="#kart" data-v="kart"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Kart</a>
+  <a href="#tester" data-v="tester"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Tester</a>
+</div></nav>
 <div class="lightbox hidden" id="lb"><img alt=""><div></div></div>
 
-<script src="config.js?v=202611252157"></script>
-<script src="parse.js?v=202611252157"></script>
+<script src="config.js?v=202611260727"></script>
+<script src="parse.js?v=202611260727"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
+
   const el = (tag, a = {}, ...kids) => {
     const n = document.createElement(tag);
     for (const [k, v] of Object.entries(a)) {
@@ -388,10 +383,10 @@
     img: '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>',
     shop: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9l1.5-5h13L20 9"/><path d="M4 9h16v2a2.7 2.7 0 01-5.3 0 2.7 2.7 0 01-5.4 0A2.7 2.7 0 014 11z"/><path d="M5 13v7h14v-7"/><path d="M10 20v-4h4v4"/></svg>',
     bread: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffb547" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11a8 5 0 0116 0v7a1 1 0 01-1 1H5a1 1 0 01-1-1z"/><path d="M9 9l1 3M14 9l-1 3"/></svg>',
-    chili: on => `<svg width="20" height="20" viewBox="0 0 24 24" fill="${on ? '#ff6a2b' : '#4a3a30'}" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`
+    chili: on => `<svg width="20" height="20" viewBox="0 0 24 24" fill="${on ? '#ff6a2b' : '#3a3a3a'}" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`
   };
 
-  let tests = [], places = [], view = 'siste', sortKey = 'total', animate = true;
+  let tests = [], places = [], view = '', animate = true;
 
   // ---------- helpers ----------
   const img = (src, alt, cap) => { const i = el('img', {src, alt: alt || '', loading: 'lazy', referrerpolicy: 'no-referrer'}); i.addEventListener('error', () => i.remove()); i.addEventListener('click', e => { e.stopPropagation(); openImg(src, cap || alt); }); return i; };
@@ -417,8 +412,8 @@
   const empty = (title, text) => el('div', {class: 'empty'}, el('strong', {text: title}), text);
 
   // ---------- kebabmåler: ti spyd, delvis fylt nedenfra, tallet i parentes ----------
-  const KB_EMPTY = '<svg class="e" viewBox="0 0 16 24" aria-hidden="true"><rect x="7.2" y="0.5" width="1.6" height="23" rx=".8" fill="#3d2c22"/><path d="M2.6 4.6h10.8l-2.5 14.2H5.1z" fill="#3d2c22"/><rect x="2" y="3" width="12" height="2.4" rx="1.2" fill="#4a362b"/></svg>';
-  const KB_FULL = '<svg class="f" viewBox="0 0 16 24" aria-hidden="true"><rect x="7.2" y="0.5" width="1.6" height="23" rx=".8" fill="#fff4e0"/><path d="M2.6 4.6h10.8l-2.5 14.2H5.1z" fill="#c0612b"/><path d="M3.2 8.2h9.6M3.7 11.6h8.6M4.3 15h7.4" stroke="#7a2e12" stroke-width="1.2" stroke-linecap="round"/><path d="M11.6 5.2l-1.8 12.6" stroke="#ffb36b" stroke-width="1" stroke-linecap="round" opacity=".7"/><rect x="2" y="3" width="12" height="2.4" rx="1.2" fill="#ffc629"/></svg>';
+  const KB_EMPTY = '<svg class="e" viewBox="0 0 16 24" aria-hidden="true"><rect x="7.2" y="0.5" width="1.6" height="23" rx=".8" fill="#3a3a3a"/><path d="M2.6 4.6h10.8l-2.5 14.2H5.1z" fill="#3a3a3a"/><rect x="2" y="3" width="12" height="2.4" rx="1.2" fill="#444"/></svg>';
+  const KB_FULL = '<svg class="f" viewBox="0 0 16 24" aria-hidden="true"><rect x="7.2" y="0.5" width="1.6" height="23" rx=".8" fill="#F5F0E7"/><path d="M2.6 4.6h10.8l-2.5 14.2H5.1z" fill="#c0612b"/><path d="M3.2 8.2h9.6M3.7 11.6h8.6M4.3 15h7.4" stroke="#7a2e12" stroke-width="1.2" stroke-linecap="round"/><path d="M11.6 5.2l-1.8 12.6" stroke="#ffb36b" stroke-width="1" stroke-linecap="round" opacity=".7"/><rect x="2" y="3" width="12" height="2.4" rx="1.2" fill="#F5B632"/></svg>';
   function kebabMeter(v, size = 'sm', showNum = true) {
     const wrap = el('span', {class: 'km ' + size, role: 'img', 'aria-label': v == null ? 'Ingen score' : `${fmt(v)} av 10 kebaber`});
     for (let i = 0; i < 10; i++) {
@@ -433,133 +428,6 @@
     return wrap;
   }
 
-  // ---------- siste test ----------
-  function renderSiste() {
-    const box = $('#view-siste'); box.replaceChildren();
-    if (!tests.length) { box.append(empty('Ingen tester ennå', 'Legg inn den første kebaben i regnearket, så dukker den opp her innen et minutt.')); return; }
-    const t = latest();
-    const photo = el('div', {class: 'photo'},
-      el('div', {class: 'badge', text: 'SISTE TEST' + (t.date ? ' · ' + dateLbl(t.date).toUpperCase() : '')}),
-      t.imgKebab ? img(t.imgKebab, 'Kebaben fra ' + t.place, t.place) : el('div', {class: 'ph'}, svg(ICON.img), 'Bilde av kebaben'),
-      el('div', {class: 'inset'}, svg(ICON.shop), 'Bilde av sjappa', t.imgShop ? img(t.imgShop, t.place, t.place) : null)
-    );
-    if (!t.imgShop) photo.querySelector('.inset').classList.toggle('hidden', !t.imgKebab ? false : true);
-    const chili = el('div', {class: 'chili', 'aria-label': t.heat != null ? `Sterkhet ${t.heat} av 5` : null});
-    if (t.heat != null) for (let i = 1; i <= 5; i++) chili.append(svg(ICON.chili(i <= t.heat)));
-    const cats = el('div', {class: 'cats'}, Object.keys(CAT_LBL).map((k, i) =>
-      el('div', {class: 'cat'}, el('div', {class: 'top'}, el('span', {text: CAT_LBL[k]}), el('b', {text: fmt(t.cat[k])})), bar(t.cat[k], i))));
-    const breadN = el('div', {class: 'disp', style: 'font-size:30px;color:var(--gold)'}); countUp(breadN, t.bread);
-    const bread = el('div', {class: 'bread'}, svg(ICON.bread),
-      el('div', {style: 'flex:1;min-width:0'},
-        el('div', {style: 'display:flex;align-items:center;gap:8px;flex-wrap:wrap'}, el('b', {text: 'Brødet'}), t.breadType ? el('span', {class: 'tag' + (isHome(t.breadType) ? ' home' : ''), text: t.breadType}) : null),
-        bar(t.bread, 6)),
-      breadN);
-    const info = el('div', {class: 'info'},
-      el('div', {}, el('div', {class: 'kick', text: 'Siste test'}), el('h3', {class: 'disp', text: t.place}),
-        el('div', {class: 'meta', text: [t.what, t.served, kr(t.price)].filter(Boolean).join(' · ')}), mapLink(t)),
-      el('div', {class: 'scoreCol'}, el('div', {class: 'lbl', text: 'TOTALSCORE'}), kebabMeter(t.total, 'lg'),
-        el('div', {class: 'split'}, 'Kebab ', el('b', {text: fmt(t.kebab)}), ' (80 %) + brød ', el('b', {text: fmt(t.bread)}), ' (20 %)'), chili),
-      el('div', {class: 'lbl', text: 'KEBABEN', style: 'margin-bottom:-8px'}), cats, bread,
-      t.notes.length ? el('div', {style: 'display:flex;flex-direction:column;gap:6px'}, t.notes.slice(0, 3).map(n => el('p', {class: 'quote'}, '«' + n.text + '» ', n.name ? el('small', {text: '– ' + n.name}) : null))) : null,
-      el('div', {class: 'lbl', text: 'ANMELDELSENE', style: 'margin-bottom:-8px'}),
-      el('div', {class: 'revs'}, t.scores.map(sc => reviewRow(t, sc))),
-      (() => { const p = places.find(x => x.key === t.placeKey); return p && p.visits > 1 ? el('div', {class: 'split'}, 'Snitt for stedet etter ', el('b', {text: p.visits + ' besøk'}), ': ', el('b', {text: fmt(p.total)}), ` (${p.ratings} vurderinger)`) : null; })()
-    );
-    box.append(el('section', {class: 'hero'}, photo, info));
-    box.append(el('section', {style: 'margin-top:40px'}, el('h2', {class: 'sec disp', text: 'KÅRINGER'}), awards()));
-    box.append(el('section', {style: 'margin-top:40px'}, el('h2', {class: 'sec disp', text: 'FOLKETS KÅRINGER'}), folkAwards(),
-      el('button', {type: 'button', class: 'infobtn', onclick: openInfo}, el('span', {text: '🏅'}), el('span', {}, el('b', {text: 'Badges og kåringer'}), el('small', {text: 'Se hva som finnes og hvordan du får dem'})), el('span', {class: 'arr', text: '›'}))));
-    box.append(el('section', {style: 'margin-top:40px', id: 'kommentarer'}, el('h2', {class: 'sec disp', text: 'KOMMENTARER'}), commentsBlock()));
-  }
-
-  function awards() {
-    const best = f => { const l = places.filter(p => f(p) != null).sort((x, y) => f(y) - f(x)); return l[0]; };
-    const n = p => `${p.ratings} ${p.ratings === 1 ? 'vurdering' : 'vurderinger'}`;
-    const defs = [
-      ['KEBABKONGEN', best(p => p.total), p => p.total, p => 'Høyeste snitt · ' + n(p)],
-      ['BESTE BRØD', best(p => p.bread), p => p.bread, p => (p.breadType || 'Brødet') + ' · ' + n(p)],
-      ['BESTE SAUS', best(p => p.cat.sauce), p => p.cat.sauce, p => (p.what || 'Sausen') + ' · ' + n(p)],
-      ['MEST FOR PENGENE', best(p => p.cat.value), p => p.cat.value, p => (p.price != null ? kr(p.price) + ' · ' : '') + n(p)]
-    ];
-    return el('div', {class: 'awards'}, stagger(defs.map(([title, p, val, sub]) => {
-      const num = el('div', {class: 'n disp'}); if (p) countUp(num, val(p));
-      return el('div', {class: 'award' + (p ? '' : ' none')},
-        el('div', {class: 'h'}, el('div', {class: 'kick', text: title}), p ? num : null),
-        el('div', {class: 'who', text: p ? p.name : 'Ingen kandidat ennå'}),
-        p ? kebabMeter(val(p), 'xs', false) : null,
-        el('div', {class: 'sub', text: p ? sub(p) : 'Kåres når første test er lagt inn'}));
-    })));
-  }
-
-  function jury() {
-    const m = new Map();
-    tests.forEach(t => t.scores.forEach(s => {
-      if (!m.has(s.name)) m.set(s.name, {name: s.name, totals: [], fav: null});
-      const j = m.get(s.name);
-      if (s.total != null) { j.totals.push(s.total); if (!j.fav || s.total > j.fav.v) j.fav = {v: s.total, place: t.place}; }
-    }));
-    const js = [...m.values()].map(j => ({...j, avg: j.totals.reduce((a, b) => a + b, 0) / (j.totals.length || 1)})).filter(j => j.totals.length)
-      .sort((a, b) => b.totals.length - a.totals.length || a.name.localeCompare(b.name));
-    if (!js.length) return [empty('Ingen dommere ennå', 'Testpersonene dukker opp her.')];
-    const kind = js.length > 1 ? js.reduce((a, b) => b.avg > a.avg ? b : a) : null;
-    const hard = js.length > 1 ? js.reduce((a, b) => b.avg < a.avg ? b : a) : null;
-    return stagger(js.map(j => el('button', {type: 'button', class: 'judge', onclick: () => openProfile(j.name), 'aria-label': 'Profil for ' + j.name},
-      mk(el('div', {class: 'av disp', text: (j.name.replace(/\(.*?\)/g, '').trim().split(/\s+/).map(w => (w.match(/\p{L}/u) || [''])[0]).join('').slice(0, 2) || '?').toUpperCase()}), j.name),
-      el('div', {style: 'flex:1;min-width:0'}, el('div', {class: 'jn', text: j.name}),
-        el('div', {class: 'st'}, 'Snitt gitt ', el('b', {text: fmt(j.avg)}), ` · ${j.totals.length} ${j.totals.length === 1 ? 'test' : 'tester'}`),
-        j.fav ? el('div', {class: 'st', text: 'Favoritt: ' + j.fav.place}) : null),
-      j === kind ? el('span', {class: 'jtag kind', text: 'SNILLEST'}) : j === hard ? el('span', {class: 'jtag hard', text: 'STRENGEST'}) : null)));
-  }
-
-  // ---------- toppliste ----------
-  function renderTopp() {
-    const box = $('#view-toppliste'); box.replaceChildren();
-    if (!places.length) { box.append(empty('Topplista er tom', 'Når dere har testet noen kebaber, rangeres stedene her.')); return; }
-    const opts = [['total', 'Total'], ['kebab', 'Kebab'], ['bread', 'Brød'], ['value', 'Pris / verdi']];
-    const val = (p, k) => k === 'value' ? p.cat.value : p[k];
-    const list = places.filter(p => val(p, sortKey) != null).sort((a, b) => val(b, sortKey) - val(a, sortKey));
-    const colors = ['#ffb547', '#d8d0c4', '#d08a5a'];
-    const table = el('div', {class: 'table'},
-      el('div', {class: 'row head'}, el('span', {text: '#'}), el('span', {text: 'STED'}),
-        el('span', {class: 'c', text: 'KEBAB'}), el('span', {class: 'c', text: 'BRØD'}), el('span', {class: 'c', text: 'PRIS'}), el('span', {style: 'text-align:center', text: 'TOTAL'})),
-      stagger(list.map((p, i) => el('div', {class: 'row'},
-        el('span', {class: 'rk disp', text: String(i + 1), style: `color:${colors[i] || '#6f6054'}`}),
-        el('span', {class: 'nm'}, el('b', {text: p.name}),
-          el('small', {text: [p.what, `${p.ratings} ${p.ratings === 1 ? 'vurdering' : 'vurderinger'}`, p.visits > 1 ? `${p.visits} besøk` : dateLbl(p.date)].filter(Boolean).join(' · ')})),
-        el('span', {class: 'c' + (sortKey === 'kebab' ? ' sel' : ''), text: fmt(p.kebab)}),
-        el('span', {class: 'c' + (sortKey === 'bread' ? ' sel' : '')}, fmt(p.bread), p.breadType ? el('small', {text: isHome(p.breadType) ? 'Hjemmelaget' : p.breadType.replace(/brød$/i, '')}) : null),
-        el('span', {class: 'c' + (sortKey === 'value' ? ' sel' : ''), text: fmt(p.cat.value)}),
-        el('span', {class: 't disp', text: fmt(sortKey === 'total' ? p.total : val(p, sortKey))})))));
-    box.append(el('div', {class: 'two'},
-      el('div', {class: 'main'},
-        el('div', {class: 'bhead'}, el('h2', {class: 'sec disp', text: 'TOPPLISTE'}),
-          el('div', {class: 'pills'}, opts.map(([k, l]) => el('button', {class: 'pill' + (sortKey === k ? ' on' : ''), text: l, onclick: () => { sortKey = k; playAnim(); renderTopp(); }})))),
-        table,
-        el('p', {class: 'ksub', style: 'margin-top:10px', text: 'Hvert sted får snittet av alle vurderinger, fra alle besøk og alle testere.'})),
-      el('div', {class: 'side'}, el('h2', {class: 'sec disp', text: 'DOMMERPANELET', style: 'margin:0'}), jury())));
-  }
-
-  // ---------- alle tester ----------
-  function renderSteder() {
-    const box = $('#view-steder'); box.replaceChildren();
-    if (!tests.length) { box.append(empty('Ingen tester ennå', 'Alle kebaber dere har testet samles her.')); return; }
-    const list = [...tests].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-    box.append(el('h2', {class: 'sec disp'}, 'ALLE TESTER ', el('span', {style: 'font-family:Inter;font-size:14px;color:var(--muted);letter-spacing:0', text: `${list.length} kebaber`})));
-    box.append(el('div', {class: 'grid'}, stagger(list.map(t => {
-      return el('article', {class: 'card'},
-        el('div', {class: 'pic'}, t.imgKebab ? img(t.imgKebab, t.place, t.place) : svg(ICON.img),
-          t.imgShop ? el('div', {class: 'mini'}, img(t.imgShop, t.place, t.place)) : null),
-        el('div', {class: 'body'},
-          el('div', {class: 'ch'}, el('div', {}, el('h4', {text: t.place}), el('div', {class: 'sm', text: sub(t)}), t.price != null ? el('div', {class: 'sm', text: kr(t.price)}) : null, mapLink(t))),
-          kebabMeter(t.total, 'sm'),
-          el('div', {class: 'kv'},
-            el('div', {}, el('b', {text: fmt(t.kebab)}), 'Kebab'),
-            el('div', {}, el('b', {text: fmt(t.bread)}), t.breadType ? 'Brød · ' + t.breadType.toLowerCase() : 'Brød')),
-          el('div', {class: 'chips'}, t.scores.map(sc => reviewChip(t, sc)))));
-    }))));
-  }
-
-  function render() { renderSiste(); renderTopp(); renderSteder(); if (view === 'kart') renderKart(); }
 
   // ---------- kart og best i byen ----------
   const store = { get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
@@ -592,72 +460,73 @@
     return leafletP;
   }
   let geocoding = false;
+
+  let kFilter = 'Alle', kq = '', kSel = '', kmarkers = [];
+  const KF = [['Alle', () => true], ['Score 7+', p => (p.total ?? 0) >= 7], ['Hjemmelaget brød', p => isHome(p.breadType)], ['Under 150 kr', p => p.price != null && p.price < 150]];
   async function renderKart() {
     const box = $('#view-kart'); box.replaceChildren();
-    box.append(el('h2', {class: 'sec disp', text: 'KART & BEST I BYEN'}));
-    if (!tests.length) { box.append(empty('Ingen steder ennå', 'Når dere har testet noen kebaber, dukker de opp på kartet.')); return; }
-    let places = placesAgg();
-    // finn kommune og kartposisjon for nye adresser (én gang per adresse, lagres i nettleseren)
-    const missing = [...new Set(places.filter(p => p.address && !geo[p.address]).map(p => p.address))];
-    if (missing.length && !geocoding) {
-      geocoding = true;
-      Promise.allSettled(missing.map(geocode)).then(() => { geocoding = false; if (view === 'kart') renderKart(); });
-    }
-    const cities = new Map();
-    places.forEach(p => { const c = p.g?.kommune; if (c) cities.set(c, (cities.get(c) || 0) + 1); });
-    if (city !== 'Alle' && city !== 'Nær meg' && !cities.has(city)) city = 'Alle';
-    const chips = el('div', {class: 'pills', style: 'margin:4px 0 18px'},
-      el('button', {class: 'pill' + (city === 'Alle' ? ' on' : ''), text: `Alle (${places.length})`, onclick: () => { city = 'Alle'; renderKart(); }}),
-      [...cities.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([c, n]) => el('button', {class: 'pill' + (city === c ? ' on' : ''), text: `${c} (${n})`, onclick: () => { city = c; renderKart(); }})),
-      el('button', {class: 'pill' + (city === 'Nær meg' ? ' on' : ''), text: '📍 Nær meg', onclick: nearMe}));
-    box.append(chips);
-
-    let list = places;
-    if (city === 'Nær meg' && me) list = places.filter(p => p.g).map(p => ({...p, dist: km(me, p.g)})).sort((a, b) => a.dist - b.dist);
-    else { if (city !== 'Alle') list = places.filter(p => p.g?.kommune === city); list = [...list].sort((a, b) => (b.total ?? -1) - (a.total ?? -1)); }
-
-    const mapEl = el('div', {class: 'kmap', id: 'kmap'}, el('div', {class: 'kmap-ph', text: 'Laster kart …'}));
-    const colors = ['#ffc629', '#e9dccb', '#c98652'];
-    const rows = list.map((p, i) => el('div', {class: 'krow'},
-      el('span', {class: 'krk disp', text: String(i + 1), style: city !== 'Nær meg' && i < 3 ? `background:${colors[i]};color:#17110e` : ''}),
-      el('div', {style: 'flex:1;min-width:0'},
-        el('b', {text: p.name}),
-        el('div', {style: 'margin:5px 0 3px'}, kebabMeter(p.total, 'sm')),
-        el('div', {class: 'ksub', text: [p.dist != null ? fmtKm(p.dist) + ' unna' : null, p.g?.kommune, p.address || 'Adresse mangler', p.ratings + (p.ratings === 1 ? ' vurdering' : ' vurderinger')].filter(Boolean).join(' · ')}),
-        el('div', {class: 'klinks'},
-          el('a', {href: gmaps(p), target: '_blank', rel: 'noopener', text: 'Åpne i Google Maps'}),
-          p.g ? el('a', {href: gdir(p), target: '_blank', rel: 'noopener', text: 'Veibeskrivelse'}) : null)),
-));
-    const title = city === 'Alle' ? 'Beste steder totalt' : city === 'Nær meg' ? 'Nærmest deg' : 'Best i ' + city;
-    box.append(el('div', {class: 'kwrap'}, mapEl,
-      el('div', {class: 'klist'}, el('div', {class: 'kick', text: title.toUpperCase(), style: 'margin-bottom:10px'}),
-        rows.length ? stagger(rows) : el('div', {class: 'empty', text: city === 'Nær meg' ? 'Fant ingen steder med kartposisjon.' : 'Ingen steder her ennå.'}),
-        places.some(p => !p.address) ? el('p', {class: 'ksub', style: 'margin-top:12px', text: 'Steder uten adresse vises ikke på kartet. Legg inn adressen i regnearket eller neste gang dere tester stedet.'}) : null)));
-
-    try { await loadLeaflet(); } catch { mapEl.replaceChildren(el('div', {class: 'kmap-ph', text: 'Kartet kunne ikke lastes akkurat nå, men lista virker.'})); return; }
+    if (!tests.length) { box.append(el('div', { class: 'sec' }, empty('Ingen steder ennå', 'Når dere har testet noen kebaber, dukker de opp på kartet.'))); return; }
+    const all = placesAgg();
+    const missing = [...new Set(all.filter(p => p.address && !geo[p.address]).map(p => p.address))];
+    if (missing.length && !geocoding) { geocoding = true; Promise.allSettled(missing.map(geocode)).then(() => { geocoding = false; if (view === 'kart') renderKart(); }); }
+    const key = s => String(s || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '');
+    const f = (KF.find(x => x[0] === kFilter) || KF[0])[1];
+    let list = all.filter(p => f(p) && (!kq || key([p.name, p.address, p.g?.kommune].join(' ')).includes(key(kq))));
+    if (me) list = list.map(p => ({ ...p, dist: p.g ? km(me, p.g) : null }));
+    const ranked = [...all].filter(p => p.total != null).sort((a, b) => b.total - a.total);
+    const topKey = ranked[0] && ranked[0].key;
+    const wrap = el('div', { class: 'kartwrap' });
+    const mapEl = el('div', { id: 'kmap' });
+    const inp = el('input', { type: 'search', placeholder: 'Søk sted eller by', 'aria-label': 'Søk sted eller by', value: kq });
+    let tmr; inp.addEventListener('input', () => { clearTimeout(tmr); tmr = setTimeout(() => { kq = inp.value; renderKart().then(() => { const i = $('#view-kart input'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }); }, 350); });
+    const over = el('div', { class: 'kover' },
+      el('div', { style: 'display:flex;gap:8px' }, el('label', { class: 'search' }, svg(ICO.search), inp), el('button', { type: 'button', class: 'nearBtn', 'aria-label': 'Nær meg', onclick: nearMe }, svg(ICO.near))),
+      el('div', { class: 'chipsRow' }, KF.map(([l]) => el('button', { type: 'button', class: 'pill' + (kFilter === l ? ' on' : ''), 'aria-pressed': String(kFilter === l), text: l, onclick: () => { kFilter = l; kSel = ''; renderKart(); } }))));
+    const sheet = el('div', { class: 'ksheet' });
+    wrap.append(mapEl, over, sheet);
+    box.append(wrap);
+    const sel = list.find(p => p.key === kSel) || (me ? [...list].filter(p => p.dist != null).sort((a, b) => a.dist - b.dist)[0] : null) || [...list].sort((a, b) => (b.total ?? -1) - (a.total ?? -1))[0];
+    const drawSheet = p => {
+      sheet.replaceChildren();
+      if (!p) { sheet.append(el('div', { class: 'grab' }), el('div', { class: 'ksub', style: 'text-align:center;padding:6px 0 4px', text: 'Ingen steder passer filteret.' })); return; }
+      const rank = ranked.findIndex(x => x.key === p.key) + 1;
+      const lp = ligaPos(p.key);
+      const kimg = el('div', { class: 'kimg' }); if (p.imgKebab) { const i = el('img', { src: thumb(p.imgKebab), alt: '', referrerpolicy: 'no-referrer' }); i.addEventListener('error', () => i.remove()); kimg.append(i); }
+      sheet.append(el('div', { class: 'grab' }),
+        el('div', { class: 'krow' }, kimg,
+          el('div', { style: 'flex:1;min-width:0' },
+            el('div', { class: 'kick', style: 'font-size:10px;letter-spacing:1.5px', text: [lp.q ? `#${lp.pos} I LIGAEN` : rank ? `#${rank} TOTALT` : null, p.dist != null ? fmtKm(p.dist) + ' UNNA' : p.g?.kommune?.toUpperCase()].filter(Boolean).join(' · ') }),
+            el('div', { class: 'kname', text: p.name }),
+            el('div', { class: 'ksub', text: [p.address || 'Adresse mangler', nv(p.ratings, 'vurdering', 'vurderinger'), p.price != null ? kr(p.price) : null].filter(Boolean).join(' · ') })),
+          el('div', { class: 'stamp' }, el('b', { text: fmt(p.total) }))),
+        el('div', { class: 'kbtns' }, el('a', { class: 'btnL', href: placeUrl(p.key), text: 'Se stedet' }), el('a', { class: 'btn2', href: gdir(p), target: '_blank', rel: 'noopener' }, svg(ICO.pin), 'Vis rute')));
+    };
+    drawSheet(sel);
+    try { await loadLeaflet(); } catch { mapEl.append(el('div', { class: 'ksub', style: 'padding:120px 20px;text-align:center', text: 'Kartet kunne ikke lastes akkurat nå.' })); return; }
     if (!document.body.contains(mapEl)) return;
     if (kmap) { kmap.remove(); kmap = null; }
-    mapEl.replaceChildren();
-    kmap = L.map(mapEl, { scrollWheelZoom: false, attributionControl: true });
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>-bidragsytere', className: 'kt-tiles' }).addTo(kmap);
-    const pts = [];
-    list.filter(p => p.g).forEach((p, i) => {
-      const icon = L.divIcon({ className: '', html: `<div class="kpin${i === 0 && city !== 'Nær meg' ? ' top' : ''}">${fmt(p.total)}</div>`, iconSize: [44, 44], iconAnchor: [22, 22] });
-      const pop = document.createElement('div');
-      pop.append(el('b', {text: p.name}), el('div', {text: `${fmt(p.total)} · ${p.ratings} ${p.ratings === 1 ? 'vurdering' : 'vurderinger'}`}), el('div', {text: p.address || ''}),
-        el('a', {href: gdir(p), target: '_blank', rel: 'noopener', text: 'Veibeskrivelse →'}));
-      L.marker([p.g.lat, p.g.lon], { icon, title: p.name }).addTo(kmap).bindPopup(pop);
-      pts.push([p.g.lat, p.g.lon]);
+    kmap = L.map(mapEl, { zoomControl: false, attributionControl: true });
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>', className: 'kt-tiles' }).addTo(kmap);
+    const pts = []; kmarkers = [];
+    list.filter(p => p.g).forEach(p => {
+      const v = p.total ?? 0, top = p.key === topKey;
+      const bg = top ? '#F5B632' : v >= 7 ? '#647C55' : v >= 6 ? '#3a3a3a' : '#D94B35';
+      const html = `<div class="kpin${top ? ' top' : ''}${sel && sel.key === p.key ? ' sel' : ''}" style="background:${bg};color:${top ? '#171717' : '#F5F0E7'}">${fmt(p.total)}</div>`;
+      const m = L.marker([p.g.lat, p.g.lon], { icon: L.divIcon({ className: '', html, iconSize: [0, 0], iconAnchor: [0, 0] }), title: p.name, keyboard: true }).addTo(kmap);
+      m.on('click', () => { kSel = p.key; drawSheet(p); document.querySelectorAll('.kpin.sel').forEach(n => n.classList.remove('sel')); const n = m.getElement() && m.getElement().querySelector('.kpin'); if (n) n.classList.add('sel'); });
+      kmarkers.push(m); pts.push([p.g.lat, p.g.lon]);
     });
-    if (me) { L.circleMarker([me.lat, me.lon], { radius: 8, color: '#fff4e0', weight: 3, fillColor: '#3b82f6', fillOpacity: 1 }).addTo(kmap).bindPopup('Du er her'); pts.push([me.lat, me.lon]); }
-    if (pts.length) kmap.fitBounds(pts, { padding: [40, 40], maxZoom: 15 }); else kmap.setView([64.5, 12], 4);
+    if (me) { L.circleMarker([me.lat, me.lon], { radius: 9, color: '#F5F0E7', weight: 3, fillColor: '#4f8fe8', fillOpacity: 1 }).addTo(kmap); pts.push([me.lat, me.lon]); }
+    const pad = { paddingTopLeft: [30, 130], paddingBottomRight: [30, 220], maxZoom: 15 };
+    if (pts.length) kmap.fitBounds(pts, pad); else kmap.setView([64.5, 12], 4);
   }
   function nearMe() {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(pos => { me = { lat: pos.coords.latitude, lon: pos.coords.longitude }; city = 'Nær meg'; renderKart(); },
-      () => { alertBox('Fikk ikke tilgang til posisjonen din. Sjekk at nettleseren har lov til å bruke posisjon.'); }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
+    if (!navigator.geolocation) return toast('Telefonen din deler ikke posisjon.');
+    navigator.geolocation.getCurrentPosition(pos => { me = { lat: pos.coords.latitude, lon: pos.coords.longitude }; kSel = ''; renderKart(); },
+      () => toast('Fikk ikke tilgang til posisjonen din. Sjekk at nettleseren har lov til å bruke posisjon.'), { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
   }
-  function alertBox(msg) { const s = $('#status'); s.textContent = msg; s.classList.remove('hidden'); setTimeout(() => s.classList.add('hidden'), 6000); }
+
+  function alertBox(msg) { toast(msg); }
 
   // ---------- folk: navn, likes, kåringer og profiler ----------
   const SHEET = `https://docs.google.com/spreadsheets/d/${(window.KTConfig || {}).SHEET_ID}/gviz/tq`;
@@ -710,7 +579,7 @@
     tests.forEach(t => t.notes.forEach(n => out.push({ id: cid(`${t.date}|${t.placeKey}|${n.name}|${n.text}`), name: n.name || 'Anonym', text: n.text, place: t.place, date: t.date })));
     return out;
   }
-  function toast(msg) { const st = $('#status'); st.textContent = msg; st.classList.remove('hidden'); clearTimeout(toast.t); toast.t = setTimeout(() => st.classList.add('hidden'), 6000); }
+  function toast(msg) { document.querySelectorAll('.toast').forEach(n => n.remove()); const t = el('div', { class: 'toast', role: 'status', text: msg }); document.body.append(t); clearTimeout(toast.t); toast.t = setTimeout(() => t.remove(), 4500); }
 
   async function toggleLike(c) {
     const cfg = window.KTConfig || {};
@@ -1149,19 +1018,365 @@
     render();
   }
 
-  // ---------- navigation ----------
-  const VIEWS = ['siste', 'toppliste', 'steder', 'kart'];
-  function setView(v, anim) {
-    view = v;
-    document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
-    VIEWS.forEach(k => $('#view-' + k).classList.toggle('hidden', k !== v));
-    if (location.hash.slice(1) !== v) history.replaceState(null, '', '#' + v);
-    if (anim) { playAnim(); render(); }
+  // ================= KEBABTESTEN 2.0: visninger =================
+  const MIN_Q = 3;        // vurderinger som trengs for å komme inn på tabellen
+  const PRIOR = 2;        // hvor mange "snitt-vurderinger" ligascoren trekkes mot
+  const avgOf = a => { const v = a.filter(x => x != null); return v.length ? v.reduce((s, x) => s + x, 0) / v.length : null; };
+  const combineKB = (k, b) => k != null && b != null ? k * KTParse.W_KEBAB + b * KTParse.W_BREAD : (k != null ? k : b);
+  const nv = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+  const ICO = {
+    pin: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l18-8-8 18-2-8z"/></svg>',
+    share: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v14"/></svg>',
+    back: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>',
+    plus: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+    search: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a8378" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+    near: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>',
+    thumb: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F5B632" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v11H4V10zM7 10l4-8a3 3 0 0 1 3 3v4h5.5a2 2 0 0 1 2 2.3l-1.3 8A2 2 0 0 1 18.2 21H7"/></svg>',
+    info: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F5B632" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" style="flex:0 0 auto"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg>',
+    crown: '<svg class="crown" width="34" height="26" viewBox="0 0 34 26" aria-hidden="true"><path d="M2 8l8 7 7-13 7 13 8-7-3 16H5z" fill="#171717"/></svg>',
+    illu: '<svg class="illu" viewBox="0 0 358 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(179 160) rotate(-14)"><ellipse cx="0" cy="96" rx="130" ry="14" fill="rgba(0,0,0,.25)"/><path d="M-120 -10 Q-128 70 -40 92 L40 92 Q128 70 120 -10 Z" fill="#E9C58A"/><path d="M-120 -10 Q-128 70 -40 92 L40 92 Q128 70 120 -10" fill="none" stroke="#B9884A" stroke-width="4"/><path d="M-118 -12 Q-80 -60 -40 -40 Q-10 -78 24 -46 Q60 -76 90 -40 Q122 -46 120 -10 Z" fill="#7A3E1E"/><path d="M-96 -30 Q-70 -50 -50 -36 M-20 -52 Q4 -64 20 -48 M40 -54 Q66 -64 84 -44" stroke="#A65A2C" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M-112 -14 Q-96 -36 -78 -22 Q-62 -42 -44 -22 Q-26 -40 -6 -20 Q14 -40 32 -20 Q52 -40 70 -20 Q90 -38 112 -14" stroke="#647C55" stroke-width="12" fill="none" stroke-linecap="round"/><circle cx="-62" cy="-30" r="13" fill="#D94B35"/><circle cx="16" cy="-34" r="13" fill="#D94B35"/><circle cx="78" cy="-30" r="12" fill="#D94B35"/><path d="M-100 -6 Q-60 18 -20 -2 Q20 20 60 -2 Q90 14 108 -6" stroke="#F5F0E7" stroke-width="9" fill="none" stroke-linecap="round"/><path d="M-40 92 L-30 30 L30 30 L40 92" fill="#d9d9d9" opacity=".9"/></g></svg>'
+  };
+  const PH_ICO = '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>';
+  const cityOf = addr => (addr && geo[addr]) ? geo[addr].kommune : '';
+  const placeUrl = key => '#sted/' + encodeURIComponent(key);
+  const thumb = u => u ? u.replace(/sz=w\d+/, 'sz=w600') : u;
+  const meterBar = v => el('div', { class: 'meter', role: 'img', 'aria-label': v == null ? 'Ingen score' : `${fmt(v)} av 10` },
+    Array.from({ length: 10 }, (_, i) => el('i', {}, el('u', { style: `width:${v == null ? 0 : Math.max(0, Math.min(1, v - i)) * 100}%` }))));
+  const picBox = (src, alt, extra) => {
+    const box = el('div', { class: 'pic' + (src ? '' : ' ph') });
+    if (src) { const i = el('img', { src: thumb(src), alt: alt || '', loading: 'lazy', referrerpolicy: 'no-referrer' }); i.addEventListener('error', () => { i.remove(); box.classList.add('ph'); box.prepend(el('div', { class: 'ico' }, svg(PH_ICO))); }); box.append(i); }
+    else box.append(el('div', { class: 'ico' }, svg(PH_ICO)));
+    (extra || []).forEach(x => x && box.append(x));
+    return box;
+  };
+
+  // ----- liga: aggregering per sted fra vurderinger -----
+  function aggregate(list) {
+    const m = new Map();
+    for (const t of list) {
+      if (!m.has(t.placeKey)) m.set(t.placeKey, { key: t.placeKey, scores: [], tests: [] });
+      const o = m.get(t.placeKey); o.tests.push(t); o.scores.push(...t.scores);
+    }
+    return [...m.values()].map(o => {
+      const cat = {}; ['meat', 'sauce', 'fill', 'portion', 'value'].forEach(c => cat[c] = avgOf(o.scores.map(s => s[c])));
+      const kebab = avgOf(o.scores.map(s => s.kebab)), bread = avgOf(o.scores.map(s => s.bread));
+      return { key: o.key, n: o.scores.length, kebab, bread, cat, total: combineKB(kebab, bread) };
+    });
   }
-  $('#home').addEventListener('click', e => { e.preventDefault(); if (view !== 'siste') setView('siste', true); window.scrollTo({ top: 0, behavior: 'smooth' }); });
-  $('#tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b && b.dataset.v !== view) setView(b.dataset.v, true); });
-  window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (VIEWS.includes(h) && h !== view) setView(h, true); });
-  { const h = location.hash.slice(1); if (VIEWS.includes(h)) setView(h); }
+  const metricOf = (a, k) => k === 'value' ? a.cat.value : a[k];
+  function standings(list, k) {
+    const ag = aggregate(list).filter(a => metricOf(a, k) != null);
+    const C = avgOf(ag.flatMap(a => Array(a.n).fill(metricOf(a, k)))) ?? 0;
+    ag.forEach(a => { a.raw = metricOf(a, k); a.liga = (a.n * a.raw + PRIOR * C) / (a.n + PRIOR); a.q = a.n >= MIN_Q; });
+    ag.sort((x, y) => y.liga - x.liga || y.n - x.n);
+    return ag;
+  }
+  let ligaKey = 'total', ligaCity = 'Alle';
+  function ligaTable(k = ligaKey, city = ligaCity) {
+    const inCity = t => city === 'Alle' || cityOf(t.address) === city;
+    const now = standings(tests.filter(inCity), k);
+    const weekAgo = new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10);
+    const before = standings(tests.filter(t => inCity(t) && t.date && t.date < weekAgo), k);
+    const anyQ = now.some(a => a.q);
+    const shown = anyQ ? now.filter(a => a.q) : now;
+    const prevList = anyQ ? before.filter(a => a.q) : before;
+    shown.forEach((a, i) => {
+      a.pos = i + 1;
+      const j = prevList.findIndex(b => b.key === a.key);
+      a.move = j < 0 ? (before.length ? 'new' : 'same') : (j + 1) - a.pos;
+    });
+    return { rows: shown, out: anyQ ? now.filter(a => !a.q) : [], provisional: !anyQ };
+  }
+  function ligaPos(key) {
+    const t = ligaTable('total', 'Alle');
+    const r = t.rows.find(a => a.key === key);
+    if (r && !t.provisional) return { pos: r.pos, q: true };
+    const o = t.out.find(a => a.key === key) || (t.provisional && r);
+    return { pos: r ? r.pos : null, q: false, n: o ? o.n : 0 };
+  }
+  const placeBy = key => places.find(p => p.key === key);
+
+  // ----- forside -----
+  function testCard(t) {
+    const likesN = t.scores.reduce((s, sc) => s + likeCount(reviewId(t, sc)), 0) + t.notes.reduce((s, n) => s + likeCount(cid(`${t.date}|${t.placeKey}|${n.name}|${n.text}`)), 0);
+    return el('a', { class: 'tcard', href: placeUrl(t.placeKey), 'aria-label': `${t.place}, ${fmt(t.total)}` },
+      picBox(t.imgKebab, 'Kebaben fra ' + t.place, [
+        t.what ? el('span', { class: 'ty', text: t.what }) : null,
+        el('span', { class: 'sc', text: fmt(t.total) }),
+        el('span', { class: 'dt', text: dateLbl(t.date) })]),
+      el('div', { class: 'tbody' },
+        el('b', { text: t.place }),
+        el('div', { class: 'ksub', text: [cityOf(t.address), joinNames(t.scores.map(s => s.name).slice(0, 2)) + (t.scores.length > 2 ? ` +${t.scores.length - 2}` : '')].filter(Boolean).join(' · ') }),
+        meterBar(t.total),
+        likesN ? el('div', { class: 'likesm' }, svg(ICO.thumb), String(likesN)) : null));
+  }
+  function placeTiles() {
+    const best = f => places.filter(p => f(p) != null).sort((x, y) => f(y) - f(x) || y.ratings - x.ratings)[0];
+    const defs = [
+      ['KEBABKONGEN', best(p => p.total), p => p.total, p => 'Høyeste snitt · ' + nv(p.ratings, 'vurdering', 'vurderinger')],
+      ['MEST FOR PENGENE', best(p => p.cat.value), p => p.cat.value, p => (p.price != null ? kr(p.price) + ' · ' : '') + fmt(p.cat.value) + ' i pris/verdi'],
+      ['BESTE SAUS', best(p => p.cat.sauce), p => p.cat.sauce, p => fmt(p.cat.sauce) + ' på sausen'],
+      ['BESTE BRØD', best(p => p.bread), p => p.bread, p => (p.breadType || 'Brødet') + ' · ' + fmt(p.bread)]
+    ];
+    return el('div', { class: 'tiles' }, stagger(defs.map(([title, p, , sub], i) => p
+      ? el('a', { class: 'tile c' + i, href: placeUrl(p.key) }, el('div', { class: 't1', text: title }), el('div', {}, el('div', { class: 't2', text: p.name }), el('div', { class: 't3', text: sub(p) })))
+      : el('div', { class: 'tile none c' + i }, el('div', { class: 't1', text: title }), el('div', { class: 't3', text: 'Kåres når første test er inne' })))));
+  }
+  let showAllAwards = false;
+  function renderHjem() {
+    const box = $('#view-hjem'); box.replaceChildren();
+    const nTests = tests.length, nPlaces = places.length, nCities = new Set(places.map(p => cityOf(p.address)).filter(Boolean)).size;
+    box.append(el('section', { style: 'padding-top:10px' },
+      el('div', { class: 'kick', text: `SESONG ${new Date().getFullYear()} · ${nv(nTests, 'TEST', 'TESTER')}` }),
+      el('h1', { class: 'h1' }, 'Norges mest ', el('em', { text: 'uoffisielle' }), ' kebabliga'),
+      el('p', { class: 'lead', text: 'Vi tester. Dere stemmer. Den beste baben vinner.' })));
+    const t = latest();
+    if (t) {
+      const hero = el('a', { class: 'hero', href: placeUrl(t.placeKey), 'aria-label': `Siste test: ${t.place}, ${fmt(t.total)}` });
+      if (t.imgKebab) { const i = el('img', { src: t.imgKebab, alt: '', referrerpolicy: 'no-referrer' }); i.addEventListener('error', () => { i.remove(); hero.prepend(el('div', { class: 'stripes' }), svg(ICO.illu)); }); hero.append(i, el('div', { class: 'shade' })); }
+      else hero.append(el('div', { class: 'stripes' }), svg(ICO.illu));
+      hero.append(el('span', { class: 'tagS', text: 'SISTE TEST' + (t.date ? ' · ' + dateLbl(t.date).toUpperCase() : '') }),
+        el('div', { class: 'stamp' }, el('b', { text: fmt(t.total) }), el('small', { text: nv(t.scores.length, 'VURDERING', 'VURD.') })),
+        el('div', { class: 'hname' }, el('b', { text: t.place }), el('span', { text: [cityOf(t.address), t.what, t.served].filter(Boolean).join(' · ') })));
+      box.append(hero);
+    }
+    box.append(el('div', { style: 'margin-top:16px;display:flex;flex-direction:column;gap:8px' },
+      el('a', { class: 'cta', href: 'legg-inn.html' }, svg(ICO.plus.replace('18', '22').replace('18', '22')), 'REGISTRER TEST'),
+      el('div', { style: 'text-align:center;font-size:12px;color:var(--dim)', text: 'Tar under ett minutt' })));
+    box.append(el('div', { class: 'stats3' },
+      el('div', { class: 'stat' }, el('b', { text: String(nTests) }), el('span', { text: nTests === 1 ? 'test' : 'tester' })),
+      el('div', { class: 'stat' }, el('b', { text: String(nPlaces) }), el('span', { text: nPlaces === 1 ? 'sted' : 'steder' })),
+      el('div', { class: 'stat' }, el('b', { text: String(nCities || '–') }), el('span', { text: nCities === 1 ? 'by' : 'byer' }))));
+    if (!tests.length) { box.append(el('div', { class: 'sec' }, empty('Ingen tester ennå', 'Registrer den første kebaben, så starter ligaen.'))); return; }
+    const recent = [...tests].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 10);
+    box.append(el('section', { class: 'sec' },
+      el('div', { class: 'sech' }, el('h2', { text: 'SISTE TESTER' }), el('a', { href: '#tester', text: 'Se alle' })),
+      el('div', { class: 'hscroll' }, stagger(recent.map(testCard)))));
+    const fa = folkAwards();
+    if (fa.classList.contains('awards') && fa.children.length > 4 && !showAllAwards) { const extra = [...fa.children].slice(4); extra.forEach(n => n.classList.add('hidden'));
+      fa.append(el('button', { type: 'button', class: 'pill', style: 'justify-self:start', text: `Vis alle kåringer (${fa.children.length})`, onclick: e => { showAllAwards = true; extra.forEach(n => n.classList.remove('hidden')); e.currentTarget.remove(); } })); }
+    box.append(el('section', { class: 'sec' }, el('div', { class: 'sech' }, el('h2', { text: 'FOLKETS KÅRINGER' })), fa,
+      el('button', { type: 'button', class: 'infobtn', onclick: openInfo }, el('span', { text: '🏅' }), el('span', {}, el('b', { text: 'Badges og kåringer' }), el('small', { text: 'Se hva som finnes og hvordan du får dem' })), el('span', { class: 'arr', text: '›' }))));
+    box.append(el('section', { class: 'sec' }, el('div', { class: 'sech' }, el('h2', { text: 'MESTERNE' }), el('a', { href: '#liga', text: 'Til ligaen' })), placeTiles()));
+    box.append(el('section', { class: 'sec', id: 'kommentarer' }, el('div', { class: 'sech' }, el('h2', { text: 'KOMMENTARER' })), commentsBlock()));
+  }
+
+  // ----- liga -----
+  function renderLiga() {
+    const box = $('#view-liga'); box.replaceChildren();
+    box.append(el('section', { style: 'padding-top:10px' }, el('div', { class: 'kick', text: `SESONG ${new Date().getFullYear()} · TABELL` }), el('h1', { class: 'h1', text: 'KEBABLIGAEN' })));
+    if (!places.length) { box.append(el('div', { class: 'sec' }, empty('Tabellen er tom', 'Når dere har testet noen kebaber, rangeres stedene her.'))); return; }
+    const cities = new Map(); places.forEach(p => { const c = cityOf(p.address); if (c) cities.set(c, (cities.get(c) || 0) + 1); });
+    if (ligaCity !== 'Alle' && !cities.has(ligaCity)) ligaCity = 'Alle';
+    box.append(el('div', { class: 'chipsRow', style: 'margin-top:16px' },
+      el('button', { type: 'button', class: 'pill' + (ligaCity === 'Alle' ? ' on' : ''), text: 'Hele Norge', onclick: () => { ligaCity = 'Alle'; playAnim(); renderLiga(); } }),
+      [...cities.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([c]) => el('button', { type: 'button', class: 'pill' + (ligaCity === c ? ' on' : ''), text: c, onclick: () => { ligaCity = c; playAnim(); renderLiga(); } }))));
+    const opts = [['total', 'Total'], ['kebab', 'Kebab'], ['bread', 'Brød'], ['value', 'Pris/verdi']];
+    box.append(el('div', { class: 'seg', role: 'tablist', 'aria-label': 'Sorter etter', style: 'margin-top:12px' }, opts.map(([k, l]) =>
+      el('button', { type: 'button', role: 'tab', 'aria-selected': String(ligaKey === k), class: ligaKey === k ? 'on' : '', text: l, onclick: () => { ligaKey = k; playAnim(); renderLiga(); } }))));
+    const { rows, out, provisional } = ligaTable();
+    const nameOf = a => (placeBy(a.key) || {}).name || a.key;
+    if (rows.length >= 3) {
+      const pod = (a, cls) => el('a', { class: 'pod ' + cls, href: placeUrl(a.key) }, cls === 'p1' ? svg(ICO.crown) : null,
+        el('div', { class: 'pn', text: String(a.pos) }), el('div', { class: 'pname', text: nameOf(a) }), el('div', { class: 'pm', text: `${fmt(a.liga)} · ${nv(a.n, 'vurd.', 'vurd.')}` }));
+      box.append(el('div', { class: 'podium' }, stagger([pod(rows[1], 'p2'), pod(rows[0], 'p1'), pod(rows[2], 'p3')])));
+    }
+    if (provisional) box.append(el('div', { class: 'note' }, svg(ICO.info), el('div', {}, el('b', { text: 'Foreløpig tabell. ' }), `Ingen steder har ${MIN_Q} vurderinger ennå, så alle vises. Når et sted når ${MIN_Q}, starter den ekte tabellen.`)));
+    const mv = a => a.move === 'new' ? ['NY', 'mv-new'] : a.move > 0 ? ['▲ ' + a.move, 'mv-up'] : a.move < 0 ? ['▼ ' + (-a.move), 'mv-down'] : ['–', 'mv-same'];
+    box.append(el('div', { class: 'ltable' },
+      el('div', { class: 'lrow head' }, el('span', { text: '#' }), el('span', { text: 'STED' }), el('span', { style: 'text-align:center', text: 'VURD.' }), el('span', { style: 'text-align:right', text: 'SCORE' })),
+      stagger(rows.map(a => { const [mt, mc] = mv(a), p = placeBy(a.key) || {};
+        return el('a', { class: 'lrow', href: placeUrl(a.key) },
+          el('div', { class: 'lpos' }, el('b', { text: String(a.pos) }), el('small', { class: mc, text: mt })),
+          el('div', { class: 'lname' }, el('b', { text: nameOf(a) }), el('small', { text: [cityOf(p.address), 'snitt ' + fmt(a.raw)].filter(Boolean).join(' · ') })),
+          el('div', { class: 'lnum', text: String(a.n) }),
+          el('div', { class: 'lsc', text: fmt(a.liga) })); }))));
+    if (out.length) {
+      box.append(el('div', { class: 'divider', text: 'IKKE KVALIFISERT ENNÅ' }));
+      out.sort((a, b) => b.n - a.n || b.raw - a.raw).forEach(a => { const p = placeBy(a.key) || {};
+        box.append(el('a', { class: 'uq', href: placeUrl(a.key) }, el('div', {}, el('b', { text: nameOf(a) }), el('div', { class: 'ksub', text: [cityOf(p.address), `${a.n} av ${MIN_Q} vurderinger`].filter(Boolean).join(' · ') })), el('span', { class: 's', text: fmt(a.raw) }))); });
+    }
+    box.append(el('div', { class: 'note' }, svg(ICO.info), el('div', {}, `Et sted må ha ${MIN_Q} vurderinger for å komme inn i tabellen. Ligascoren trekkes mot snittet for alle steder til det finnes nok vurderinger, så én gladtest ikke vinner alene. `, el('a', { href: '#om', text: 'Slik regner vi' }))));
+  }
+
+  // ----- alle tester -----
+  let tq = '', tType = 'Alle', tSort = 'Nyest';
+  function renderTester(keepFocus) {
+    const box = $('#view-tester');
+    const types = ['Alle', ...[...new Set(tests.map(t => t.what).filter(Boolean))].slice(0, 5)];
+    if (!types.includes(tType)) tType = 'Alle';
+    const key = s => String(s || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '');
+    const q = key(tq.trim());
+    let list = tests.filter(t => (tType === 'Alle' || t.what === tType) && (!q || key([t.place, t.address, cityOf(t.address), t.what, ...t.scores.map(s => s.name)].join(' ')).includes(q)));
+    list = list.sort((a, b) => tSort === 'Best' ? (b.total ?? 0) - (a.total ?? 0) : (b.date || '').localeCompare(a.date || ''));
+    const grid = el('div', { class: 'tgrid' }, stagger(list.map(testCard)));
+    if (keepFocus && box.querySelector('.tgrid')) { box.querySelector('.tgrid').replaceWith(grid); const e = box.querySelector('.tempty'); if (e) e.remove(); if (!list.length) grid.after(el('div', { class: 'empty tempty', style: 'margin-top:16px', text: 'Ingen tester passer søket.' })); return; }
+    box.replaceChildren();
+    box.append(el('section', { style: 'padding-top:10px' }, el('div', { class: 'kick', text: nv(tests.length, 'TEST', 'TESTER') }), el('h1', { class: 'h1', text: 'ALLE TESTER' })));
+    if (!tests.length) { box.append(el('div', { class: 'sec' }, empty('Ingen tester ennå', 'Alle kebaber dere tester samles her.'))); return; }
+    const inp = el('input', { type: 'search', placeholder: 'Søk sted, by eller tester', 'aria-label': 'Søk sted, by eller tester', value: tq });
+    inp.addEventListener('input', () => { tq = inp.value; renderTester(true); });
+    box.append(el('div', { style: 'display:flex;gap:8px;margin-top:16px' }, el('label', { class: 'search' }, svg(ICO.search), inp),
+      el('button', { type: 'button', class: 'pill', style: 'height:50px;border-radius:14px', 'aria-label': 'Sortering: ' + tSort, text: tSort === 'Nyest' ? '↓ Nyest' : '★ Best', onclick: () => { tSort = tSort === 'Nyest' ? 'Best' : 'Nyest'; renderTester(); } })));
+    box.append(el('div', { class: 'chipsRow', style: 'margin-top:12px' }, types.map(ty => el('button', { type: 'button', class: 'pill' + (tType === ty ? ' on' : ''), 'aria-pressed': String(tType === ty), text: ty, onclick: () => { tType = ty; renderTester(); } }))));
+    box.append(grid);
+    if (!list.length) box.append(el('div', { class: 'empty tempty', style: 'margin-top:16px', text: 'Ingen tester passer søket.' }));
+  }
+
+  // ----- restaurantside -----
+  let stedKey = '';
+  async function sharePlace(p, lp) {
+    const url = location.href.split('#')[0] + placeUrl(p.key);
+    const text = `${p.name}: ${fmt(p.total)} på Kebabtesten` + (lp && lp.q ? ` (#${lp.pos} i kebabligaen)` : '');
+    try { if (navigator.share) { await navigator.share({ title: 'Kebabtesten', text, url }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+    try { await navigator.clipboard.writeText(text + ' ' + url); toast('Lenken er kopiert.'); } catch { toast(url); }
+  }
+  async function storyCanvas(p, lp) {
+    const c = document.createElement('canvas'); c.width = 1080; c.height = 1920;
+    const x = c.getContext('2d');
+    const A = 'Anton, Impact, sans-serif';
+    x.fillStyle = '#171717'; x.fillRect(0, 0, 1080, 1920);
+    x.fillStyle = '#F5F0E7'; x.font = `120px ${A}`; x.fillText('KEBAB', 60, 190); x.fillStyle = '#F5B632'; x.fillText('TESTEN', 60 + x.measureText('KEBAB').width + 16, 190);
+    x.fillStyle = '#D94B35'; x.fillRect(60, 250, 960, 640);
+    x.save(); x.beginPath(); x.rect(60, 250, 960, 640); x.clip(); x.strokeStyle = 'rgba(0,0,0,.08)'; x.lineWidth = 40;
+    for (let i = -1200; i < 1200; i += 100) { x.beginPath(); x.moveTo(i, 950); x.lineTo(i + 800, 150); x.stroke(); }
+    try { const im = new Image(); const svgTxt = ICO.illu.replace('<svg class="illu"', '<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640"'); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgTxt); await im.decode(); x.drawImage(im, 60, 250, 960, 640); } catch {}
+    x.restore();
+    const tag = lp && lp.q ? `#${lp.pos} I KEBABLIGAEN` : 'NORGES MEST UOFFISIELLE KEBABLIGA';
+    x.font = `700 34px Inter, sans-serif`; const tw = x.measureText(tag).width;
+    x.fillStyle = '#171717'; x.fillRect(96, 286, tw + 48, 66); x.fillStyle = '#F5B632'; x.fillText(tag, 120, 331);
+    x.fillStyle = '#F5B632'; x.beginPath(); x.arc(840, 770, 170, 0, Math.PI * 2); x.fill();
+    x.fillStyle = '#171717'; x.textAlign = 'center'; x.font = `170px ${A}`; x.fillText(fmt(p.total), 840, 820);
+    x.font = `800 28px Inter, sans-serif`; x.fillText(nv(p.ratings, 'VURDERING', 'VURDERINGER'), 840, 870);
+    x.textAlign = 'left'; x.fillStyle = '#F5F0E7'; x.font = `110px ${A}`;
+    const words = p.name.toUpperCase().split(/\s+/); let line = '', y = 1030; const lines = [];
+    words.forEach(w => { const tl = line ? line + ' ' + w : w; if (x.measureText(tl).width > 960 && line) { lines.push(line); line = w; } else line = tl; }); lines.push(line);
+    lines.slice(0, 2).forEach(l => { x.fillText(l, 60, y); y += 118; });
+    x.fillStyle = '#b3ac9f'; x.font = `500 40px Inter, sans-serif`; x.fillText([cityOf(p.address), p.what, p.price != null ? kr(p.price) : ''].filter(Boolean).join(' · '), 60, y - 40);
+    const parts = [['Kjøtt', p.cat.meat], ['Saus', p.cat.sauce], ['Fyll', p.cat.fill], ['Porsjon', p.cat.portion], ['Pris/verdi', p.cat.value], ['Brød', p.bread]];
+    let by = y + 30;
+    parts.forEach(([l, v]) => { x.fillStyle = '#cfc8bb'; x.font = `600 34px Inter, sans-serif`; x.fillText(l, 60, by + 26); x.fillStyle = '#333'; x.fillRect(300, by, 600, 26); x.fillStyle = l === 'Brød' ? '#e2b77a' : '#F5B632'; x.fillRect(300, by, 60 * (v || 0), 26); x.fillStyle = '#F5F0E7'; x.font = `40px ${A}`; x.fillText(fmt(v), 940, by + 30); by += 64; });
+    x.fillStyle = '#F5B632'; x.font = `700 34px Inter, sans-serif`; x.fillText((location.host + location.pathname).replace(/index\.html$/, ''), 60, 1860);
+    return c;
+  }
+  async function shareStory(p, lp) {
+    try { await document.fonts.load('100px Anton'); } catch {}
+    const c = await storyCanvas(p, lp);
+    const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+    const file = new File([blob], 'kebabtesten-' + p.key.replace(/[^a-z0-9]+/gi, '-') + '.png', { type: 'image/png' });
+    try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'Kebabtesten' }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+    const a = el('a', { href: URL.createObjectURL(blob), download: file.name }); document.body.append(a); a.click(); a.remove();
+    toast('Delekortet er lastet ned. Del det i Instagram eller Snap.');
+  }
+  function renderSted() {
+    const box = $('#view-sted'); box.replaceChildren();
+    const p = placeBy(stedKey);
+    if (!p) { box.append(el('div', { class: 'sec' }, empty('Fant ikke stedet', tests.length ? 'Det kan ha fått nytt navn.' : 'Henter tester …'))); return; }
+    const lp = ligaPos(p.key);
+    const hero = el('div', { class: 'shero' + (p.imgKebab ? '' : ' ph') });
+    if (p.imgKebab) hero.append(img(p.imgKebab, 'Kebaben fra ' + p.name, p.name)); else hero.append(el('div', { class: 'stripes', style: 'position:absolute;inset:0;background:repeating-linear-gradient(-35deg,rgba(0,0,0,.07) 0 18px,transparent 18px 36px)' }), svg(ICO.illu));
+    hero.append(el('div', { class: 'shade' }),
+      el('div', { class: 'bar' },
+        el('button', { type: 'button', class: 'rbtn', 'aria-label': 'Tilbake', onclick: () => { if (history.length > 1 && document.referrer.split('#')[0] === location.href.split('#')[0]) history.back(); else location.hash = '#liga'; } }, svg(ICO.back)),
+        el('button', { type: 'button', class: 'sharebtn', onclick: () => sharePlace(p, lp) }, svg(ICO.share), 'Del')),
+      lp.q ? el('div', { class: 'ligatag', text: `#${lp.pos} I KEBABLIGAEN` }) : el('div', { class: 'ligatag uq', text: `IKKE KVALIFISERT · ${lp.n || p.ratings} AV ${MIN_Q}` }));
+    box.append(hero);
+    const chili = el('div', { class: 'heat', 'aria-label': p.tests[0] && p.tests[0].heat != null ? `Sterkhet ${p.tests[0].heat} av 5` : null });
+    const heat = p.tests.map(t => t.heat).find(h => h != null);
+    if (heat != null) for (let i = 1; i <= 5; i++) chili.append(svg(ICON.chili(i <= heat)));
+    box.append(el('section', { class: 'stitle' },
+      el('div', { style: 'flex:1;min-width:0' }, el('h1', { text: p.name }),
+        el('div', { class: 'ksub', style: 'font-size:13px;margin-top:8px', text: [p.address, p.what, p.served, kr(p.price)].filter(Boolean).join(' · ') }),
+        heat != null ? el('div', { style: 'margin-top:8px' }, chili) : null),
+      el('div', { class: 'stamp', style: 'transform:rotate(6deg)' }, el('b', { text: fmt(p.total) }), el('small', { text: nv(p.ratings, 'VURDERING', 'VURD.') }))));
+    box.append(el('div', { style: 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:16px' },
+      el('a', { class: 'btnL', href: 'legg-inn.html?sted=' + encodeURIComponent(p.name) }, svg(ICO.plus), 'Test her'),
+      el('a', { class: 'btn2', href: gdir({ ...p, g: p.address ? geo[p.address] : null }), target: '_blank', rel: 'noopener' }, svg(ICO.pin), 'Vis rute')));
+    const parts = [['Kjøtt', p.cat.meat], ['Saus', p.cat.sauce], ['Fyll / grønt', p.cat.fill], ['Porsjon', p.cat.portion], ['Pris / verdi', p.cat.value], ['Brød', p.bread]];
+    box.append(el('section', { class: 'card sec' },
+      el('div', { class: 'sech', style: 'margin:0' }, el('h2', { text: 'SCOREKORT' }), el('span', { class: 'ksub', text: 'snitt av ' + nv(p.ratings, 'vurdering', 'vurderinger') })),
+      el('div', { class: 'bars' }, parts.map(([l, v], i) => el('div', { class: 'brow' }, el('span', { text: l }),
+        el('div', { class: 'tr' }, el('i', { style: `width:${(v || 0) * 10}%;${l === 'Brød' ? 'background:var(--bread);' : ''}animation-delay:${i * 60}ms` })), el('b', { text: fmt(v) })))),
+      el('div', { class: 'ksub', style: 'margin-top:14px;padding-top:12px;border-top:1px solid var(--line)' }, 'Total = kebab ', el('b', { style: 'color:var(--text)', text: fmt(p.kebab) }), ' × 80 % + brød ', el('b', { style: 'color:var(--text)', text: fmt(p.bread) }), ' × 20 %', p.breadType ? ` · ${p.breadType.toLowerCase()}` : '')));
+    const visits = [...p.tests].filter(t => t.total != null).sort((a, b) => (a.date || '').localeCompare(b.date || '')).slice(-8);
+    if (visits.length) {
+            const delta = visits.length > 1 ? visits[visits.length - 1].total - visits[visits.length - 2].total : null;
+      box.append(el('section', { class: 'card sec', style: 'margin-top:12px' },
+        el('div', { class: 'sech', style: 'margin:0' }, el('h2', { text: 'FORMKURVE' }), delta != null ? el('span', { class: delta >= 0 ? 'mv-up' : 'mv-down', style: 'font-size:12px;font-weight:700', text: (delta >= 0 ? '▲ ' : '▼ ') + fmt(Math.abs(delta)) + ' siden sist' }) : el('span', { class: 'ksub', text: 'Ett besøk så langt' })),
+        el('div', { class: 'form' }, visits.map(t => el('div', {}, el('span', { text: fmt(t.total) }),
+          el('i', { style: `height:${Math.round(Math.max(0, t.total) / 10 * 84)}px` }), el('small', { text: t.date ? dateLbl(t.date).replace(/ \d{4}$/, '') : '' }))))));
+    }
+    const pics = p.tests.flatMap(t => [t.imgKebab, t.imgShop]).filter(Boolean);
+    if (pics.length) box.append(el('section', { class: 'sec' }, el('div', { class: 'sech', style: 'margin:0' }, el('h2', { text: 'BILDER' })), el('div', { class: 'gal' }, pics.map(u => img(thumb(u), p.name, p.name)))));
+    box.append(el('section', { class: 'sec' }, el('div', { class: 'sech', style: 'margin:0' }, el('h2', { text: 'TESTHISTORIKK' })),
+      p.tests.map(t => { const cs = t.notes.map(n => ({ id: cid(`${t.date}|${t.placeKey}|${n.name}|${n.text}`), name: n.name || 'Anonym', text: n.text, place: '', date: '' }));
+        return el('div', { class: 'visit' }, el('div', { class: 'vh' }, el('b', { text: dateLbl(t.date) || 'Uten dato' }), el('span', { class: 'ksub', text: `${fmt(t.total)} · ${nv(t.scores.length, 'vurdering', 'vurderinger')}` })),
+          el('div', { class: 'revs' }, t.scores.map(sc => reviewRow(t, sc))),
+          cs.filter(c => !t.scores.some(sc => sc.name === c.name)).length ? el('div', { class: 'cmts', style: 'margin-top:8px' }, cs.filter(c => !t.scores.some(sc => sc.name === c.name)).map(commentRow)) : null); })));
+    box.append(el('section', { class: 'storycard' },
+      el('div', { class: 'mini', 'aria-hidden': 'true' }, el('div', { class: 'disp', style: 'font-size:8px;color:var(--gold)', text: 'KEBABTESTEN' }), el('div', { style: 'height:44px;border-radius:6px;background:#D94B35' }), el('div', {}, el('div', { class: 'disp', style: 'font-size:9px;line-height:1', text: p.name.toUpperCase().slice(0, 18) }), el('div', { class: 'disp', style: 'font-size:18px;color:var(--gold)', text: fmt(p.total) }))),
+      el('div', { style: 'flex:1' }, el('div', { class: 'disp', style: 'font-size:22px;line-height:1.05', text: 'DEL SOM STORY' }), el('div', { style: 'font-size:12px;line-height:1.4;margin-top:4px', text: 'Ferdig delekort for Instagram og Snap, med score og plassering.' }),
+        el('button', { type: 'button', style: 'margin-top:10px;height:44px;padding:0 16px;border-radius:12px;border:0;background:#171717;color:var(--text);font-weight:800;font-size:13px;cursor:pointer', text: 'Lag delekort', onclick: () => shareStory(p, lp) }))));
+  }
+
+  // ----- om -----
+  function renderOm() {
+    const box = $('#view-om'); box.replaceChildren();
+    const stp = (n, b, t) => el('div', { class: 'stp' }, el('div', { class: 'n', text: n }), el('div', {}, el('b', { text: b }), el('div', { text: t })));
+    box.append(el('section', { style: 'padding-top:14px;text-align:center' },
+      el('img', { src: 'logo.svg', alt: 'Kebabtesten-logo', style: 'width:110px;height:110px' }),
+      el('h1', { class: 'h1', style: 'font-size:clamp(36px,10vw,52px)' }, 'En liga for ', el('em', { text: 'folk' }), ' som elsker bab'),
+      el('p', { class: 'lead', text: 'Ingen restaurantkritikere. Ingen sponsorer. Bare vanlige folk som spiser kebab, gir ærlige poeng og kjemper om å finne Norges beste bab.' })));
+    box.append(el('section', { class: 'sec' }, el('div', { class: 'sech' }, el('h2', { text: 'SLIK FUNKER DET' })), el('div', { class: 'steps' },
+      stp('1', 'Spis en kebab', 'Alene eller med gjengen. Ta bilde av baben og sjappa.'),
+      stp('2', 'Gi poeng fra 1 til 10', 'Kjøtt, saus, fyll, porsjon, pris/verdi og brød. Tar under ett minutt.'),
+      stp('3', 'Klatre i ligaen', 'Stedet klatrer på tabellen. Du samler badges og titler.'))));
+    box.append(el('section', { class: 'card sec' }, el('h2', { text: 'POENGMODELLEN' }),
+      el('div', { class: 'split8020' }, el('div', { style: 'flex:80;background:var(--gold)' }, el('b', { text: '80 %' }), el('small', { text: 'KEBAB' })), el('div', { style: 'flex:20;background:var(--bread);align-items:center;padding:0' }, el('b', { text: '20 %', style: 'font-size:18px' }), el('small', { text: 'BRØD' }))),
+      el('p', { class: 'ksub', style: 'font-size:13px;line-height:1.5;margin-top:14px' }, 'Kebabscoren er snittet av kjøtt, saus, fyll, porsjon og pris/verdi. Brødet får sin egen score. Alle tester på samme sted slås sammen til ett snitt.')));
+    box.append(el('section', { class: 'card', style: 'margin-top:12px;border:2px solid var(--green)' }, el('h2', { text: 'RETTFERDIG TABELL' }),
+      el('p', { class: 'ksub', style: 'font-size:13px;line-height:1.5;margin-top:8px', text: 'Én test med 10 i alt skal ikke slå et sted med 20 gode tester. Derfor:' }),
+      el('ul', { class: 'checks' },
+        el('li', { text: `Et sted må ha minst ${MIN_Q} vurderinger for å komme inn på tabellen.` }),
+        el('li', { text: `Ligascoren trekkes mot snittet for alle steder, som om stedet hadde ${PRIOR} ekstra snittvurderinger. Jo flere vurderinger, jo mindre betyr det.` }),
+        el('li', { text: 'Antall vurderinger står alltid ved siden av scoren.' }))));
+    box.append(el('section', { class: 'sec' }, el('div', { class: 'sech' }, el('h2', { text: 'TITLER OG BADGES' })),
+      el('div', { class: 'tiles' },
+        el('div', { class: 'tile c0' }, el('div', { class: 't2', text: 'Månedens babcowboy / babgirl' }), el('div', { class: 't3', text: 'Mest bidrag i måneden' })),
+        el('div', { class: 'tile c2' }, el('div', { class: 't2', text: 'Årets vinner' }), el('div', { class: 't3', text: 'Får årsmerke, som ’26, for alltid' })),
+        el('div', { class: 'tile c1' }, el('div', { class: 't2', text: `${ALL_BADGES.length} badges` }), el('div', { class: 't3', text: 'Fra Første bit til Spydmester' })),
+        el('button', { type: 'button', class: 'tile c3', onclick: openInfo }, el('div', { class: 't2', text: 'Se alt' }), el('div', { class: 't3', text: 'Alle badges og kåringer ›' })))));
+    box.append(el('section', { class: 'sec' }, el('div', { class: 'sech' }, el('h2', { text: 'DOMMERPANELET' })), el('div', { class: 'jurygrid' }, jury())));
+    box.append(el('section', { class: 'sec' }, el('a', { class: 'cta', href: 'legg-inn.html', text: 'BLI MED I LIGAEN' })));
+    box.append(el('footer', {}, el('span', { id: 'updated' })));
+  }
+  function jury() {
+    const ps = peopleStats().filter(p => p.entries.length).sort((a, b) => b.entries.length - a.entries.length || a.name.localeCompare(b.name));
+    if (!ps.length) return [empty('Ingen testere ennå', 'Testerne dukker opp her.')];
+    return ps.map(p => el('button', { type: 'button', class: 'judge', onclick: () => openProfile(p.name), 'aria-label': 'Profil for ' + p.name },
+      mk(el('span', { class: 'av', text: initials(p.name) }), p.name),
+      el('div', { style: 'flex:1;min-width:0' }, el('div', { class: 'jn', text: p.name }),
+        el('div', { class: 'st', text: `${nv(p.entries.length, 'test', 'tester')} · snitt gitt ${fmt(p.avg)}` }))));
+  }
+
+  function render() {
+    renderMe();
+    if (view === 'hjem') renderHjem();
+    else if (view === 'liga') renderLiga();
+    else if (view === 'tester') renderTester();
+    else if (view === 'sted') renderSted();
+    else if (view === 'om') renderOm();
+    else if (view === 'kart') renderKart();
+  }
+  function renderMe() {
+    const b = $('#meBtn'), me = getMe();
+    b.replaceChildren(); b.className = 'meBtn' + (me ? '' : ' anon');
+    b.textContent = me ? initials(me) : '?';
+    b.setAttribute('aria-label', me ? 'Din profil: ' + me : 'Velg kallenavn');
+    if (me) mk(b, me);
+  }
+  $('#meBtn').addEventListener('click', async () => { const me = getMe(); if (me && peopleStats().some(p => p.name.toLowerCase() === me.toLowerCase())) openProfile(me); else { const n = await askWho(!!me); if (n) renderMe(); } });
+
 
   // ---------- data ----------
   async function fetchData() {
@@ -1201,12 +1416,34 @@
       }
       loaded = true;
       $('#status').classList.add('hidden');
-      $('#updated').textContent = 'Oppdatert ' + new Date().toLocaleTimeString('nb-NO', {hour: '2-digit', minute: '2-digit'});
+      if ($('#updated')) $('#updated').textContent = 'Oppdatert ' + new Date().toLocaleTimeString('nb-NO', {hour: '2-digit', minute: '2-digit'});
     } catch (e) {
       if (!loaded) { $('#status').textContent = 'Får ikke hentet testene akkurat nå. Prøv igjen om litt.'; render(); }
     }
   }
-  render(); load();
+
+  // ---------- navigasjon ----------
+  const VIEWS = ['hjem', 'liga', 'kart', 'tester', 'sted', 'om'];
+  const LEGACY = { siste: 'hjem', toppliste: 'liga', steder: 'tester' };
+  function parseHash() {
+    const h = decodeURIComponent(location.hash.slice(1));
+    if (h.startsWith('sted/')) return { v: 'sted', key: h.slice(5) };
+    const v = LEGACY[h] || h;
+    return { v: VIEWS.includes(v) && v !== 'sted' ? v : 'hjem' };
+  }
+  function setView(v, key, anim = true) {
+    const changed = v !== view || (v === 'sted' && key !== stedKey);
+    view = v; if (v === 'sted') stedKey = key || '';
+    document.querySelectorAll('nav.bnav a[data-v]').forEach(a => { const on = a.dataset.v === (v === 'sted' ? 'liga' : v); a.classList.toggle('on', on); on ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'); });
+    VIEWS.forEach(k => $('#view-' + k).classList.toggle('hidden', k !== v));
+    document.body.classList.toggle('v-kart', v === 'kart');
+    if (changed) { if (anim) playAnim(); render(); window.scrollTo(0, 0); }
+  }
+  window.addEventListener('hashchange', () => { const r = parseHash(); setView(r.v, r.key); });
+  document.querySelector('.brand').addEventListener('click', e => { if (view === 'hjem') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } });
+  { const r = parseHash(); view = ''; setView(r.v, r.key, false); }
+
+  load();
   setInterval(() => { if (!document.hidden) load(); }, 60000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
 })();
