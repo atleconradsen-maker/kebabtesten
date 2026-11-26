@@ -8,7 +8,13 @@
 <meta name="description" content="Norges mest uoffisielle kebabliga. Vi tester kebab, gir poeng og kårer den beste baben.">
 <meta property="og:title" content="Kebabtesten – Norges mest uoffisielle kebabliga">
 <meta property="og:description" content="Vi tester. Dere stemmer. Den beste baben vinner.">
-<meta property="og:image" content="logo.svg">
+<meta property="og:image" content="icon-512.png">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kebabtesten">
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,6 +31,7 @@
 
   /* topp og bunnmeny */
   .top{position:sticky;top:0;z-index:30;background:rgba(23,23,23,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .top{padding-top:env(safe-area-inset-top)}
   .top .in{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:10px 16px}
   .brand{display:flex;align-items:center;gap:10px;color:var(--text);flex:1;min-width:0}
   .brand img{width:40px;height:40px;flex:0 0 auto}
@@ -180,7 +187,7 @@
 
   /* kart */
   body.v-kart .wrap{padding-bottom:calc(var(--nav) + env(safe-area-inset-bottom))}
-  .kartwrap{position:relative;margin:0 -16px;height:calc(100vh - 62px - var(--nav) - env(safe-area-inset-bottom));height:calc(100dvh - 62px - var(--nav) - env(safe-area-inset-bottom));min-height:420px;overflow:hidden}
+  .kartwrap{position:relative;margin:0 -16px;height:calc(100vh - 62px - var(--nav) - env(safe-area-inset-bottom) - env(safe-area-inset-top));height:calc(100dvh - 62px - var(--nav) - env(safe-area-inset-bottom) - env(safe-area-inset-top));min-height:420px;overflow:hidden}
   #kmap{position:absolute;inset:0;background:#1e2120}
   .kover{position:absolute;left:12px;right:12px;top:12px;z-index:500;display:flex;flex-direction:column;gap:10px;pointer-events:none}
   .kover>*{pointer-events:auto}
@@ -356,8 +363,8 @@
 </div></nav>
 <div class="lightbox hidden" id="lb"><img alt=""><div></div></div>
 
-<script src="config.js?v=202611260727"></script>
-<script src="parse.js?v=202611260727"></script>
+<script src="config.js?v=202611260914"></script>
+<script src="parse.js?v=202611260914"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -1143,6 +1150,7 @@
     box.append(el('div', { style: 'margin-top:16px;display:flex;flex-direction:column;gap:8px' },
       el('a', { class: 'cta', href: 'legg-inn.html' }, svg(ICO.plus.replace('18', '22').replace('18', '22')), 'REGISTRER TEST'),
       el('div', { style: 'text-align:center;font-size:12px;color:var(--dim)', text: 'Tar under ett minutt' })));
+    const ih = installHint(); if (ih) box.append(ih);
     box.append(el('div', { class: 'stats3' },
       el('div', { class: 'stat' }, el('b', { text: String(nTests) }), el('span', { text: nTests === 1 ? 'test' : 'tester' })),
       el('div', { class: 'stat' }, el('b', { text: String(nPlaces) }), el('span', { text: nPlaces === 1 ? 'sted' : 'steder' })),
@@ -1346,9 +1354,49 @@
         el('div', { class: 'tile c2' }, el('div', { class: 't2', text: 'Årets vinner' }), el('div', { class: 't3', text: 'Får årsmerke, som ’26, for alltid' })),
         el('div', { class: 'tile c1' }, el('div', { class: 't2', text: `${ALL_BADGES.length} badges` }), el('div', { class: 't3', text: 'Fra Første bit til Spydmester' })),
         el('button', { type: 'button', class: 'tile c3', onclick: openInfo }, el('div', { class: 't2', text: 'Se alt' }), el('div', { class: 't3', text: 'Alle badges og kåringer ›' })))));
+    box.append(installCard());
     box.append(el('section', { class: 'sec' }, el('div', { class: 'sech' }, el('h2', { text: 'DOMMERPANELET' })), el('div', { class: 'jurygrid' }, jury())));
     box.append(el('section', { class: 'sec' }, el('a', { class: 'cta', href: 'legg-inn.html', text: 'BLI MED I LIGAEN' })));
     box.append(el('footer', {}, el('span', { id: 'updated' })));
+  }
+  // ----- legg siden på hjemskjermen -----
+  const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const SHARE_ICO = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v14"/></svg>';
+  function installSteps() {
+    const stp = (n, ...kids) => el('div', { class: 'stp', style: 'padding:12px 14px' }, el('div', { class: 'n', style: 'width:36px;height:36px;font-size:18px', text: n }), el('div', { style: 'font-size:14px;line-height:1.45' }, ...kids));
+    return isIOS() || !/android/i.test(navigator.userAgent)
+      ? [el('div', { class: 'lbl', style: 'margin:4px 0 8px', text: 'iPhone og iPad (Safari)' }), el('div', { class: 'steps' },
+          stp('1', 'Åpne siden i ', el('b', { text: 'Safari' }), '.'),
+          stp('2', 'Trykk på ', el('b', { text: 'Del-knappen ' }), svg(SHARE_ICO), ' nederst (eller øverst på iPad).'),
+          stp('3', 'Bla ned og velg ', el('b', { text: '«Legg til på Hjem-skjerm»' }), '.'),
+          stp('4', 'Trykk ', el('b', { text: '«Legg til»' }), '. Nå ligger Kebabtesten med logoen på hjemskjermen.')),
+        el('div', { class: 'ksub', style: 'margin-top:10px', text: 'Android (Chrome): trykk ⋮ øverst til høyre og velg «Legg til på startskjermen» eller «Installer app».' })]
+      : [el('div', { class: 'lbl', style: 'margin:4px 0 8px', text: 'Android (Chrome)' }), el('div', { class: 'steps' },
+          stp('1', 'Trykk på ', el('b', { text: '⋮' }), ' øverst til høyre.'),
+          stp('2', 'Velg ', el('b', { text: '«Installer app»' }), ' eller ', el('b', { text: '«Legg til på startskjermen»' }), '.'),
+          stp('3', 'Bekreft. Nå ligger Kebabtesten med logoen på startskjermen.')),
+        el('div', { class: 'ksub', style: 'margin-top:10px', text: 'iPhone: åpne i Safari, trykk Del og velg «Legg til på Hjem-skjerm».' })];
+  }
+  function installCard() {
+    return el('section', { class: 'sec', id: 'hjemskjerm' },
+      el('div', { class: 'sech' }, el('h2', { text: 'LEGG PÅ HJEMSKJERMEN' })),
+      el('div', { class: 'card', style: 'display:flex;gap:14px;align-items:center;margin-bottom:10px' },
+        el('img', { src: 'icon-180.png', alt: '', style: 'width:64px;height:64px;border-radius:15px;flex:0 0 auto' }),
+        el('div', { style: 'font-size:14px;line-height:1.45' }, isStandalone() ? 'Du bruker allerede Kebabtesten fra hjemskjermen. 👌' : 'Få Kebabtesten som en app på telefonen, med logoen på hjemskjermen. Åpner rett i fullskjerm uten adressefelt.')),
+      isStandalone() ? null : installSteps());
+  }
+  // Lite tips på forsiden, bare i nettleseren og til det er lukket
+  function installHint() {
+    if (isStandalone() || !/iphone|ipad|ipod|android/i.test(navigator.userAgent)) return null;
+    try { if (localStorage.getItem('kt-install-hidden')) return null; } catch { return null; }
+    const box = el('div', { class: 'card', style: 'margin-top:14px;display:flex;gap:12px;align-items:center;border:1px dashed var(--gold);background:rgba(245,182,50,.06)' },
+      el('img', { src: 'icon-180.png', alt: '', style: 'width:48px;height:48px;border-radius:12px;flex:0 0 auto' }),
+      el('div', { style: 'flex:1;min-width:0;font-size:13px;line-height:1.4' }, el('b', { text: 'Legg Kebabtesten på hjemskjermen' }), el('br'),
+        isIOS() ? ['Trykk ', svg(SHARE_ICO), ' i Safari og velg «Legg til på Hjem-skjerm». '] : 'Trykk ⋮ og velg «Installer app». ',
+        el('a', { href: '#om', onclick: () => setTimeout(() => { const h = $('#hjemskjerm'); if (h) h.scrollIntoView({ behavior: 'smooth' }); }, 60), text: 'Vis meg hvordan' })),
+      el('button', { type: 'button', 'aria-label': 'Skjul tipset', style: 'width:44px;height:44px;border-radius:50%;border:0;background:transparent;color:var(--muted);font-size:22px;cursor:pointer;flex:0 0 auto', text: '×', onclick: () => { try { localStorage.setItem('kt-install-hidden', '1'); } catch {} box.remove(); } }));
+    return box;
   }
   function jury() {
     const ps = peopleStats().filter(p => p.entries.length).sort((a, b) => b.entries.length - a.entries.length || a.name.localeCompare(b.name));
