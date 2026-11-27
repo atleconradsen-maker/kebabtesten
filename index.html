@@ -363,9 +363,9 @@
 </div></nav>
 <div class="lightbox hidden" id="lb"><img alt=""><div></div></div>
 
-<script src="config.js?v=202611271416"></script>
-<script src="qr.js?v=202611271416"></script>
-<script src="parse.js?v=202611271416"></script>
+<script src="config.js?v=202611271427"></script>
+<script src="qr.js?v=202611271427"></script>
+<script src="parse.js?v=202611271427"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -782,6 +782,37 @@
     dlg.addEventListener('click', e => { if (e.target === dlg) close(); });
     document.body.append(dlg);
     dlg.querySelector('.btn-primary').focus();
+    return true;
+  }
+
+  // «Nytt i Kebabtesten»: vises én gang per nyhet
+  const NEWS_KEY = 'kt-nytt-2026-11-27';
+  function seenNews() { try { localStorage.setItem(NEWS_KEY, '1'); } catch {} }
+  function showNews(after) {
+    try { if (localStorage.getItem(NEWS_KEY)) return false; } catch { return false; }
+    seenNews();
+    const dlg = el('div', { class: 'overlay', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'newsT' });
+    let done = false;
+    const close = go => { if (done) return; done = true; dlg.remove(); document.removeEventListener('keydown', esc); if (!go && after) setTimeout(after, 400); };
+    const esc = e => { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', esc);
+    const row = (i, b, t) => el('div', { class: 'bdg on' }, el('span', { class: 'bi', text: i }), el('span', {}, el('b', { text: b }), el('small', { text: t })));
+    const best = [...places].filter(p => p.total != null).sort((a, b) => b.total - a.total)[0];
+    dlg.append(el('div', { class: 'sheet intro' },
+      el('button', { type: 'button', class: 'x', 'aria-label': 'Lukk', text: '×', onclick: () => close() }),
+      el('div', { class: 'intro-hero', 'aria-hidden': 'true', text: '🆕📲' }),
+      el('h3', { class: 'disp', id: 'newsT', text: 'NYTT I KEBABTESTEN' }),
+      el('div', { class: 'blist', style: 'margin-top:14px' },
+        row('📸', 'Delekort med QR-kode', 'Trykk på et sted og «Lag delekort». Ferdig story-bilde med score og QR-kode rett til stedet.'),
+        row('🔗', 'Del bilde + lenke', 'Lenken følger med, og kopieres så du kan lime den inn som lenke-klistremerke i Snap og Instagram.'),
+        row('🔳', 'QR-kode til siden', 'Under Om. Vis den til nye testere, så er de inne med en gang.'),
+        row('📍', 'Jeg er her nå', 'Når du legger inn en test, finner telefonen sjappa du står ved. Virker i utlandet også.'),
+        row('🌍', 'Bortekamp', 'Kebab fra ferien får egen tabell, pris i euro og badgen Kebabturist.')),
+      el('div', { class: 'intro-btns' },
+        best ? el('button', { type: 'button', class: 'btn-primary', text: 'PRØV DELEKORTET', onclick: () => { close(true); location.hash = placeUrl(best.key); } }) : null,
+        el('button', { type: 'button', class: 'linkbtn', text: 'Kult, skjønner', onclick: () => close() }))));
+    dlg.addEventListener('click', e => { if (e.target === dlg) close(); });
+    document.body.append(dlg);
     return true;
   }
 
@@ -1549,7 +1580,7 @@
       if (json !== last || lkJson !== lastLikes) {
         last = json; lastLikes = lkJson; if (lk) likes = lk;
         tests = data.tests; places = data.places || [];
-        if (!loaded) playAnim(); render(); ensureGeo(); setTimeout(() => { if (intro(celebrate)) return; if (!announce()) celebrate(); else setTimeout(celebrate, 8000); }, 1600);
+        if (!loaded) playAnim(); render(); ensureGeo(); setTimeout(() => { if (intro(celebrate)) { seenNews(); return; } if (showNews(celebrate)) return; if (!announce()) celebrate(); else setTimeout(celebrate, 8000); }, 1600);
       }
       loaded = true;
       $('#status').classList.add('hidden');
