@@ -363,9 +363,9 @@
 </div></nav>
 <div class="lightbox hidden" id="lb"><img alt=""><div></div></div>
 
-<script src="config.js?v=202611271437"></script>
-<script src="qr.js?v=202611271437"></script>
-<script src="parse.js?v=202611271437"></script>
+<script src="config.js?v=202611271449"></script>
+<script src="qr.js?v=202611271449"></script>
+<script src="parse.js?v=202611271449"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -1244,11 +1244,19 @@
       hero.append(el('span', { class: 'tagS', text: 'SISTE TEST' + (t.date ? ' · ' + dateLbl(t.date).toUpperCase() : '') }),
         el('div', { class: 'stamp' }, el('b', { text: fmt(t.total) }), el('small', { text: nv(t.scores.length, 'VURDERING', 'VURD.') })),
         el('div', { class: 'hname' }, el('b', { text: t.place }), el('span', { text: [cityOf(t), t.what, t.served].filter(Boolean).join(' · ') })));
-      box.append(hero);
+      const hp = placeBy(t.placeKey);
+      box.append(el('div', { style: 'position:relative' }, hero,
+        hp ? el('button', { type: 'button', class: 'sharebtn', style: 'position:absolute;right:12px;top:12px;z-index:2', 'aria-label': 'Del ' + hp.name, onclick: () => shareStory(hp, ligaPos(hp.key)) }, svg(ICO.share), 'Del') : null));
     }
     box.append(el('div', { style: 'margin-top:16px;display:flex;flex-direction:column;gap:8px' },
       el('a', { class: 'cta', href: 'legg-inn.html' }, svg(ICO.plus.replace('18', '22').replace('18', '22')), 'REGISTRER TEST'),
       el('div', { style: 'text-align:center;font-size:12px;color:var(--dim)', text: 'Tar under ett minutt' })));
+    if (t && placeBy(t.placeKey)) { const hp = placeBy(t.placeKey);
+      box.append(el('section', { class: 'storycard', style: 'margin-top:14px' },
+        el('div', { class: 'mini', 'aria-hidden': 'true' }, el('div', { class: 'disp', style: 'font-size:8px;color:var(--gold)', text: 'KEBABTESTEN' }), el('div', { style: 'height:44px;border-radius:6px;background:#D94B35' }), el('div', {}, el('div', { class: 'disp', style: 'font-size:9px;line-height:1', text: hp.name.toUpperCase().slice(0, 18) }), el('div', { class: 'disp', style: 'font-size:18px;color:var(--gold)', text: fmt(hp.total) }))),
+        el('div', { style: 'flex:1' }, el('div', { class: 'disp', style: 'font-size:22px;line-height:1.05', text: 'DEL SOM STORY' }),
+          el('div', { style: 'font-size:12px;line-height:1.4;margin-top:4px', text: 'Ferdig bilde med score og QR-kode, pluss lenke. Gir 📣 +1 poeng.' }),
+          el('button', { type: 'button', style: 'margin-top:10px;height:44px;padding:0 16px;border-radius:12px;border:0;background:#171717;color:var(--text);font-weight:800;font-size:13px;cursor:pointer', text: 'Lag delekort', onclick: () => shareStory(hp, ligaPos(hp.key)) })))); }
     const ih = installHint(); if (ih) box.append(ih);
     box.append(el('div', { class: 'stats3' },
       el('div', { class: 'stat' }, el('b', { text: String(nTests) }), el('span', { text: nTests === 1 ? 'test' : 'tester' })),
