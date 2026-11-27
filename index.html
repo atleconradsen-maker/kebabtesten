@@ -363,8 +363,8 @@
 </div></nav>
 <div class="lightbox hidden" id="lb"><img alt=""><div></div></div>
 
-<script src="config.js?v=202611261000"></script>
-<script src="parse.js?v=202611261000"></script>
+<script src="config.js?v=202611271404"></script>
+<script src="parse.js?v=202611271404"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -1298,13 +1298,31 @@
     return c;
   }
   async function shareStory(p, lp) {
+    toast('Lager delekort …');
     try { await document.fonts.load('100px Anton'); } catch {}
     const c = await storyCanvas(p, lp);
-    const blob = await new Promise(r => c.toBlob(r, 'image/png'));
-    const file = new File([blob], 'kebabtesten-' + p.key.replace(/[^a-z0-9]+/gi, '-') + '.png', { type: 'image/png' });
-    try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'Kebabtesten' }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
-    const a = el('a', { href: URL.createObjectURL(blob), download: file.name }); document.body.append(a); a.click(); a.remove();
-    toast('Delekortet er lastet ned. Del det i Instagram eller Snap.');
+    // JPEG uten gjennomsiktighet: Snapchat og Instagram viser PNG fra delingsarket som hvitt
+    const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.92));
+    const name = 'kebabtesten-' + p.key.replace(/[^a-z0-9]+/gi, '-') + '.jpg';
+    const file = new File([blob], name, { type: 'image/jpeg' });
+    const url = URL.createObjectURL(blob);
+    document.querySelectorAll('.toast').forEach(n => n.remove());
+    // Vis kortet først. Del-knappen trykkes på nytt, så telefonen gir lov til å dele (og bildet er ferdig laget).
+    const dlg = el('div', { class: 'overlay', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Delekort' });
+    const close = () => { dlg.remove(); URL.revokeObjectURL(url); };
+    const canFiles = !!(navigator.canShare && navigator.canShare({ files: [file] }));
+    dlg.append(el('div', { class: 'sheet', style: 'text-align:center' },
+      el('button', { type: 'button', class: 'x', 'aria-label': 'Lukk', text: '×', onclick: close }),
+      el('h3', { text: 'DELEKORT' }),
+      el('img', { src: url, alt: 'Delekort for ' + p.name, style: 'display:block;width:min(62vw,260px);aspect-ratio:9/16;object-fit:cover;margin:10px auto 0;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.5);-webkit-touch-callout:default' }),
+      el('div', { style: 'display:flex;flex-direction:column;gap:8px;margin-top:16px' },
+        canFiles ? el('button', { type: 'button', class: 'btn-primary', text: 'DEL BILDET', onclick: async () => {
+          try { await navigator.share({ files: [file] }); } catch (e) { if (!e || e.name !== 'AbortError') toast('Fikk ikke delt. Lagre bildet og del det fra Bilder.'); }
+        } }) : null,
+        el('a', { class: 'btn2', href: url, download: name, text: 'Last ned bildet' })),
+      el('p', { class: 'ksub', style: 'margin-top:12px;line-height:1.45' }, 'Tips til Snap og Instagram: velg ', el('b', { style: 'color:var(--text)', text: '«Arkiver bilde»' }), ' i delingsarket (eller hold fingeren på bildet og velg «Legg til i Bilder»). Legg det så ut som story fra kamerarullen.')));
+    dlg.addEventListener('click', e => { if (e.target === dlg) close(); });
+    document.body.append(dlg);
   }
   function renderSted() {
     const box = $('#view-sted'); box.replaceChildren();
