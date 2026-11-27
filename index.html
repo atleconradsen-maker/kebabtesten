@@ -363,8 +363,9 @@
 </div></nav>
 <div class="lightbox hidden" id="lb"><img alt=""><div></div></div>
 
-<script src="config.js?v=202611271404"></script>
-<script src="parse.js?v=202611271404"></script>
+<script src="config.js?v=202611271416"></script>
+<script src="qr.js?v=202611271416"></script>
+<script src="parse.js?v=202611271416"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -1264,7 +1265,7 @@
   // ----- restaurantside -----
   let stedKey = '';
   async function sharePlace(p, lp) {
-    const url = location.href.split('#')[0] + placeUrl(p.key);
+    const url = siteBase() + placeUrl(p.key);
     const text = `${p.name}: ${fmt(p.total)} på Kebabtesten` + (lp && lp.q ? ` (#${lp.pos} i ${lp.borte ? 'bortekampen' : 'kebabligaen'})` : '');
     try { if (navigator.share) { await navigator.share({ title: 'Kebabtesten', text, url }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
     try { await navigator.clipboard.writeText(text + ' ' + url); toast('Lenken er kopiert.'); } catch { toast(url); }
@@ -1293,9 +1294,31 @@
     x.fillStyle = '#b3ac9f'; x.font = `500 40px Inter, sans-serif`; x.fillText([cityOf(p), p.what, priceLbl(p) || ''].filter(Boolean).join(' · '), 60, y - 40);
     const parts = [['Kjøtt', p.cat.meat], ['Saus', p.cat.sauce], ['Fyll', p.cat.fill], ['Porsjon', p.cat.portion], ['Pris/verdi', p.cat.value], ['Brød', p.bread]];
     let by = y + 30;
-    parts.forEach(([l, v]) => { x.fillStyle = '#cfc8bb'; x.font = `600 34px Inter, sans-serif`; x.fillText(l, 60, by + 26); x.fillStyle = '#333'; x.fillRect(300, by, 600, 26); x.fillStyle = l === 'Brød' ? '#e2b77a' : '#F5B632'; x.fillRect(300, by, 60 * (v || 0), 26); x.fillStyle = '#F5F0E7'; x.font = `40px ${A}`; x.fillText(fmt(v), 940, by + 30); by += 64; });
+    const qrTop = by;
+    parts.forEach(([l, v]) => { x.fillStyle = '#cfc8bb'; x.font = `600 32px Inter, sans-serif`; x.fillText(l, 60, by + 26); x.fillStyle = '#333'; x.fillRect(270, by, 340, 26); x.fillStyle = l === 'Brød' ? '#e2b77a' : '#F5B632'; x.fillRect(270, by, 34 * (v || 0), 26); x.fillStyle = '#F5F0E7'; x.font = `38px ${A}`; x.fillText(fmt(v), 630, by + 30); by += 64; });
+    // QR-kode rett til stedet
+    try { drawQR(x, siteBase() + placeUrl(p.key), 760, qrTop - 6, 260); x.fillStyle = '#F5B632'; x.font = `800 26px Inter, sans-serif`; x.textAlign = 'center'; x.fillText('SCAN FOR Å SE STEDET', 890, qrTop + 290); x.textAlign = 'left'; } catch {}
     x.fillStyle = '#F5B632'; x.font = `700 34px Inter, sans-serif`; x.fillText((location.host + location.pathname).replace(/index\.html$/, ''), 60, 1860);
     return c;
+  }
+  // Tegn QR-kode (hvit boks med stille sone) på et canvas
+  function drawQR(x, text, px, py, size) {
+    const m = window.KTQR(text, 'M'), n = m.length, q = 2, cell = Math.floor(size / (n + q * 2)), real = cell * (n + q * 2), off = Math.floor((size - real) / 2);
+    x.fillStyle = '#ffffff'; x.beginPath(); if (x.roundRect) x.roundRect(px, py, size, size, 18); else x.rect(px, py, size, size); x.fill();
+    x.fillStyle = '#171717';
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (m[r][c]) x.fillRect(px + off + (c + q) * cell, py + off + (r + q) * cell, cell, cell);
+  }
+  function qrEl(text, size, label) {
+    const c = document.createElement('canvas'); const d = Math.min(3, window.devicePixelRatio || 1);
+    c.width = size * d; c.height = size * d; c.style.width = c.style.height = size + 'px'; c.style.borderRadius = '14px';
+    c.setAttribute('role', 'img'); c.setAttribute('aria-label', label || 'QR-kode');
+    try { drawQR(c.getContext('2d'), text, 0, 0, size * d); } catch { return el('div'); }
+    return c;
+  }
+  function siteBase() { return location.href.split('#')[0].split('?')[0].replace(/index\.html$/, ''); }
+  function copyQuiet(t) {
+    try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).catch(() => {}); return; } } catch {}
+    try { const ta = el('textarea', { style: 'position:fixed;opacity:0' }); ta.value = t; document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); } catch {}
   }
   async function shareStory(p, lp) {
     toast('Lager delekort …');
@@ -1311,16 +1334,26 @@
     const dlg = el('div', { class: 'overlay', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Delekort' });
     const close = () => { dlg.remove(); URL.revokeObjectURL(url); };
     const canFiles = !!(navigator.canShare && navigator.canShare({ files: [file] }));
+    const link = siteBase() + placeUrl(p.key);
+    const shareText = `${p.name}: ${fmt(p.total)} på Kebabtesten` + (lp && lp.q ? ` (#${lp.pos} i ${lp.borte ? 'bortekampen' : 'kebabligaen'})` : '');
     dlg.append(el('div', { class: 'sheet', style: 'text-align:center' },
       el('button', { type: 'button', class: 'x', 'aria-label': 'Lukk', text: '×', onclick: close }),
       el('h3', { text: 'DELEKORT' }),
       el('img', { src: url, alt: 'Delekort for ' + p.name, style: 'display:block;width:min(62vw,260px);aspect-ratio:9/16;object-fit:cover;margin:10px auto 0;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.5);-webkit-touch-callout:default' }),
       el('div', { style: 'display:flex;flex-direction:column;gap:8px;margin-top:16px' },
-        canFiles ? el('button', { type: 'button', class: 'btn-primary', text: 'DEL BILDET', onclick: async () => {
-          try { await navigator.share({ files: [file] }); } catch (e) { if (!e || e.name !== 'AbortError') toast('Fikk ikke delt. Lagre bildet og del det fra Bilder.'); }
+        canFiles ? el('button', { type: 'button', class: 'btn-primary', text: 'DEL BILDE + LENKE', onclick: async () => {
+          // Lenken kopieres samtidig, så den kan limes inn som lenke-klistremerke i Snap/Instagram
+          copyQuiet(link);
+          try { await navigator.share({ files: [file], text: shareText + '\n' + link }); toast('Lenken er kopiert. Lim den inn som lenke-klistremerke i storyen.'); }
+          catch (e) { if (!e || e.name !== 'AbortError') toast('Fikk ikke delt. Lagre bildet og del det fra Bilder.'); }
         } }) : null,
-        el('a', { class: 'btn2', href: url, download: name, text: 'Last ned bildet' })),
-      el('p', { class: 'ksub', style: 'margin-top:12px;line-height:1.45' }, 'Tips til Snap og Instagram: velg ', el('b', { style: 'color:var(--text)', text: '«Arkiver bilde»' }), ' i delingsarket (eller hold fingeren på bildet og velg «Legg til i Bilder»). Legg det så ut som story fra kamerarullen.')));
+        el('button', { type: 'button', class: 'btnL', onclick: () => sharePlace(p, lp) }, svg(ICO.share), 'Del bare lenken'),
+        el('button', { type: 'button', class: 'btn2', onclick: () => { copyQuiet(link); toast('Lenken er kopiert.'); } }, 'Kopier lenke'),
+        canFiles ? null : el('a', { class: 'btn2', href: url, download: name, text: 'Last ned bildet' })),
+      el('div', { style: 'margin-top:18px;display:flex;gap:14px;align-items:center;text-align:left;background:var(--panel);border-radius:16px;padding:12px' },
+        qrEl(link, 96, 'QR-kode til ' + p.name),
+        el('div', { class: 'ksub', style: 'font-size:13px;line-height:1.45' }, el('b', { style: 'color:var(--text)', text: 'Vis QR-koden til kompisen. ' }), 'De scanner med kameraet og havner rett på stedet.')),
+      el('p', { class: 'ksub', style: 'margin-top:12px;line-height:1.45' }, el('b', { style: 'color:var(--text)', text: 'Snap og Instagram story: ' }), 'Lenken kopieres når du deler. Legg til et lenke-klistremerke 🔗 i storyen og lim den inn, så kan folk trykke seg rett til stedet.')));
     dlg.addEventListener('click', e => { if (e.target === dlg) close(); });
     document.body.append(dlg);
   }
@@ -1333,7 +1366,7 @@
     if (p.imgKebab) hero.append(img(p.imgKebab, 'Kebaben fra ' + p.name, p.name)); else hero.append(el('div', { class: 'stripes', style: 'position:absolute;inset:0;background:repeating-linear-gradient(-35deg,rgba(0,0,0,.07) 0 18px,transparent 18px 36px)' }), svg(ICO.illu));
     hero.append(el('div', { class: 'shade' }),
       el('div', { class: 'bar' },
-        el('button', { type: 'button', class: 'rbtn', 'aria-label': 'Tilbake', onclick: () => { if (history.length > 1 && document.referrer.split('#')[0] === location.href.split('#')[0]) history.back(); else location.hash = '#liga'; } }, svg(ICO.back)),
+        el('button', { type: 'button', class: 'rbtn', 'aria-label': 'Tilbake', onclick: () => { if (history.length > 1 && document.referrer.split('#')[0] === siteBase()) history.back(); else location.hash = '#liga'; } }, svg(ICO.back)),
         el('button', { type: 'button', class: 'sharebtn', onclick: () => sharePlace(p, lp) }, svg(ICO.share), 'Del')),
       lp.q ? el('div', { class: 'ligatag', text: `#${lp.pos} I ${lp.borte ? 'BORTEKAMPEN' : 'KEBABLIGAEN'}` }) : el('div', { class: 'ligatag uq', text: `IKKE KVALIFISERT · ${lp.n || p.ratings} AV ${MIN_Q}` }));
     box.append(hero);
@@ -1402,6 +1435,7 @@
         el('div', { class: 'tile c2' }, el('div', { class: 't2', text: 'Årets vinner' }), el('div', { class: 't3', text: 'Får årsmerke, som ’26, for alltid' })),
         el('div', { class: 'tile c1' }, el('div', { class: 't2', text: `${ALL_BADGES.length} badges` }), el('div', { class: 't3', text: 'Fra Første bit til Spydmester' })),
         el('button', { type: 'button', class: 'tile c3', onclick: openInfo }, el('div', { class: 't2', text: 'Se alt' }), el('div', { class: 't3', text: 'Alle badges og kåringer ›' })))));
+    box.append(siteQR());
     box.append(installCard());
     box.append(el('section', { class: 'sec' }, el('div', { class: 'sech' }, el('h2', { text: 'DOMMERPANELET' })), el('div', { class: 'jurygrid' }, jury())));
     box.append(el('section', { class: 'sec' }, el('a', { class: 'cta', href: 'legg-inn.html', text: 'BLI MED I LIGAEN' })));
@@ -1425,6 +1459,13 @@
           stp('2', 'Velg ', el('b', { text: '«Installer app»' }), ' eller ', el('b', { text: '«Legg til på startskjermen»' }), '.'),
           stp('3', 'Bekreft. Nå ligger Kebabtesten med logoen på startskjermen.')),
         el('div', { class: 'ksub', style: 'margin-top:10px', text: 'iPhone: åpne i Safari, trykk Del og velg «Legg til på Hjem-skjerm».' })];
+  }
+  function siteQR() {
+    const url = siteBase();
+    return el('section', { class: 'sec' }, el('div', { class: 'sech' }, el('h2', { text: 'QR-KODE TIL SIDEN' })),
+      el('div', { class: 'card', style: 'display:flex;gap:16px;align-items:center' }, qrEl(url, 128, 'QR-kode til Kebabtesten'),
+        el('div', { style: 'font-size:14px;line-height:1.45' }, 'Vis denne til nye testere. De scanner med kameraet og er inne på Kebabtesten med en gang. ',
+          el('button', { type: 'button', class: 'linkbtn', text: 'Kopier lenken', onclick: () => { copyQuiet(url); toast('Lenken er kopiert.'); } }))));
   }
   function installCard() {
     return el('section', { class: 'sec', id: 'hjemskjerm' },
