@@ -357,15 +357,15 @@
 <nav class="bnav" aria-label="Hovedmeny"><div class="in">
   <a href="#hjem" data-v="hjem"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Hjem</a>
   <a href="#liga" data-v="liga"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg>Liga</a>
-  <a href="legg-inn.html" class="plus" aria-label="Registrer test"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></a>
+  <a href="legg-inn.html" class="plus" aria-label="Rate en bab"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></a>
   <a href="#kart" data-v="kart"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Kart</a>
-  <a href="#tester" data-v="tester"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Tester</a>
+  <a href="#tester" data-v="tester"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Baber</a>
 </div></nav>
 <div class="lightbox hidden" id="lb"><img alt=""><div></div></div>
 
-<script src="config.js?v=202611271449"></script>
-<script src="qr.js?v=202611271449"></script>
-<script src="parse.js?v=202611271449"></script>
+<script src="config.js?v=202611271501"></script>
+<script src="qr.js?v=202611271501"></script>
+<script src="parse.js?v=202611271501"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -1233,7 +1233,7 @@
     const box = $('#view-hjem'); box.replaceChildren();
     const nTests = tests.length, nPlaces = places.length, nCities = new Set(places.map(p => cityOf(p)).filter(Boolean)).size;
     box.append(el('section', { style: 'padding-top:10px' },
-      el('div', { class: 'kick', text: `SESONG ${new Date().getFullYear()} · ${nv(nTests, 'TEST', 'TESTER')}` }),
+      el('div', { class: 'kick', text: `SESONG ${new Date().getFullYear()} · ${nv(nTests, 'BAB', 'BABER')}` }),
       el('h1', { class: 'h1' }, 'Norges mest ', el('em', { text: 'uoffisielle' }), ' kebabliga'),
       el('p', { class: 'lead', text: 'Vi tester. Dere stemmer. Den beste baben vinner.' })));
     const t = latest();
@@ -1241,7 +1241,7 @@
       const hero = el('a', { class: 'hero', href: placeUrl(t.placeKey), 'aria-label': `Siste test: ${t.place}, ${fmt(t.total)}` });
       if (t.imgKebab) { const i = el('img', { src: t.imgKebab, alt: '', referrerpolicy: 'no-referrer' }); i.addEventListener('error', () => { i.remove(); hero.prepend(el('div', { class: 'stripes' }), svg(ICO.illu)); }); hero.append(i, el('div', { class: 'shade' })); }
       else hero.append(el('div', { class: 'stripes' }), svg(ICO.illu));
-      hero.append(el('span', { class: 'tagS', text: 'SISTE TEST' + (t.date ? ' · ' + dateLbl(t.date).toUpperCase() : '') }),
+      hero.append(el('span', { class: 'tagS', text: 'SISTE BAB' + (t.date ? ' · ' + dateLbl(t.date).toUpperCase() : '') }),
         el('div', { class: 'stamp' }, el('b', { text: fmt(t.total) }), el('small', { text: nv(t.scores.length, 'VURDERING', 'VURD.') })),
         el('div', { class: 'hname' }, el('b', { text: t.place }), el('span', { text: [cityOf(t), t.what, t.served].filter(Boolean).join(' · ') })));
       const hp = placeBy(t.placeKey);
@@ -1249,7 +1249,7 @@
         hp ? el('button', { type: 'button', class: 'sharebtn', style: 'position:absolute;right:12px;top:12px;z-index:2', 'aria-label': 'Del ' + hp.name, onclick: () => shareStory(hp, ligaPos(hp.key)) }, svg(ICO.share), 'Del') : null));
     }
     box.append(el('div', { style: 'margin-top:16px;display:flex;flex-direction:column;gap:8px' },
-      el('a', { class: 'cta', href: 'legg-inn.html' }, svg(ICO.plus.replace('18', '22').replace('18', '22')), 'REGISTRER TEST'),
+      el('a', { class: 'cta', href: 'legg-inn.html' }, svg(ICO.plus.replace('18', '22').replace('18', '22')), 'RATE EN BAB'),
       el('div', { style: 'text-align:center;font-size:12px;color:var(--dim)', text: 'Tar under ett minutt' })));
     if (t && placeBy(t.placeKey)) { const hp = placeBy(t.placeKey);
       box.append(el('section', { class: 'storycard', style: 'margin-top:14px' },
@@ -1259,13 +1259,13 @@
           el('button', { type: 'button', style: 'margin-top:10px;height:44px;padding:0 16px;border-radius:12px;border:0;background:#171717;color:var(--text);font-weight:800;font-size:13px;cursor:pointer', text: 'Lag delekort', onclick: () => shareStory(hp, ligaPos(hp.key)) })))); }
     const ih = installHint(); if (ih) box.append(ih);
     box.append(el('div', { class: 'stats3' },
-      el('div', { class: 'stat' }, el('b', { text: String(nTests) }), el('span', { text: nTests === 1 ? 'test' : 'tester' })),
+      el('div', { class: 'stat' }, el('b', { text: String(nTests) }), el('span', { text: nTests === 1 ? 'bab' : 'baber' })),
       el('div', { class: 'stat' }, el('b', { text: String(nPlaces) }), el('span', { text: nPlaces === 1 ? 'sted' : 'steder' })),
       el('div', { class: 'stat' }, el('b', { text: String(nCities || '–') }), el('span', { text: nCities === 1 ? 'by' : 'byer' }))));
-    if (!tests.length) { box.append(el('div', { class: 'sec' }, empty('Ingen tester ennå', 'Registrer den første kebaben, så starter ligaen.'))); return; }
+    if (!tests.length) { box.append(el('div', { class: 'sec' }, empty('Ingen baber ennå', 'Rate den første baben, så starter ligaen.'))); return; }
     const recent = [...tests].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 10);
     box.append(el('section', { class: 'sec' },
-      el('div', { class: 'sech' }, el('h2', { text: 'SISTE TESTER' }), el('a', { href: '#tester', text: 'Se alle' })),
+      el('div', { class: 'sech' }, el('h2', { text: 'FERSKE BABER' }), el('a', { href: '#tester', text: 'Se alle' })),
       el('div', { class: 'hscroll' }, stagger(recent.map(testCard)))));
     const fa = folkAwards();
     if (fa.classList.contains('awards') && fa.children.length > 4 && !showAllAwards) { const extra = [...fa.children].slice(4); extra.forEach(n => n.classList.add('hidden'));
@@ -1328,17 +1328,17 @@
     let list = tests.filter(t => (tType === 'Alle' || t.what === tType) && (!q || key([t.place, t.address, cityOf(t), t.what, ...t.scores.map(s => s.name)].join(' ')).includes(q)));
     list = list.sort((a, b) => tSort === 'Best' ? (b.total ?? 0) - (a.total ?? 0) : (b.date || '').localeCompare(a.date || ''));
     const grid = el('div', { class: 'tgrid' }, stagger(list.map(testCard)));
-    if (keepFocus && box.querySelector('.tgrid')) { box.querySelector('.tgrid').replaceWith(grid); const e = box.querySelector('.tempty'); if (e) e.remove(); if (!list.length) grid.after(el('div', { class: 'empty tempty', style: 'margin-top:16px', text: 'Ingen tester passer søket.' })); return; }
+    if (keepFocus && box.querySelector('.tgrid')) { box.querySelector('.tgrid').replaceWith(grid); const e = box.querySelector('.tempty'); if (e) e.remove(); if (!list.length) grid.after(el('div', { class: 'empty tempty', style: 'margin-top:16px', text: 'Ingen baber passer søket.' })); return; }
     box.replaceChildren();
-    box.append(el('section', { style: 'padding-top:10px' }, el('div', { class: 'kick', text: nv(tests.length, 'TEST', 'TESTER') }), el('h1', { class: 'h1', text: 'ALLE TESTER' })));
-    if (!tests.length) { box.append(el('div', { class: 'sec' }, empty('Ingen tester ennå', 'Alle kebaber dere tester samles her.'))); return; }
+    box.append(el('section', { style: 'padding-top:10px' }, el('div', { class: 'kick', text: nv(tests.length, 'BAB', 'BABER') }), el('h1', { class: 'h1', text: 'ALLE BABER' })));
+    if (!tests.length) { box.append(el('div', { class: 'sec' }, empty('Ingen baber ennå', 'Alle babene dere rater samles her.'))); return; }
     const inp = el('input', { type: 'search', placeholder: 'Søk sted, by eller tester', 'aria-label': 'Søk sted, by eller tester', value: tq });
     inp.addEventListener('input', () => { tq = inp.value; renderTester(true); });
     box.append(el('div', { style: 'display:flex;gap:8px;margin-top:16px' }, el('label', { class: 'search' }, svg(ICO.search), inp),
       el('button', { type: 'button', class: 'pill', style: 'height:50px;border-radius:14px', 'aria-label': 'Sortering: ' + tSort, text: tSort === 'Nyest' ? '↓ Nyest' : '★ Best', onclick: () => { tSort = tSort === 'Nyest' ? 'Best' : 'Nyest'; renderTester(); } })));
     box.append(el('div', { class: 'chipsRow', style: 'margin-top:12px' }, types.map(ty => el('button', { type: 'button', class: 'pill' + (tType === ty ? ' on' : ''), 'aria-pressed': String(tType === ty), text: ty, onclick: () => { tType = ty; renderTester(); } }))));
     box.append(grid);
-    if (!list.length) box.append(el('div', { class: 'empty tempty', style: 'margin-top:16px', text: 'Ingen tester passer søket.' }));
+    if (!list.length) box.append(el('div', { class: 'empty tempty', style: 'margin-top:16px', text: 'Ingen baber passer søket.' }));
   }
 
   // ----- restaurantside -----
