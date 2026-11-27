@@ -363,9 +363,9 @@
 </div></nav>
 <div class="lightbox hidden" id="lb"><img alt=""><div></div></div>
 
-<script src="config.js?v=202611271435"></script>
-<script src="qr.js?v=202611271435"></script>
-<script src="parse.js?v=202611271435"></script>
+<script src="config.js?v=202611271437"></script>
+<script src="qr.js?v=202611271437"></script>
+<script src="parse.js?v=202611271437"></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -633,9 +633,43 @@
     }
   }
 
+  // ----- delinger gir poeng: lagres som en egen rad i Likes-fanen (id «del-ÅÅÅÅMMDD-...») -----
+  const SHARE_CAP = 10; // maks poeng for deling per person per måned
+  async function recordShare(kind, key) {
+    const cfg = window.KTConfig || {};
+    if (!cfg.SCRIPT_URL) return;
+    let me = getMe();
+    if (!me) { toast('Velg kallenavn, så får du poeng for delingen.'); me = await askWho(); if (!me) return; renderMe(); }
+    const d = new Date(), day = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+    const id = `del-${day}-${kind}-${String(key || 'siden').replace(/[^a-z0-9]/gi, '').slice(0, 40)}-${Math.random().toString(36).slice(2, 7)}`;
+    const before = sharesOf(me);
+    likes.set(id, new Set([me.toLowerCase()]));
+    const after = sharesOf(me);
+    const thisMonth = monthShares(me);
+    toast(after > before ? (thisMonth <= SHARE_CAP ? '📣 Takk for at du deler! +1 poeng.' : '📣 Takk for at du deler! (Maks poeng for deling denne måneden.)') : '📣 Takk for at du deler!');
+    render(); setTimeout(celebrate, 800);
+    try { await fetch(cfg.SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'like', id, fra: me }) }); } catch {}
+  }
+  // Én deling teller per person, dag og ting som deles
+  function sharesList() {
+    const seen = new Set(), out = [];
+    for (const [id, set] of likes) {
+      const m = /^del-(\d{4})(\d{2})(\d{2})-(\w)-([a-z0-9]*)-/i.exec(id); if (!m) continue;
+      for (const fra of set) { const k = `${fra}|${m[1]}${m[2]}${m[3]}|${m[5]}`; if (seen.has(k)) continue; seen.add(k); out.push({ fra, date: `${m[1]}-${m[2]}-${m[3]}`, key: m[5] }); }
+    }
+    return out;
+  }
+  const sharesOf = name => sharesList().filter(x => x.fra === String(name).toLowerCase()).length;
+  const monthShares = name => { const ym = new Date().toISOString().slice(0, 7); return sharesList().filter(x => x.fra === String(name).toLowerCase() && x.date.startsWith(ym)).length; };
+  function nameOfLower(lc) {
+    for (const t of tests) { for (const sc of t.scores) if (sc.name.toLowerCase() === lc) return sc.name; for (const n of t.notes) if ((n.name || '').toLowerCase() === lc) return n.name; }
+    const me = getMe(); if (me && me.toLowerCase() === lc) return me;
+    return lc.replace(/(^|\s)(\p{L})/gu, (a, b, c) => b + c.toUpperCase());
+  }
+
   function peopleStats() {
     const m = new Map();
-    const get = n => { if (!m.has(n)) m.set(n, { name: n, entries: [], totals: [], likes: 0, comments: 0, discovered: 0, cities: new Map(), same: new Map(), maxSame: 0, hot: 0, cheap: 0, bread10: 0, harsh: 0, photos: 0, abroad: 0 }); return m.get(n); };
+    const get = n => { if (!m.has(n)) m.set(n, { name: n, entries: [], totals: [], likes: 0, comments: 0, discovered: 0, cities: new Map(), same: new Map(), maxSame: 0, hot: 0, cheap: 0, bread10: 0, harsh: 0, photos: 0, abroad: 0, shares: 0 }); return m.get(n); };
     for (const t of tests) for (const sc of t.scores) {
       const p = get(sc.name);
       p.entries.push({ t, s: sc });
@@ -659,7 +693,8 @@
     return [...m.values()].map(p => {
       const avgGiven = p.totals.length ? p.totals.reduce((a, b) => a + b, 0) / p.totals.length : null;
       const fav = [...p.entries].filter(e => e.s.total != null).sort((a, b) => b.s.total - a.s.total)[0];
-      return { ...p, avg: avgGiven, fav: fav ? fav.t.place : '' };
+      sharesList().forEach(x => { const p = m.get(nameOfLower(x.fra)) || get(nameOfLower(x.fra)); p.shares++; });
+    return { ...p, avg: avgGiven, fav: fav ? fav.t.place : '' };
     }).filter(p => p.name && p.name !== 'Anonym');
   }
   function folkTitles(ps = peopleStats()) {
@@ -691,8 +726,10 @@
   function monthBoard(ym) { return boardFor(ym); }
   function boardFor(prefix) {
     const m = new Map();
-    const add = (n, pts, kind) => { if (!n || n === 'Anonym') return; if (!m.has(n)) m.set(n, { name: n, pts: 0, tests: 0, comments: 0 }); const o = m.get(n); o.pts += pts; o[kind]++; };
+    const add = (n, pts, kind) => { if (!n || n === 'Anonym') return; if (!m.has(n)) m.set(n, { name: n, pts: 0, tests: 0, comments: 0, shares: 0 }); const o = m.get(n); o.pts += pts; o[kind]++; };
     tests.filter(t => (t.date || '').startsWith(prefix)).forEach(t => { t.scores.forEach(sc => add(sc.name, 3, 'tests')); t.notes.forEach(n => add(n.name, 1, 'comments')); });
+    const perMonth = new Map();
+    sharesList().filter(x => x.date.startsWith(prefix)).forEach(x => { const k = x.fra + '|' + x.date.slice(0, 7), c = (perMonth.get(k) || 0) + 1; perMonth.set(k, c); if (c <= SHARE_CAP) add(nameOfLower(x.fra), 1, 'shares'); });
     const l = [...m.values()]; if (!l.length) return [];
     const mx = Math.max(...l.map(o => o.pts)); return l.filter(o => o.pts === mx);
   }
@@ -735,7 +772,7 @@
     }
     return node;
   }
-  const champSub = o => `${o.tests} ${o.tests === 1 ? 'test' : 'tester'}` + (o.comments ? ` og ${o.comments} ${o.comments === 1 ? 'kommentar' : 'kommentarer'}` : '');
+  const champSub = o => joinNames([`${o.tests} ${o.tests === 1 ? 'test' : 'tester'}`, o.comments ? `${o.comments} ${o.comments === 1 ? 'kommentar' : 'kommentarer'}` : null, o.shares ? `${o.shares} ${o.shares === 1 ? 'deling' : 'delinger'}` : null].filter(Boolean));
   function champCard() {
     const c = monthChamp(); if (!c) return null;
     return el('div', { class: 'award folk champ' },
@@ -774,7 +811,7 @@
         row('🥙', 'Legg inn tester', 'Gi kjøtt, saus, fyll, porsjon, pris og brød en score fra 1 til 10'),
         row('🏅', 'Samle badges', '15 badges å jakte på, fra «Første bit» til «Spydmester». De er dine for alltid'),
         row('👍', 'Gi cred', 'Lik anmeldelser og kommentarer du er enig i'),
-        row('🤠', 'Bli månedens babcowboy/babgirl', 'Mest bidrag i måneden vinner. En test gir 3 poeng og en kommentar 1'),
+        row('🤠', 'Bli månedens babcowboy/babgirl', 'Mest bidrag i måneden vinner. En test gir 3 poeng, en kommentar 1 og en deling 1'),
         row('🏆', 'Bli årets', 'Årets vinner får et merke med årstallet (som ’26) på profilbildet for alltid')),
       el('div', { class: 'intro-btns' },
         el('button', { type: 'button', class: 'btn-primary', text: 'Kom i gang', onclick: close }),
@@ -786,7 +823,7 @@
   }
 
   // «Nytt i Kebabtesten»: vises én gang per nyhet
-  const NEWS_KEY = 'kt-nytt-2026-11-27';
+  const NEWS_KEY = 'kt-nytt-2026-11-27b';
   function seenNews() { try { localStorage.setItem(NEWS_KEY, '1'); } catch {} }
   function showNews(after) {
     try { if (localStorage.getItem(NEWS_KEY)) return false; } catch { return false; }
@@ -807,7 +844,8 @@
         row('🔗', 'Del bilde + lenke', 'Lenken følger med, og kopieres så du kan lime den inn som lenke-klistremerke i Snap og Instagram.'),
         row('🔳', 'QR-kode til siden', 'Under Om. Vis den til nye testere, så er de inne med en gang.'),
         row('📍', 'Jeg er her nå', 'Når du legger inn en test, finner telefonen sjappa du står ved. Virker i utlandet også.'),
-        row('🌍', 'Bortekamp', 'Kebab fra ferien får egen tabell, pris i euro og badgen Kebabturist.')),
+        row('🌍', 'Bortekamp', 'Kebab fra ferien får egen tabell, pris i euro og badgen Kebabturist.'),
+        row('📣', 'Del og få poeng', 'Hver deling gir 1 poeng i kampen om månedens babcowboy/babgirl, og nye badges: Budbringer og Influenser.')),
       el('div', { class: 'intro-btns' },
         best ? el('button', { type: 'button', class: 'btn-primary', text: 'PRØV DELEKORTET', onclick: () => { close(true); location.hash = placeUrl(best.key); } }) : null,
         el('button', { type: 'button', class: 'linkbtn', text: 'Kult, skjønner', onclick: () => close() }))));
@@ -874,6 +912,8 @@
     ['Folket', [
       ['likt', '👍', 'Likt', 'Få din første like', p => p.likes, 1],
       ['ordsmed', '💬', 'Ordsmed', 'Skriv 10 kommentarer', p => p.comments, 10],
+      ['budbringer', '📣', 'Budbringer', 'Del Kebabtesten for første gang', p => p.shares, 1],
+      ['influenser', '📢', 'Influenser', 'Del 10 ganger (ett sted per dag teller)', p => p.shares, 10],
       ['folkefavoritt', '⭐', 'Folkefavoritt', 'Få 25 likes til sammen', p => p.likes, 25]]],
     ['Moro', [
       ['ildsjel', '🌶️', 'Ildsjel', 'Spis en kebab med sterkhet 5', p => p.hot, 1],
@@ -895,7 +935,7 @@
     const esc = e => { if (e.key === 'Escape') close(); };
     document.addEventListener('keydown', esc);
     const FOLK = [
-      ['🤠', 'Månedens babcowboy / babgirl', 'Mest bidrag forrige måned. En test gir 3 poeng og en kommentar 1 poeng. Kåres den 1. hver måned'],
+      ['🤠', 'Månedens babcowboy / babgirl', 'Mest bidrag forrige måned. En test gir 3 poeng, en kommentar 1 og en deling 1 (maks 10 delinger i måneden). Kåres den 1. hver måned'],
       ['🏆', 'Årets babcowboy / babgirl', 'Flest poeng samlet gjennom hele året, med samme poeng som over. Kåres 1. januar'],
       ['🚜', 'Kebabmaskinen', 'Den som har vært med på flest tester'],
       ['👍', 'Folkets stemme', 'Flest likes på anmeldelser og kommentarer'],
@@ -1298,8 +1338,8 @@
   async function sharePlace(p, lp) {
     const url = siteBase() + placeUrl(p.key);
     const text = `${p.name}: ${fmt(p.total)} på Kebabtesten` + (lp && lp.q ? ` (#${lp.pos} i ${lp.borte ? 'bortekampen' : 'kebabligaen'})` : '');
-    try { if (navigator.share) { await navigator.share({ title: 'Kebabtesten', text, url }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
-    try { await navigator.clipboard.writeText(text + ' ' + url); toast('Lenken er kopiert.'); } catch { toast(url); }
+    try { if (navigator.share) { await navigator.share({ title: 'Kebabtesten', text, url }); recordShare('l', p.key); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+    copyQuiet(text + ' ' + url); toast('Lenken er kopiert.'); recordShare('l', p.key);
   }
   async function storyCanvas(p, lp) {
     const c = document.createElement('canvas'); c.width = 1080; c.height = 1920;
@@ -1375,11 +1415,11 @@
         canFiles ? el('button', { type: 'button', class: 'btn-primary', text: 'DEL BILDE + LENKE', onclick: async () => {
           // Lenken kopieres samtidig, så den kan limes inn som lenke-klistremerke i Snap/Instagram
           copyQuiet(link);
-          try { await navigator.share({ files: [file], text: shareText + '\n' + link }); toast('Lenken er kopiert. Lim den inn som lenke-klistremerke i storyen.'); }
+          try { await navigator.share({ files: [file], text: shareText + '\n' + link }); toast('Lenken er kopiert. Lim den inn som lenke-klistremerke i storyen.'); recordShare('s', p.key); }
           catch (e) { if (!e || e.name !== 'AbortError') toast('Fikk ikke delt. Lagre bildet og del det fra Bilder.'); }
         } }) : null,
         el('button', { type: 'button', class: 'btnL', onclick: () => sharePlace(p, lp) }, svg(ICO.share), 'Del bare lenken'),
-        el('button', { type: 'button', class: 'btn2', onclick: () => { copyQuiet(link); toast('Lenken er kopiert.'); } }, 'Kopier lenke'),
+        el('button', { type: 'button', class: 'btn2', onclick: () => { copyQuiet(link); toast('Lenken er kopiert.'); recordShare('l', p.key); } }, 'Kopier lenke'),
         canFiles ? null : el('a', { class: 'btn2', href: url, download: name, text: 'Last ned bildet' })),
       el('div', { style: 'margin-top:18px;display:flex;gap:14px;align-items:center;text-align:left;background:var(--panel);border-radius:16px;padding:12px' },
         qrEl(link, 96, 'QR-kode til ' + p.name),
@@ -1496,7 +1536,7 @@
     return el('section', { class: 'sec' }, el('div', { class: 'sech' }, el('h2', { text: 'QR-KODE TIL SIDEN' })),
       el('div', { class: 'card', style: 'display:flex;gap:16px;align-items:center' }, qrEl(url, 128, 'QR-kode til Kebabtesten'),
         el('div', { style: 'font-size:14px;line-height:1.45' }, 'Vis denne til nye testere. De scanner med kameraet og er inne på Kebabtesten med en gang. ',
-          el('button', { type: 'button', class: 'linkbtn', text: 'Kopier lenken', onclick: () => { copyQuiet(url); toast('Lenken er kopiert.'); } }))));
+          el('button', { type: 'button', class: 'linkbtn', text: 'Kopier lenken', onclick: () => { copyQuiet(url); toast('Lenken er kopiert.'); recordShare('l', 'siden'); } }))));
   }
   function installCard() {
     return el('section', { class: 'sec', id: 'hjemskjerm' },
